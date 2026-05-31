@@ -1,0 +1,95 @@
+import { PrismaService } from "../../prisma/prisma.service";
+import { TenancyService } from "../../common/tenancy/tenancy.service";
+import { PaginationInput } from "../../common/pagination/pagination.input";
+import { PaginatedInterface } from "../../common/pagination/paginated.type";
+import { Contract } from './models/contract.model';
+import { CreateContractInput } from './dto/create-contract.input';
+import { UpdateContractInput } from './dto/update-contract.input';
+export declare class ContractsService {
+    private readonly prisma;
+    private readonly tenancy;
+    constructor(prisma: PrismaService, tenancy: TenancyService);
+    listContracts(userId: string, orgId: string, pagination: PaginationInput): Promise<PaginatedInterface<Contract>>;
+    findContractById(userId: string, id: string): Promise<{
+        number: string;
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        orgId: string;
+        status: import("generated/prisma").$Enums.ContractStatus;
+        projectId: string | null;
+        clientName: string;
+        valueLabel: string;
+        expiresAt: Date | null;
+    }>;
+    findProjectByContract(projectId: string): import("generated/prisma").Prisma.Prisma__ProjectClient<{
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        orgId: string;
+        status: import("generated/prisma").$Enums.ProjectStatus;
+        slug: string;
+        client: string | null;
+        progress: number;
+        color: string;
+        budgetCents: number;
+        spentPct: number;
+        dueLabel: string | null;
+    } | null, null, import("generated/prisma/runtime/client").DefaultArgs, import("generated/prisma").Prisma.PrismaClientOptions>;
+    listExpiringContracts(userId: string, orgId: string): Promise<{
+        number: string;
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        orgId: string;
+        status: import("generated/prisma").$Enums.ContractStatus;
+        projectId: string | null;
+        clientName: string;
+        valueLabel: string;
+        expiresAt: Date | null;
+    }[]>;
+    createContract(userId: string, input: CreateContractInput): Promise<{
+        number: string;
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        orgId: string;
+        status: import("generated/prisma").$Enums.ContractStatus;
+        projectId: string | null;
+        clientName: string;
+        valueLabel: string;
+        expiresAt: Date | null;
+    }>;
+    updateContract(userId: string, input: UpdateContractInput): Promise<{
+        number: string;
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        orgId: string;
+        status: import("generated/prisma").$Enums.ContractStatus;
+        projectId: string | null;
+        clientName: string;
+        valueLabel: string;
+        expiresAt: Date | null;
+    }>;
+    renewContract(userId: string, id: string, expiresAt: Date): Promise<{
+        number: string;
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        orgId: string;
+        status: import("generated/prisma").$Enums.ContractStatus;
+        projectId: string | null;
+        clientName: string;
+        valueLabel: string;
+        expiresAt: Date | null;
+    }>;
+    removeContract(userId: string, id: string): Promise<boolean>;
+    private loadContractOrThrow;
+}

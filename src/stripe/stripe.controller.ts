@@ -1,13 +1,15 @@
 import {
   Body, Controller, Headers, Post,
-  RawBodyRequest, Req, UseGuards,
+  Req, UseGuards,
 } from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { StripeService } from './stripe.service';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@/auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '@/auth/decorators/current-user.decorator';
 import { Public } from '@/auth/decorators/public.decorator';
 
 @ApiTags('Stripe')
@@ -19,7 +21,7 @@ export class StripeController {
   @UseGuards(JwtAuthGuard)
   @Post('checkout')
   @ApiOperation({ summary: 'Create a Stripe checkout session' })
-  createCheckout(@CurrentUser() user: any, @Body() dto: CreateCheckoutDto) {
+  createCheckout(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateCheckoutDto) {
     return this.stripeService.createCheckoutSession(user.id, user.email, dto.priceId);
   }
 
@@ -27,7 +29,7 @@ export class StripeController {
   @UseGuards(JwtAuthGuard)
   @Post('portal')
   @ApiOperation({ summary: 'Create a Stripe billing portal session' })
-  createPortal(@CurrentUser() user: any) {
+  createPortal(@CurrentUser() user: AuthenticatedUser) {
     return this.stripeService.createPortalSession(user.id);
   }
 

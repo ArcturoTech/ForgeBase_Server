@@ -3,7 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -18,7 +18,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async registerUser(dto: RegisterDto) {
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (exists) throw new ConflictException('Email already in use');
 
@@ -32,7 +32,7 @@ export class AuthService {
     return tokens;
   }
 
-  async login(dto: LoginDto) {
+  async loginUser(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user?.password) throw new UnauthorizedException('Invalid credentials');
 
@@ -44,13 +44,13 @@ export class AuthService {
     return tokens;
   }
 
-  async refresh(userId: string, email: string) {
+  async refreshUserTokens(userId: string, email: string) {
     const tokens = await this.generateTokens(userId, email);
     await this.saveRefreshToken(userId, tokens.refreshToken);
     return tokens;
   }
 
-  async logout(userId: string) {
+  async logoutUser(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken: null },
@@ -61,15 +61,18 @@ export class AuthService {
   private async generateTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
 
+    const accessOptions: JwtSignOptions = {
+      secret: this.config.get<string>('jwt.accessSecret'),
+      expiresIn: this.config.get<string>('jwt.accessExpiresIn') as JwtSignOptions['expiresIn'],
+    };
+    const refreshOptions: JwtSignOptions = {
+      secret: this.config.get<string>('jwt.refreshSecret'),
+      expiresIn: this.config.get<string>('jwt.refreshExpiresIn') as JwtSignOptions['expiresIn'],
+    };
+
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwt.signAsync(payload, {
-        secret: this.config.get<string>('jwt.accessSecret'),
-        expiresIn: this.config.get<string>('jwt.accessExpiresIn'),
-      }),
-      this.jwt.signAsync(payload, {
-        secret: this.config.get<string>('jwt.refreshSecret'),
-        expiresIn: this.config.get<string>('jwt.refreshExpiresIn'),
-      }),
+      this.jwt.signAsync(payload, accessOptions),
+      this.jwt.signAsync(payload, refreshOptions),
     ]);
 
     return { accessToken, refreshToken };

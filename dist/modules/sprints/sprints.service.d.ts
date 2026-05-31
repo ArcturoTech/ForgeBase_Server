@@ -1,0 +1,103 @@
+import { PrismaService } from "../../prisma/prisma.service";
+import { TenancyService } from "../../common/tenancy/tenancy.service";
+import { CreateSprintInput } from './dto/create-sprint.input';
+import { UpdateSprintInput } from './dto/update-sprint.input';
+export declare class SprintsService {
+    private readonly prisma;
+    private readonly tenancy;
+    constructor(prisma: PrismaService, tenancy: TenancyService);
+    listSprintsByProject(userId: string, projectId: string): Promise<{
+        number: number;
+        id: string;
+        projectId: string;
+        name: string;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        startDate: Date | null;
+        endDate: Date | null;
+        totalPoints: number;
+        targetPoints: number | null;
+        createdAt: Date;
+    }[]>;
+    findActiveSprintSummary(userId: string, orgId: string): Promise<{
+        id: string;
+        number: number;
+        name: string;
+        pointsDone: number;
+        pointsTotal: number;
+        issueCount: number;
+        inReview: number;
+        daysRemaining: number;
+        durationDays: number;
+        members: string[];
+        startDate: Date | undefined;
+        endDate: Date | undefined;
+    } | null>;
+    findSprintById(userId: string, id: string): Promise<{
+        number: number;
+        id: string;
+        projectId: string;
+        name: string;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        startDate: Date | null;
+        endDate: Date | null;
+        totalPoints: number;
+        targetPoints: number | null;
+        createdAt: Date;
+    }>;
+    createSprint(userId: string, input: CreateSprintInput): Promise<{
+        number: number;
+        id: string;
+        projectId: string;
+        name: string;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        startDate: Date | null;
+        endDate: Date | null;
+        totalPoints: number;
+        targetPoints: number | null;
+        createdAt: Date;
+    }>;
+    updateSprint(userId: string, input: UpdateSprintInput): Promise<{
+        number: number;
+        id: string;
+        projectId: string;
+        name: string;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        startDate: Date | null;
+        endDate: Date | null;
+        totalPoints: number;
+        targetPoints: number | null;
+        createdAt: Date;
+    }>;
+    removeSprint(userId: string, id: string): Promise<boolean>;
+    startSprintById(userId: string, id: string): Promise<{
+        number: number;
+        id: string;
+        projectId: string;
+        name: string;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        startDate: Date | null;
+        endDate: Date | null;
+        totalPoints: number;
+        targetPoints: number | null;
+        createdAt: Date;
+    }>;
+    closeSprintById(userId: string, id: string): Promise<{
+        number: number;
+        id: string;
+        projectId: string;
+        name: string;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        startDate: Date | null;
+        endDate: Date | null;
+        totalPoints: number;
+        targetPoints: number | null;
+        createdAt: Date;
+    }>;
+    private loadSprintOrThrow;
+}

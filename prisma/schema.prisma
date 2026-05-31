@@ -8,17 +8,26 @@ datasource db {
 }
 
 model User {
-  id                  String    @id @default(uuid())
-  name                String?
-  email               String    @unique
-  password            String?
-  role                Role      @default(USER)
-  emailVerified       Boolean   @default(false)
-  refreshToken        String?   @db.Text
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id            String   @id @default(uuid())
+  name          String?
+  email         String   @unique
+  password      String?
+  role          Role     @default(USER)
+  emailVerified Boolean  @default(false)
+  refreshToken  String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  subscription        Subscription?
+  subscription     Subscription?
+  memberships      Membership[]
+  projectMembers   ProjectMember[]
+  assignedIssues   IssueAssignee[]
+  reportedIssues   Issue[]           @relation("IssueReporter")
+  issueComments    Comment[]
+  documentComments DocumentComment[]
+  documents        Document[]
+  activities       Activity[]
+  notifications    Notification[]
 
   @@map("users")
 }
@@ -40,6 +49,464 @@ model Subscription {
   @@map("subscriptions")
 }
 
+model Organization {
+  id           String       @id @default(uuid())
+  name         String
+  slug         String       @unique
+  plan         OrgPlan      @default(TEAM)
+  status       OrgStatus    @default(ACTIVE)
+  region       String       @default("sa-east-1")
+  databaseName String?
+  mrrCents     Int          @default(0)
+  trialEndsAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  memberships   Membership[]
+  featureFlags  FeatureFlag[]
+  projects      Project[]
+  labels        Label[]
+  issues        Issue[]
+  contracts     Contract[]
+  invoices      Invoice[]
+  documents     Document[]
+  apiKeys       ApiKey[]
+  webhooks      Webhook[]
+  activities    Activity[]
+  notifications Notification[]
+
+  @@map("organizations")
+}
+
+model Membership {
+  id        String     @id @default(uuid())
+  orgId     String
+  userId    String
+  role      MemberRole @default(MEMBER)
+  title     String?
+  createdAt DateTime   @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+model FeatureFlag {
+  id          String    @id @default(uuid())
+  orgId       String
+  key         String
+  label       String
+  description String
+  enabled     Boolean   @default(false)
+  locked      Boolean   @default(false)
+  enabledAt   DateTime?
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, key])
+  @@map("feature_flags")
+}
+
+model Project {
+  id        String        @id @default(uuid())
+  orgId     String
+  name      String
+  slug      String
+  client    String?
+  status    ProjectStatus @default(ACTIVE)
+  progress  Int           @default(0)
+  color     String        @default("oklch(0.62 0.13 240)")
+  budgetCents Int         @default(0)
+  spentPct  Int           @default(0)
+  dueLabel  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  organization Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  members      ProjectMember[]
+  milestones   Milestone[]
+  sprints      Sprint[]
+  boards       Board[]
+  documents    Document[]
+  contracts    Contract[]
+  invoices     Invoice[]
+
+  @@unique([orgId, slug])
+  @@index([orgId, status])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String @id @default(uuid())
+  projectId String
+  userId    String
+  role      String @default("Member")
+  hours     Int    @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Milestone {
+  id         String  @id @default(uuid())
+  projectId  String
+  name       String
+  startMonth Int
+  endMonth   Int
+  color      String
+  done       Boolean @default(false)
+  current    Boolean @default(false)
+  progress   Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("milestones")
+}
+
+model Sprint {
+  id           String       @id @default(uuid())
+  projectId    String
+  number       Int
+  name         String
+  code         String?
+  status       SprintStatus @default(PLANNING)
+  startDate    DateTime?
+  endDate      DateTime?
+  totalPoints  Int          @default(0)
+  targetPoints Int?
+  createdAt    DateTime     @default(now())
+
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  issues    Issue[]
+  snapshots SprintSnapshot[]
+
+  @@index([projectId, status])
+  @@map("sprints")
+}
+
+model SprintSnapshot {
+  id              String   @id @default(uuid())
+  sprintId        String
+  capturedOn      DateTime @default(now())
+  remainingPoints Int
+  totalPoints     Int
+
+  sprint Sprint @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+
+  @@index([sprintId, capturedOn])
+  @@map("sprint_snapshots")
+}
+
+model Board {
+  id        String   @id @default(uuid())
+  projectId String
+  name      String
+  createdAt DateTime @default(now())
+
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  columns Column[]
+  issues  Issue[]
+
+  @@index([projectId])
+  @@map("boards")
+}
+
+model Column {
+  id       String  @id @default(uuid())
+  boardId  String
+  name     String
+  position Int
+  wipLimit Int?
+  color    String  @default("var(--fb-text-faint)")
+
+  board  Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  issues Issue[]
+
+  @@index([boardId, position])
+  @@map("columns")
+}
+
+model Issue {
+  id          String   @id @default(uuid())
+  orgId       String
+  boardId     String
+  columnId    String
+  sprintId    String?
+  key         String   @unique
+  title       String
+  description String?  @db.Text
+  points      Int?
+  priority    Priority @default(MED)
+  position    Int      @default(0)
+  urgent      Boolean  @default(false)
+  done        Boolean  @default(false)
+  reporterId  String?
+  epic        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  board        Board             @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  column       Column            @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  sprint       Sprint?           @relation(fields: [sprintId], references: [id])
+  reporter     User?             @relation("IssueReporter", fields: [reporterId], references: [id])
+  assignees    IssueAssignee[]
+  labels       IssueLabel[]
+  subtasks     Subtask[]
+  comments     Comment[]
+  dependencies IssueDependency[] @relation("IssueDependencyFrom")
+  dependents   IssueDependency[] @relation("IssueDependencyTo")
+
+  @@index([boardId, columnId, position])
+  @@index([sprintId])
+  @@map("issues")
+}
+
+model Label {
+  id    String @id @default(uuid())
+  orgId String
+  name  String
+  hue   Int    @default(240)
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  issues       IssueLabel[]
+
+  @@unique([orgId, name])
+  @@map("labels")
+}
+
+model IssueLabel {
+  issueId String
+  labelId String
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([issueId, labelId])
+  @@map("issue_labels")
+}
+
+model IssueAssignee {
+  issueId String
+  userId  String
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([issueId, userId])
+  @@index([userId])
+  @@map("issue_assignees")
+}
+
+model Subtask {
+  id       String  @id @default(uuid())
+  issueId  String
+  label    String
+  done     Boolean @default(false)
+  position Int     @default(0)
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("subtasks")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  issueId   String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  issue  Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("comments")
+}
+
+model IssueDependency {
+  id              String         @id @default(uuid())
+  issueId         String
+  dependsOnIssueId String
+  kind            DependencyKind @default(BLOCKS)
+
+  issue     Issue @relation("IssueDependencyFrom", fields: [issueId], references: [id], onDelete: Cascade)
+  dependsOn Issue @relation("IssueDependencyTo", fields: [dependsOnIssueId], references: [id], onDelete: Cascade)
+
+  @@unique([issueId, dependsOnIssueId])
+  @@map("issue_dependencies")
+}
+
+model Activity {
+  id         String   @id @default(uuid())
+  orgId      String
+  userId     String
+  action     String
+  targetType String?
+  targetId   String?
+  createdAt  DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@map("activities")
+}
+
+model Contract {
+  id         String         @id @default(uuid())
+  orgId      String
+  projectId  String?
+  number     String         @unique
+  clientName String
+  name       String
+  valueLabel String
+  status     ContractStatus @default(ACTIVE)
+  expiresAt  DateTime?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id])
+
+  @@index([orgId, status])
+  @@index([orgId, expiresAt])
+  @@map("contracts")
+}
+
+model Invoice {
+  id          String        @id @default(uuid())
+  orgId       String
+  projectId   String?
+  number      String        @unique
+  clientName  String
+  amountCents Int
+  issueDate   DateTime?
+  dueDate     DateTime?
+  status      InvoiceStatus @default(DRAFT)
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id])
+
+  @@index([orgId, status])
+  @@map("invoices")
+}
+
+model Document {
+  id        String    @id @default(uuid())
+  orgId     String
+  projectId String?
+  title     String
+  authorId  String?
+  version   Int       @default(1)
+  status    DocStatus @default(DRAFT)
+  body      Json?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project      Project?          @relation(fields: [projectId], references: [id])
+  author       User?             @relation(fields: [authorId], references: [id])
+  comments     DocumentComment[]
+
+  @@index([orgId])
+  @@map("documents")
+}
+
+model DocumentComment {
+  id         String   @id @default(uuid())
+  documentId String
+  authorId   String
+  body       String   @db.Text
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("document_comments")
+}
+
+model ApiKey {
+  id         String       @id @default(uuid())
+  orgId      String
+  name       String
+  prefix     String
+  scope      String
+  status     ApiKeyStatus @default(ACTIVE)
+  lastUsedAt DateTime?
+  callCount  Int          @default(0)
+  createdAt  DateTime     @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("api_keys")
+}
+
+model Webhook {
+  id             String        @id @default(uuid())
+  orgId          String
+  url            String
+  events         String[]
+  status         WebhookStatus @default(OK)
+  successRate    Float         @default(100)
+  lastDeliveryAt DateTime?
+  createdAt      DateTime      @default(now())
+
+  organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  deliveries   WebhookDelivery[]
+
+  @@index([orgId])
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id         String   @id @default(uuid())
+  webhookId  String
+  event      String
+  statusCode Int
+  durationMs Int
+  target     String
+  failed     Boolean  @default(false)
+  retryLabel String?
+  createdAt  DateTime @default(now())
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, createdAt])
+  @@map("webhook_deliveries")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  orgId     String
+  userId    String
+  type      String
+  title     String
+  body      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
 enum Role {
   USER
   ADMIN
@@ -57,4 +524,80 @@ enum Plan {
   FREE
   PRO
   ENTERPRISE
+}
+
+enum OrgPlan {
+  STARTER
+  TEAM
+  SCALE
+}
+
+enum OrgStatus {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+  PROVISIONING
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  IDEA
+  DONE
+  CANCELLED
+}
+
+enum SprintStatus {
+  PLANNING
+  ACTIVE
+  CLOSED
+}
+
+enum Priority {
+  HIGH
+  MED
+  LOW
+}
+
+enum DependencyKind {
+  BLOCKS
+  RELATES
+}
+
+enum ContractStatus {
+  ACTIVE
+  PAUSED
+  DONE
+  DRAFT
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+}
+
+enum DocStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum WebhookStatus {
+  OK
+  DEGRADED
+  FAILING
 }

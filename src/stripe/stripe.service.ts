@@ -1,28 +1,48 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
+import { SubscriptionStatus } from '@/prisma/prisma-client';
 import Stripe from 'stripe';
+
+interface StripeSubscriptionShape {
+  id: string;
+  customer: string;
+  status: string;
+  current_period_end: number;
+  items: { data: Array<{ price: { id: string } }> };
+}
 
 @Injectable()
 export class StripeService {
-  private stripe: Stripe;
+  private readonly stripe?: InstanceType<typeof Stripe>;
 
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
   ) {
-    this.stripe = new Stripe(this.config.get<string>('stripe.secretKey')!, {
-      apiVersion: '2025-02-24.acacia',
-      typescript: true,
-    });
+    const secretKey = this.config.get<string>('stripe.secretKey');
+    if (secretKey) {
+      this.stripe = new Stripe(secretKey, {
+        apiVersion: '2026-05-27.dahlia',
+        typescript: true,
+      });
+    }
+  }
+
+  private getClient(): InstanceType<typeof Stripe> {
+    if (!this.stripe) {
+      throw new BadRequestException('Stripe não está configurado');
+    }
+    return this.stripe;
   }
 
   async createCheckoutSession(userId: string, email: string, priceId: string) {
-    let subscription = await this.prisma.subscription.findUnique({ where: { userId } });
+    const stripe = this.getClient();
+    const subscription = await this.prisma.subscription.findUnique({ where: { userId } });
     let customerId = subscription?.stripeCustomerId;
 
     if (!customerId) {
-      const customer = await this.stripe.customers.create({ email });
+      const customer = await stripe.customers.create({ email });
       customerId = customer.id;
       await this.prisma.subscription.upsert({
         where: { userId },
@@ -31,7 +51,7 @@ export class StripeService {
       });
     }
 
-    const session = await this.stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -44,12 +64,13 @@ export class StripeService {
   }
 
   async createPortalSession(userId: string) {
+    const stripe = this.getClient();
     const subscription = await this.prisma.subscription.findUnique({ where: { userId } });
     if (!subscription?.stripeCustomerId) {
       throw new BadRequestException('No Stripe customer found');
     }
 
-    const session = await this.stripe.billingPortal.sessions.create({
+    const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripeCustomerId,
       return_url: `${this.config.get('app.frontendUrl')}/billing`,
     });
@@ -58,37 +79,27 @@ export class StripeService {
   }
 
   async handleWebhook(payload: Buffer, signature: string) {
-    let event: Stripe.Event;
-
-    try {
-      event = this.stripe.webhooks.constructEvent(
-        payload,
-        signature,
-        this.config.get<string>('stripe.webhookSecret')!,
-      );
-    } catch {
-      throw new BadRequestException('Invalid Stripe webhook signature');
-    }
+    const event = this.constructWebhookEvent(payload, signature);
 
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
-        const sub = event.data.object as Stripe.Subscription;
+        const sub = event.data.object as unknown as StripeSubscriptionShape;
         await this.prisma.subscription.updateMany({
-          where: { stripeCustomerId: sub.customer as string },
+          where: { stripeCustomerId: sub.customer },
           data: {
             stripeSubscriptionId: sub.id,
             stripePriceId: sub.items.data[0].price.id,
             stripeCurrentPeriodEnd: new Date(sub.current_period_end * 1000),
-            status: sub.status.toUpperCase() as any,
+            status: sub.status.toUpperCase() as SubscriptionStatus,
           },
         });
         break;
       }
       case 'customer.subscription.deleted': {
-        const sub = event.data.object as Stripe.Subscription;
+        const sub = event.data.object as unknown as StripeSubscriptionShape;
         await this.prisma.subscription.updateMany({
-          where: { stripeCustomerId: sub.customer as string },
+          where: { stripeCustomerId: sub.customer },
           data: { status: 'CANCELED', plan: 'FREE' },
         });
         break;
@@ -96,5 +107,18 @@ export class StripeService {
     }
 
     return { received: true };
+  }
+
+  private constructWebhookEvent(payload: Buffer, signature: string) {
+    const stripe = this.getClient();
+    try {
+      return stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        this.config.get<string>('stripe.webhookSecret')!,
+      );
+    } catch {
+      throw new BadRequestException('Invalid Stripe webhook signature');
+    }
   }
 }

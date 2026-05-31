@@ -6,7 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findById(id: string) {
+  async findUserById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -16,6 +16,7 @@ export class UsersService {
         role: true,
         emailVerified: true,
         createdAt: true,
+        updatedAt: true,
         subscription: true,
       },
     });
@@ -23,16 +24,25 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto) {
+  async updateUser(id: string, dto: UpdateUserDto) {
+    await this.findUserById(id);
     return this.prisma.user.update({
       where: { id },
       data: dto,
-      select: { id: true, name: true, email: true, role: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
-  async remove(id: string) {
-    await this.findById(id);
+  async removeUser(id: string) {
+    await this.findUserById(id);
     await this.prisma.user.delete({ where: { id } });
     return { message: 'User deleted' };
   }

@@ -1,0 +1,762 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Activity {
+  action: String!
+  actor: User
+  createdAt: DateTime!
+  id: ID!
+  targetId: String
+  targetType: String
+}
+
+input AddCommentToIssueInput {
+  body: String!
+  issueId: ID!
+}
+
+input AddSubtaskInput {
+  issueId: ID!
+  label: String!
+}
+
+type ApiKey {
+  callCount: Int!
+  createdAt: DateTime!
+  id: ID!
+  lastUsedAt: DateTime
+  name: String!
+  prefix: String!
+  scope: String!
+  status: ApiKeyStatus!
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+}
+
+input AssignIssueToSprintInput {
+  issueId: ID!
+  sprintId: ID
+}
+
+type AuthTokens {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type Board {
+  columns: [Column!]!
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  projectId: String!
+}
+
+type Column {
+  boardId: String!
+  color: String!
+  id: ID!
+  name: String!
+  position: Int!
+  wipLimit: Int
+}
+
+type Contract {
+  clientName: String!
+  createdAt: DateTime!
+  expiresAt: DateTime
+  id: ID!
+  name: String!
+  number: String!
+  orgId: String!
+  project: Project
+  projectId: String
+  status: ContractStatus!
+  updatedAt: DateTime!
+  valueLabel: String!
+}
+
+enum ContractStatus {
+  ACTIVE
+  CANCELLED
+  DONE
+  DRAFT
+  PAUSED
+}
+
+input CreateApiKeyInput {
+  name: String!
+  orgId: ID!
+  scope: String!
+}
+
+input CreateBoardInput {
+  name: String!
+  projectId: ID!
+}
+
+input CreateColumnInput {
+  boardId: String!
+  color: String
+  name: String!
+  position: Int!
+  wipLimit: Int
+}
+
+input CreateContractInput {
+  clientName: String!
+  expiresAt: DateTime
+  name: String!
+  number: String!
+  orgId: ID!
+  projectId: ID
+  status: ContractStatus
+  valueLabel: String!
+}
+
+input CreateDocumentInput {
+  orgId: ID!
+  projectId: ID
+  status: DocStatus
+  title: String!
+  version: Int
+}
+
+input CreateInvoiceInput {
+  amountCents: Int!
+  clientName: String!
+  dueDate: DateTime
+  issueDate: DateTime
+  number: String!
+  orgId: ID!
+  projectId: ID
+  status: InvoiceStatus
+}
+
+input CreateIssueInput {
+  assigneeIds: [ID!]
+  boardId: ID!
+  columnId: ID!
+  description: String
+  labelIds: [ID!]
+  orgId: ID!
+  points: Int
+  priority: Priority
+  sprintId: ID
+  title: String!
+}
+
+input CreateNotificationInput {
+  body: String
+  orgId: ID!
+  title: String!
+  type: String!
+  userId: ID!
+}
+
+input CreateOrganizationInput {
+  name: String!
+  plan: OrgPlan
+  region: String
+  slug: String!
+}
+
+input CreateProjectInput {
+  budgetCents: Int
+  client: String
+  color: String
+  name: String!
+  orgId: ID!
+  slug: String!
+}
+
+input CreateSprintInput {
+  code: String
+  name: String!
+  number: Int!
+  projectId: ID!
+  targetPoints: Int
+}
+
+input CreateWebhookInput {
+  events: [String!]!
+  orgId: ID!
+  url: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum DocStatus {
+  DRAFT
+  PUBLISHED
+  REVIEW
+}
+
+type Document {
+  authorId: String
+  body: JSON
+  comments: [DocumentComment!]!
+  createdAt: DateTime!
+  id: ID!
+  orgId: String!
+  projectId: String
+  status: DocStatus!
+  title: String!
+  updatedAt: DateTime!
+  version: Int!
+}
+
+type DocumentComment {
+  author: User
+  authorId: String!
+  body: String!
+  createdAt: DateTime!
+  documentId: String!
+  id: ID!
+  resolved: Boolean!
+}
+
+type FeatureFlag {
+  description: String!
+  enabled: Boolean!
+  enabledAt: DateTime
+  id: ID!
+  key: String!
+  label: String!
+  locked: Boolean!
+}
+
+type IntegrationStats {
+  activeApiKeys: Int!
+  averageSuccessRate: Float!
+  failingWebhooks: Int!
+  totalWebhooks: Int!
+}
+
+type Invoice {
+  amountCents: Int!
+  clientName: String!
+  createdAt: DateTime!
+  dueDate: DateTime
+  id: ID!
+  issueDate: DateTime
+  number: String!
+  orgId: String!
+  paidAt: DateTime
+  projectId: String
+  status: InvoiceStatus!
+  updatedAt: DateTime!
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OVERDUE
+  PAID
+  SENT
+}
+
+type Issue {
+  assignees: [User!]!
+  boardId: String!
+  column: Column!
+  columnId: String!
+  comments: [IssueComment!]!
+  createdAt: DateTime!
+  description: String
+  done: Boolean!
+  epic: String
+  id: ID!
+  key: String!
+  labels: [Label!]!
+  orgId: String!
+  points: Int
+  position: Int!
+  priority: Priority!
+  reporterId: String
+  sprintId: String
+  subtasks: [Subtask!]!
+  title: String!
+  updatedAt: DateTime!
+  urgent: Boolean!
+}
+
+type IssueComment {
+  author: User
+  authorId: String!
+  body: String!
+  createdAt: DateTime!
+  id: ID!
+  issueId: String!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type Label {
+  hue: Int!
+  id: ID!
+  name: String!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+input MarkInvoicePaidInput {
+  id: ID!
+  paidAt: DateTime
+}
+
+type Member {
+  createdAt: DateTime!
+  id: ID!
+  orgId: String!
+  role: MemberRole!
+  title: String
+  user: User!
+  userId: String!
+}
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+  OWNER
+}
+
+type Milestone {
+  color: String!
+  current: Boolean!
+  done: Boolean!
+  endMonth: Int!
+  id: ID!
+  name: String!
+  progress: Int!
+  projectId: String!
+  startMonth: Int!
+}
+
+input MoveIssueInput {
+  id: ID!
+  position: Int!
+  toColumnId: ID!
+}
+
+type Mutation {
+  addCommentToDocument(body: String!, documentId: ID!): DocumentComment!
+  addCommentToIssue(input: AddCommentToIssueInput!): IssueComment!
+  addSubtaskToIssue(input: AddSubtaskInput!): Subtask!
+  assignIssueToSprint(input: AssignIssueToSprintInput!): Issue!
+  closeSprint(id: ID!): Sprint!
+  createApiKey(input: CreateApiKeyInput!): ApiKey!
+  createBoard(input: CreateBoardInput!): Board!
+  createColumn(input: CreateColumnInput!): Column!
+  createContract(input: CreateContractInput!): Contract!
+  createDocument(input: CreateDocumentInput!): Document!
+  createInvoice(input: CreateInvoiceInput!): Invoice!
+  createIssue(input: CreateIssueInput!): Issue!
+  createNotification(input: CreateNotificationInput!): Notification!
+  createOrganization(input: CreateOrganizationInput!): Organization!
+  createProject(input: CreateProjectInput!): Project!
+  createSprint(input: CreateSprintInput!): Sprint!
+  createWebhook(input: CreateWebhookInput!): Webhook!
+  inviteMember(orgId: ID!, role: MemberRole, title: String, userId: ID!): Member!
+  loginUser(input: LoginUserInput!): AuthTokens!
+  logoutUser: Boolean!
+  markAllNotificationsRead(orgId: ID!): Int!
+  markInvoicePaid(input: MarkInvoicePaidInput!): Invoice!
+  markNotificationRead(id: ID!): Notification!
+  moveIssue(input: MoveIssueInput!): Issue!
+  refreshToken(token: String!): AuthTokens!
+  registerUser(input: RegisterUserInput!): AuthTokens!
+  removeBoard(id: ID!): Boolean!
+  removeColumn(id: ID!): Boolean!
+  removeContract(id: ID!): Boolean!
+  removeDocument(id: ID!): Boolean!
+  removeInvoice(id: ID!): Boolean!
+  removeIssue(id: ID!): Boolean!
+  removeMember(membershipId: ID!): Boolean!
+  removeNotification(id: ID!): Boolean!
+  removeProject(id: ID!): Boolean!
+  removeSprint(id: ID!): Boolean!
+  removeWebhook(id: ID!): Boolean!
+  renewContract(expiresAt: DateTime!, id: ID!): Contract!
+  revokeApiKey(id: ID!): ApiKey!
+  sendInvoice(id: ID!): Invoice!
+  startSprint(id: ID!): Sprint!
+  toggleFeatureFlag(key: String!, orgId: ID!): FeatureFlag!
+  toggleSubtask(subtaskId: ID!): Subtask!
+  updateBoard(input: UpdateBoardInput!): Board!
+  updateContract(input: UpdateContractInput!): Contract!
+  updateDocument(input: UpdateDocumentInput!): Document!
+  updateInvoice(input: UpdateInvoiceInput!): Invoice!
+  updateIssue(input: UpdateIssueInput!): Issue!
+  updateMemberRole(membershipId: ID!, role: MemberRole!): Member!
+  updateOrganization(input: UpdateOrganizationInput!): Organization!
+  updateProject(input: UpdateProjectInput!): Project!
+  updateSprint(input: UpdateSprintInput!): Sprint!
+  updateUserProfile(input: UpdateUserProfileInput!): User!
+  updateWebhook(input: UpdateWebhookInput!): Webhook!
+}
+
+type Notification {
+  body: String
+  createdAt: DateTime!
+  id: ID!
+  orgId: String!
+  read: Boolean!
+  title: String!
+  type: String!
+  userId: String!
+}
+
+enum OrgPlan {
+  SCALE
+  STARTER
+  TEAM
+}
+
+enum OrgStatus {
+  ACTIVE
+  PROVISIONING
+  SUSPENDED
+  TRIAL
+}
+
+type Organization {
+  createdAt: DateTime!
+  databaseName: String
+  id: ID!
+  mrrCents: Int!
+  name: String!
+  plan: OrgPlan!
+  region: String!
+  slug: String!
+  status: OrgStatus!
+  trialEndsAt: DateTime
+  updatedAt: DateTime!
+}
+
+type PaginatedContracts {
+  data: [Contract!]!
+  hasNextPage: Boolean!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
+type PaginatedInvoices {
+  data: [Invoice!]!
+  hasNextPage: Boolean!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
+type PaginatedOrganizations {
+  data: [Organization!]!
+  hasNextPage: Boolean!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
+input PaginationInput {
+  limit: Int! = 20
+  page: Int! = 1
+  search: String
+}
+
+enum Priority {
+  HIGH
+  LOW
+  MED
+}
+
+type Project {
+  budgetCents: Int!
+  client: String
+  color: String!
+  createdAt: DateTime!
+  dueLabel: String
+  id: ID!
+  members: [ProjectMember!]!
+  name: String!
+  orgId: String!
+  progress: Int!
+  slug: String!
+  spentPct: Int!
+  sprintCount: Int!
+  status: ProjectStatus!
+  updatedAt: DateTime!
+}
+
+type ProjectMember {
+  hours: Int!
+  id: ID!
+  projectId: String!
+  role: String!
+  user: User!
+  userId: String!
+}
+
+enum ProjectStatus {
+  ACTIVE
+  CANCELLED
+  DONE
+  IDEA
+  PAUSED
+}
+
+type Query {
+  findActiveSprintSummary(orgId: ID!): SprintSummary
+  findBoardById(id: ID!): Board!
+  findContractById(id: ID!): Contract!
+  findDocumentById(id: ID!): Document
+  findIntegrationStats(orgId: ID!): IntegrationStats!
+  findInvoiceById(id: ID!): Invoice!
+  findIssueById(id: ID!): Issue!
+  findMyProfile: User!
+  findOrganizationBySlug(slug: String!): Organization!
+  findProjectById(id: ID!): Project!
+  findRevenueSummary(orgId: ID!): RevenueSummary!
+  findSprintById(id: ID!): Sprint!
+  listActivityFeed(orgId: ID!): [Activity!]!
+  listApiKeys(orgId: ID!): [ApiKey!]!
+  listBacklogIssuesByProject(projectId: ID!): [Issue!]!
+  listBoardsByProject(projectId: ID!): [Board!]!
+  listContracts(orgId: ID!, pagination: PaginationInput!): PaginatedContracts!
+  listDocuments(orgId: ID!): [Document!]!
+  listExpiringContracts(orgId: ID!): [Contract!]!
+  listFeatureFlags(orgId: ID!): [FeatureFlag!]!
+  listInvoices(orgId: ID!, pagination: PaginationInput!): PaginatedInvoices!
+  listIssuesByBoard(boardId: ID!): [Issue!]!
+  listMembers(orgId: ID!): [Member!]!
+  listMyAssignedIssues: [Issue!]!
+  listMyOrganizations: [Organization!]!
+  listNotifications(orgId: ID!): [Notification!]!
+  listOrganizations(pagination: PaginationInput!): PaginatedOrganizations!
+  listProjectMilestones(projectId: ID!): [Milestone!]!
+  listProjects(orgId: ID!): [Project!]!
+  listSprintBurndown(sprintId: ID!): [SprintSnapshot!]!
+  listSprintVelocity(projectId: ID!): [VelocityPoint!]!
+  listSprintsByProject(projectId: ID!): [Sprint!]!
+  listWebhookDeliveries(webhookId: ID!): [WebhookDelivery!]!
+  listWebhooks(orgId: ID!): [Webhook!]!
+}
+
+input RegisterUserInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+type RevenueSummary {
+  mrrCents: Int!
+  overdueCents: Int!
+  receivableCents: Int!
+  receivedCents: Int!
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+type Sprint {
+  code: String
+  createdAt: DateTime!
+  endDate: DateTime
+  id: ID!
+  issues: [Issue!]!
+  name: String!
+  number: Int!
+  projectId: String!
+  startDate: DateTime
+  status: SprintStatus!
+  targetPoints: Int
+  totalPoints: Int!
+}
+
+type SprintSnapshot {
+  capturedOn: DateTime!
+  id: ID!
+  remainingPoints: Int!
+  totalPoints: Int!
+}
+
+enum SprintStatus {
+  ACTIVE
+  CLOSED
+  PLANNING
+}
+
+type SprintSummary {
+  daysRemaining: Int!
+  durationDays: Int!
+  endDate: DateTime
+  id: ID!
+  inReview: Int!
+  issueCount: Int!
+  members: [String!]!
+  name: String!
+  number: Int!
+  pointsDone: Int!
+  pointsTotal: Int!
+  startDate: DateTime
+}
+
+type Subscription {
+  activityRecorded(orgId: ID!): Activity!
+  issueCommented(boardId: ID!): Issue!
+  issueCreated(boardId: ID!): Issue!
+  issueMoved(boardId: ID!): Issue!
+  issueUpdated(boardId: ID!): Issue!
+  notificationReceived(userId: ID!): Notification!
+}
+
+type Subtask {
+  done: Boolean!
+  id: ID!
+  issueId: String!
+  label: String!
+  position: Int!
+}
+
+input UpdateBoardInput {
+  id: ID!
+  name: String!
+}
+
+input UpdateContractInput {
+  clientName: String
+  expiresAt: DateTime
+  id: ID!
+  name: String
+  status: ContractStatus
+  valueLabel: String
+}
+
+input UpdateDocumentInput {
+  body: JSON
+  id: ID!
+  status: DocStatus
+  title: String
+  version: Int
+}
+
+input UpdateInvoiceInput {
+  amountCents: Int
+  clientName: String
+  dueDate: DateTime
+  id: ID!
+  issueDate: DateTime
+  projectId: ID
+  status: InvoiceStatus
+}
+
+input UpdateIssueInput {
+  description: String
+  done: Boolean
+  id: ID!
+  points: Int
+  priority: Priority
+  title: String
+  urgent: Boolean
+}
+
+input UpdateOrganizationInput {
+  id: ID!
+  mrrCents: Int
+  name: String
+  plan: OrgPlan
+  region: String
+  slug: String
+  status: OrgStatus
+}
+
+input UpdateProjectInput {
+  budgetCents: Int
+  client: String
+  color: String
+  dueLabel: String
+  id: ID!
+  name: String
+  progress: Int
+  slug: String
+  spentPct: Int
+  status: ProjectStatus
+}
+
+input UpdateSprintInput {
+  code: String
+  endDate: DateTime
+  id: ID!
+  name: String
+  startDate: DateTime
+  targetPoints: Int
+}
+
+input UpdateUserProfileInput {
+  name: String
+}
+
+input UpdateWebhookInput {
+  events: [String!]
+  id: ID!
+  status: WebhookStatus
+  url: String
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  emailVerified: Boolean!
+  id: ID!
+  name: String
+  role: Role!
+  updatedAt: DateTime!
+}
+
+type VelocityPoint {
+  done: Int!
+  label: String!
+  planned: Int!
+  sprintNumber: Int!
+}
+
+type Webhook {
+  createdAt: DateTime!
+  events: [String!]!
+  id: ID!
+  lastDeliveryAt: DateTime
+  status: WebhookStatus!
+  successRate: Float!
+  url: String!
+}
+
+type WebhookDelivery {
+  createdAt: DateTime!
+  durationMs: Int!
+  event: String!
+  failed: Boolean!
+  id: ID!
+  retryLabel: String
+  statusCode: Int!
+  target: String!
+  webhookId: String!
+}
+
+enum WebhookStatus {
+  DEGRADED
+  FAILING
+  OK
+}

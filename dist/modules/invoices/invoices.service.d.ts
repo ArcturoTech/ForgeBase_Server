@@ -1,0 +1,88 @@
+import { PrismaService } from "../../prisma/prisma.service";
+import { TenancyService } from "../../common/tenancy/tenancy.service";
+import { PaginationInput } from "../../common/pagination/pagination.input";
+import { PaginatedInterface } from "../../common/pagination/paginated.type";
+import { Invoice } from './models/invoice.model';
+import { RevenueSummary } from './models/revenue-summary.model';
+import { CreateInvoiceInput } from './dto/create-invoice.input';
+import { MarkInvoicePaidInput } from './dto/mark-invoice-paid.input';
+import { UpdateInvoiceInput } from './dto/update-invoice.input';
+export declare class InvoicesService {
+    private readonly prisma;
+    private readonly tenancy;
+    constructor(prisma: PrismaService, tenancy: TenancyService);
+    listInvoices(userId: string, orgId: string, pagination: PaginationInput): Promise<PaginatedInterface<Invoice>>;
+    findInvoiceById(userId: string, id: string): Promise<{
+        number: string;
+        id: string;
+        orgId: string;
+        projectId: string | null;
+        clientName: string;
+        amountCents: number;
+        issueDate: Date | null;
+        dueDate: Date | null;
+        status: import("generated/prisma").$Enums.InvoiceStatus;
+        paidAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    findRevenueSummary(userId: string, orgId: string): Promise<RevenueSummary>;
+    createInvoice(userId: string, input: CreateInvoiceInput): Promise<{
+        number: string;
+        id: string;
+        orgId: string;
+        projectId: string | null;
+        clientName: string;
+        amountCents: number;
+        issueDate: Date | null;
+        dueDate: Date | null;
+        status: import("generated/prisma").$Enums.InvoiceStatus;
+        paidAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    updateInvoice(userId: string, input: UpdateInvoiceInput): Promise<{
+        number: string;
+        id: string;
+        orgId: string;
+        projectId: string | null;
+        clientName: string;
+        amountCents: number;
+        issueDate: Date | null;
+        dueDate: Date | null;
+        status: import("generated/prisma").$Enums.InvoiceStatus;
+        paidAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    removeInvoice(userId: string, id: string): Promise<boolean>;
+    sendInvoice(userId: string, id: string): Promise<{
+        number: string;
+        id: string;
+        orgId: string;
+        projectId: string | null;
+        clientName: string;
+        amountCents: number;
+        issueDate: Date | null;
+        dueDate: Date | null;
+        status: import("generated/prisma").$Enums.InvoiceStatus;
+        paidAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    markInvoicePaidById(userId: string, input: MarkInvoicePaidInput): Promise<{
+        number: string;
+        id: string;
+        orgId: string;
+        projectId: string | null;
+        clientName: string;
+        amountCents: number;
+        issueDate: Date | null;
+        dueDate: Date | null;
+        status: import("generated/prisma").$Enums.InvoiceStatus;
+        paidAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    private loadInvoiceOrThrow;
+}
