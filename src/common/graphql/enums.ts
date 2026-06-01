@@ -6,6 +6,7 @@ import {
   MemberRole,
   ProjectStatus,
   SprintStatus,
+  IssueType,
   Priority,
   DependencyKind,
   ContractStatus,
@@ -21,6 +22,7 @@ registerEnumType(OrgStatus, { name: 'OrgStatus' });
 registerEnumType(MemberRole, { name: 'MemberRole' });
 registerEnumType(ProjectStatus, { name: 'ProjectStatus' });
 registerEnumType(SprintStatus, { name: 'SprintStatus' });
+registerEnumType(IssueType, { name: 'IssueType' });
 registerEnumType(Priority, { name: 'Priority' });
 registerEnumType(DependencyKind, { name: 'DependencyKind' });
 registerEnumType(ContractStatus, { name: 'ContractStatus' });
@@ -36,6 +38,7 @@ export {
   MemberRole,
   ProjectStatus,
   SprintStatus,
+  IssueType,
   Priority,
   DependencyKind,
   ContractStatus,

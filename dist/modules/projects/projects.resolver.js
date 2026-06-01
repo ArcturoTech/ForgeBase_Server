@@ -21,6 +21,9 @@ const milestone_model_1 = require("./models/milestone.model");
 const project_member_model_1 = require("./models/project-member.model");
 const create_project_input_1 = require("./dto/create-project.input");
 const update_project_input_1 = require("./dto/update-project.input");
+const add_project_member_input_1 = require("./dto/add-project-member.input");
+const update_project_member_input_1 = require("./dto/update-project-member.input");
+const remove_project_member_input_1 = require("./dto/remove-project-member.input");
 const user_model_1 = require("../../users/models/user.model");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
@@ -46,6 +49,18 @@ let ProjectsResolver = class ProjectsResolver {
     }
     removeProject(user, id) {
         return this.projectsService.removeProject(user.id, id);
+    }
+    listProjectMembers(user, projectId) {
+        return this.projectsService.listProjectMembers(user.id, projectId);
+    }
+    addProjectMember(user, input) {
+        return this.projectsService.addProjectMember(user.id, input);
+    }
+    updateProjectMember(user, input) {
+        return this.projectsService.updateProjectMember(user.id, input);
+    }
+    removeProjectMember(user, input) {
+        return this.projectsService.removeProjectMember(user.id, input);
     }
     members(project) {
         if (project.members)
@@ -111,6 +126,42 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], ProjectsResolver.prototype, "removeProject", null);
+__decorate([
+    (0, graphql_1.Query)(() => [project_member_model_1.ProjectMember]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], ProjectsResolver.prototype, "listProjectMembers", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => project_member_model_1.ProjectMember),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, add_project_member_input_1.AddProjectMemberInput]),
+    __metadata("design:returntype", Promise)
+], ProjectsResolver.prototype, "addProjectMember", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => project_member_model_1.ProjectMember),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_project_member_input_1.UpdateProjectMemberInput]),
+    __metadata("design:returntype", Promise)
+], ProjectsResolver.prototype, "updateProjectMember", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, remove_project_member_input_1.RemoveProjectMemberInput]),
+    __metadata("design:returntype", Promise)
+], ProjectsResolver.prototype, "removeProjectMember", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [project_member_model_1.ProjectMember]),
     __param(0, (0, graphql_1.Parent)()),

@@ -55,4 +55,8 @@ export class UpdateProjectInput {
   @IsOptional()
   @IsString()
   dueLabel?: string;
+
+  @Field(() => Date, { nullable: true })
+  @IsOptional()
+  deadline?: Date;
 }

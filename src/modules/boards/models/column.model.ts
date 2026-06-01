@@ -19,4 +19,7 @@ export class Column {
 
   @Field()
   color: string;
+
+  @Field()
+  isDone: boolean;
 }

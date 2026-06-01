@@ -26,14 +26,20 @@ let Issue = class Issue {
     title;
     description;
     points;
+    type;
     priority;
     position;
     urgent;
     done;
     epic;
+    parentId;
+    startDate;
+    dueDate;
+    goal;
     reporterId;
     createdAt;
     updatedAt;
+    children;
     assignees;
     labels;
     subtasks;
@@ -77,6 +83,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Issue.prototype, "points", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => enums_1.IssueType),
+    __metadata("design:type", String)
+], Issue.prototype, "type", void 0);
+__decorate([
     (0, graphql_1.Field)(() => enums_1.Priority),
     __metadata("design:type", String)
 ], Issue.prototype, "priority", void 0);
@@ -99,6 +109,22 @@ __decorate([
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
+], Issue.prototype, "parentId", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    __metadata("design:type", Date)
+], Issue.prototype, "startDate", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    __metadata("design:type", Date)
+], Issue.prototype, "dueDate", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Issue.prototype, "goal", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
 ], Issue.prototype, "reporterId", void 0);
 __decorate([
     (0, graphql_1.Field)(),
@@ -108,6 +134,10 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)
 ], Issue.prototype, "updatedAt", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [Issue], { nullable: true }),
+    __metadata("design:type", Array)
+], Issue.prototype, "children", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [user_model_1.User]),
     __metadata("design:type", Array)

@@ -122,6 +122,7 @@ model Project {
   budgetCents Int         @default(0)
   spentPct  Int           @default(0)
   dueLabel  String?
+  deadline  DateTime?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
@@ -225,6 +226,7 @@ model Column {
   position Int
   wipLimit Int?
   color    String  @default("var(--fb-text-faint)")
+  isDone   Boolean @default(false)
 
   board  Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
   issues Issue[]
@@ -239,16 +241,21 @@ model Issue {
   boardId     String
   columnId    String
   sprintId    String?
-  key         String   @unique
+  key         String
   title       String
   description String?  @db.Text
   points      Int?
+  type        IssueType @default(TASK)
   priority    Priority @default(MED)
   position    Int      @default(0)
   urgent      Boolean  @default(false)
   done        Boolean  @default(false)
   reporterId  String?
   epic        String?
+  parentId    String?
+  startDate   DateTime?
+  dueDate     DateTime?
+  goal        String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -257,6 +264,8 @@ model Issue {
   column       Column            @relation(fields: [columnId], references: [id], onDelete: Cascade)
   sprint       Sprint?           @relation(fields: [sprintId], references: [id])
   reporter     User?             @relation("IssueReporter", fields: [reporterId], references: [id])
+  parent       Issue?            @relation("IssueChildren", fields: [parentId], references: [id])
+  children     Issue[]           @relation("IssueChildren")
   assignees    IssueAssignee[]
   labels       IssueLabel[]
   subtasks     Subtask[]
@@ -264,8 +273,11 @@ model Issue {
   dependencies IssueDependency[] @relation("IssueDependencyFrom")
   dependents   IssueDependency[] @relation("IssueDependencyTo")
 
+  @@unique([orgId, key])
   @@index([boardId, columnId, position])
+  @@index([orgId])
   @@index([sprintId])
+  @@index([parentId])
   @@map("issues")
 }
 
@@ -557,6 +569,13 @@ enum SprintStatus {
   PLANNING
   ACTIVE
   CLOSED
+}
+
+enum IssueType {
+  EPIC
+  STORY
+  TASK
+  BUG
 }
 
 enum Priority {

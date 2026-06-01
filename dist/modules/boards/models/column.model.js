@@ -18,6 +18,7 @@ let Column = class Column {
     position;
     wipLimit;
     color;
+    isDone;
 };
 exports.Column = Column;
 __decorate([
@@ -44,6 +45,10 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", String)
 ], Column.prototype, "color", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", Boolean)
+], Column.prototype, "isDone", void 0);
 exports.Column = Column = __decorate([
     (0, graphql_1.ObjectType)()
 ], Column);

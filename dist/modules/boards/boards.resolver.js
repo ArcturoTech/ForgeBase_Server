@@ -19,6 +19,7 @@ const boards_service_1 = require("./boards.service");
 const board_model_1 = require("./models/board.model");
 const column_model_1 = require("./models/column.model");
 const create_column_input_1 = require("./dto/create-column.input");
+const update_column_input_1 = require("./dto/update-column.input");
 const create_board_input_1 = require("./dto/create-board.input");
 const update_board_input_1 = require("./dto/update-board.input");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
@@ -45,6 +46,9 @@ let BoardsResolver = class BoardsResolver {
     }
     createColumn(user, input) {
         return this.boardsService.createColumn(user.id, input);
+    }
+    updateColumn(user, input) {
+        return this.boardsService.updateColumn(user.id, input);
     }
     removeColumn(user, id) {
         return this.boardsService.removeColumn(user.id, id);
@@ -110,6 +114,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_column_input_1.CreateColumnInput]),
     __metadata("design:returntype", Promise)
 ], BoardsResolver.prototype, "createColumn", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => column_model_1.Column),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_column_input_1.UpdateColumnInput]),
+    __metadata("design:returntype", Promise)
+], BoardsResolver.prototype, "updateColumn", null);
 __decorate([
     (0, graphql_1.Mutation)(() => Boolean),
     (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),

@@ -4,6 +4,7 @@ import { BoardsService } from './boards.service';
 import { Board } from './models/board.model';
 import { Column } from './models/column.model';
 import { CreateColumnInput } from './dto/create-column.input';
+import { UpdateColumnInput } from './dto/update-column.input';
 import { CreateBoardInput } from './dto/create-board.input';
 import { UpdateBoardInput } from './dto/update-board.input';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
@@ -66,6 +67,15 @@ export class BoardsResolver {
     @Args('input') input: CreateColumnInput,
   ): Promise<Column> {
     return this.boardsService.createColumn(user.id, input) as Promise<Column>;
+  }
+
+  @Mutation(() => Column)
+  @UseGuards(GqlAuthGuard)
+  updateColumn(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: UpdateColumnInput,
+  ): Promise<Column> {
+    return this.boardsService.updateColumn(user.id, input) as Promise<Column>;
   }
 
   @Mutation(() => Boolean)

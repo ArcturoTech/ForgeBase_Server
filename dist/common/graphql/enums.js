@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WebhookStatus = exports.ApiKeyStatus = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.SprintStatus = exports.ProjectStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
+exports.WebhookStatus = exports.ApiKeyStatus = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.IssueType = exports.SprintStatus = exports.ProjectStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const prisma_client_1 = require("../../prisma/prisma-client");
 Object.defineProperty(exports, "Role", { enumerable: true, get: function () { return prisma_client_1.Role; } });
@@ -9,6 +9,7 @@ Object.defineProperty(exports, "OrgStatus", { enumerable: true, get: function ()
 Object.defineProperty(exports, "MemberRole", { enumerable: true, get: function () { return prisma_client_1.MemberRole; } });
 Object.defineProperty(exports, "ProjectStatus", { enumerable: true, get: function () { return prisma_client_1.ProjectStatus; } });
 Object.defineProperty(exports, "SprintStatus", { enumerable: true, get: function () { return prisma_client_1.SprintStatus; } });
+Object.defineProperty(exports, "IssueType", { enumerable: true, get: function () { return prisma_client_1.IssueType; } });
 Object.defineProperty(exports, "Priority", { enumerable: true, get: function () { return prisma_client_1.Priority; } });
 Object.defineProperty(exports, "DependencyKind", { enumerable: true, get: function () { return prisma_client_1.DependencyKind; } });
 Object.defineProperty(exports, "ContractStatus", { enumerable: true, get: function () { return prisma_client_1.ContractStatus; } });
@@ -22,6 +23,7 @@ Object.defineProperty(exports, "WebhookStatus", { enumerable: true, get: functio
 (0, graphql_1.registerEnumType)(prisma_client_1.MemberRole, { name: 'MemberRole' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ProjectStatus, { name: 'ProjectStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.SprintStatus, { name: 'SprintStatus' });
+(0, graphql_1.registerEnumType)(prisma_client_1.IssueType, { name: 'IssueType' });
 (0, graphql_1.registerEnumType)(prisma_client_1.Priority, { name: 'Priority' });
 (0, graphql_1.registerEnumType)(prisma_client_1.DependencyKind, { name: 'DependencyKind' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ContractStatus, { name: 'ContractStatus' });

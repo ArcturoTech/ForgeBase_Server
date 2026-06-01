@@ -30,4 +30,8 @@ export class CreateProjectInput {
   @IsInt()
   @Min(0)
   budgetCents?: number;
+
+  @Field(() => Date, { nullable: true })
+  @IsOptional()
+  deadline?: Date;
 }

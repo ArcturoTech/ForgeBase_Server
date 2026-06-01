@@ -6,6 +6,9 @@ import { Milestone } from './models/milestone.model';
 import { ProjectMember } from './models/project-member.model';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
+import { AddProjectMemberInput } from './dto/add-project-member.input';
+import { UpdateProjectMemberInput } from './dto/update-project-member.input';
+import { RemoveProjectMemberInput } from './dto/remove-project-member.input';
 import { User } from '@/users/models/user.model';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -67,6 +70,42 @@ export class ProjectsResolver {
     @Args('id', { type: () => ID }) id: string,
   ): Promise<boolean> {
     return this.projectsService.removeProject(user.id, id);
+  }
+
+  @Query(() => [ProjectMember])
+  @UseGuards(GqlAuthGuard)
+  listProjectMembers(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('projectId', { type: () => ID }) projectId: string,
+  ): Promise<ProjectMember[]> {
+    return this.projectsService.listProjectMembers(user.id, projectId) as Promise<ProjectMember[]>;
+  }
+
+  @Mutation(() => ProjectMember)
+  @UseGuards(GqlAuthGuard)
+  addProjectMember(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: AddProjectMemberInput,
+  ): Promise<ProjectMember> {
+    return this.projectsService.addProjectMember(user.id, input) as Promise<ProjectMember>;
+  }
+
+  @Mutation(() => ProjectMember)
+  @UseGuards(GqlAuthGuard)
+  updateProjectMember(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: UpdateProjectMemberInput,
+  ): Promise<ProjectMember> {
+    return this.projectsService.updateProjectMember(user.id, input) as Promise<ProjectMember>;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  removeProjectMember(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: RemoveProjectMemberInput,
+  ): Promise<boolean> {
+    return this.projectsService.removeProjectMember(user.id, input);
   }
 
   @ResolveField(() => [ProjectMember])

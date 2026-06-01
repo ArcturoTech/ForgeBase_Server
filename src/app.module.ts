@@ -3,7 +3,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -50,8 +53,13 @@ import { validateEnv } from './config/env.validation';
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,
         playground: false,
+        introspection: process.env.NODE_ENV !== 'production',
         validationRules: [depthLimit(10)],
-        plugins: [ApolloServerPluginLandingPageLocalDefault()],
+        plugins: [
+          process.env.NODE_ENV === 'production'
+            ? ApolloServerPluginLandingPageProductionDefault({ footer: false })
+            : ApolloServerPluginLandingPageLocalDefault(),
+        ],
         subscriptions: {
           'graphql-ws': {
             onConnect: (context: {

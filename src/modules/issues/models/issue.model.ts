@@ -1,5 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Priority } from '@/common/graphql/enums';
+import { IssueType, Priority } from '@/common/graphql/enums';
 import { User } from '@/users/models/user.model';
 import { Label } from './label.model';
 import { Subtask } from './subtask.model';
@@ -34,6 +34,9 @@ export class Issue {
   @Field(() => Int, { nullable: true })
   points?: number;
 
+  @Field(() => IssueType)
+  type: IssueType;
+
   @Field(() => Priority)
   priority: Priority;
 
@@ -50,6 +53,18 @@ export class Issue {
   epic?: string;
 
   @Field({ nullable: true })
+  parentId?: string;
+
+  @Field(() => Date, { nullable: true })
+  startDate?: Date;
+
+  @Field(() => Date, { nullable: true })
+  dueDate?: Date;
+
+  @Field({ nullable: true })
+  goal?: string;
+
+  @Field({ nullable: true })
   reporterId?: string;
 
   @Field()
@@ -57,6 +72,9 @@ export class Issue {
 
   @Field()
   updatedAt: Date;
+
+  @Field(() => [Issue], { nullable: true })
+  children?: Issue[];
 
   @Field(() => [User])
   assignees?: User[];

@@ -37,6 +37,7 @@ export declare class ContractsService {
         budgetCents: number;
         spentPct: number;
         dueLabel: string | null;
+        deadline: Date | null;
     } | null, null, import("generated/prisma/runtime/client").DefaultArgs, import("generated/prisma").Prisma.PrismaClientOptions>;
     listExpiringContracts(userId: string, orgId: string): Promise<{
         number: string;

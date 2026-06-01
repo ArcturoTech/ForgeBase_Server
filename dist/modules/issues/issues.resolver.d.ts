@@ -10,7 +10,9 @@ import { UpdateIssueInput } from './dto/update-issue.input';
 import { MoveIssueInput } from './dto/move-issue.input';
 import { AddCommentToIssueInput, AddSubtaskInput } from './dto/issue-content.input';
 import { AssignIssueToSprintInput } from './dto/assign-issue-to-sprint.input';
+import { AssignUserToIssueInput } from './dto/assign-user-to-issue.input';
 import { User } from "../../users/models/user.model";
+import { Activity } from "../activity/models/activity.model";
 import type { AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 import type { AppLoaders } from "../../common/dataloader/loaders";
 export declare class IssuesResolver {
@@ -25,10 +27,16 @@ export declare class IssuesResolver {
     removeIssue(user: AuthenticatedUser, id: string): Promise<boolean>;
     listMyAssignedIssues(user: AuthenticatedUser): Promise<Issue[]>;
     listBacklogIssuesByProject(user: AuthenticatedUser, projectId: string): Promise<Issue[]>;
+    listEpicsByProject(user: AuthenticatedUser, projectId: string): Promise<Issue[]>;
+    listIssuesByEpic(user: AuthenticatedUser, epicId: string): Promise<Issue[]>;
     assignIssueToSprint(user: AuthenticatedUser, input: AssignIssueToSprintInput): Promise<Issue>;
+    assignUserToIssue(user: AuthenticatedUser, input: AssignUserToIssueInput): Promise<Issue>;
+    unassignUserFromIssue(user: AuthenticatedUser, input: AssignUserToIssueInput): Promise<Issue>;
+    listActivityByIssue(user: AuthenticatedUser, issueId: string): Promise<Activity[]>;
     addSubtaskToIssue(user: AuthenticatedUser, input: AddSubtaskInput): Promise<Subtask>;
     toggleSubtask(user: AuthenticatedUser, subtaskId: string): Promise<Subtask>;
     addCommentToIssue(user: AuthenticatedUser, input: AddCommentToIssueInput): Promise<IssueComment>;
+    children(issue: Issue): Promise<Issue[]>;
     assignees(issue: Issue, loaders: AppLoaders): Promise<User[]>;
     labels(issue: Issue, loaders: AppLoaders): Promise<Label[]>;
     subtasks(issue: Issue, loaders: AppLoaders): Promise<Subtask[]>;

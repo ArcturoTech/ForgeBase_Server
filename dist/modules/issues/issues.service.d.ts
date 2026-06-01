@@ -1,4 +1,5 @@
 import { PubSub } from 'graphql-subscriptions';
+import { Prisma } from "../../prisma/prisma-client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
 import { ActivityService } from "../activity/activity.service";
@@ -7,6 +8,7 @@ import { UpdateIssueInput } from './dto/update-issue.input';
 import { MoveIssueInput } from './dto/move-issue.input';
 import { AddCommentToIssueInput, AddSubtaskInput } from './dto/issue-content.input';
 import { AssignIssueToSprintInput } from './dto/assign-issue-to-sprint.input';
+import { AssignUserToIssueInput } from './dto/assign-user-to-issue.input';
 export declare const ISSUE_EVENTS: {
     readonly moved: "issueMoved";
     readonly created: "issueCreated";
@@ -20,6 +22,7 @@ export declare class IssuesService {
     private readonly pubSub;
     constructor(prisma: PrismaService, tenancy: TenancyService, activity: ActivityService, pubSub: PubSub);
     private loadIssueOrThrow;
+    private assertValidParent;
     listIssuesByBoard(userId: string, boardId: string): Promise<{
         id: string;
         createdAt: Date;
@@ -27,9 +30,11 @@ export declare class IssuesService {
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -38,6 +43,9 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }[]>;
     findIssueById(userId: string, id: string): Promise<{
         id: string;
@@ -46,9 +54,11 @@ export declare class IssuesService {
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -57,6 +67,9 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }>;
     createIssue(userId: string, input: CreateIssueInput): Promise<{
         id: string;
@@ -65,9 +78,11 @@ export declare class IssuesService {
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -76,7 +91,12 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }>;
+    private isDuplicateKeyError;
+    private createIssueWithSequentialKey;
     updateIssue(userId: string, input: UpdateIssueInput): Promise<{
         id: string;
         createdAt: Date;
@@ -84,9 +104,11 @@ export declare class IssuesService {
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -95,6 +117,9 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }>;
     moveIssue(userId: string, input: MoveIssueInput): Promise<{
         id: string;
@@ -103,9 +128,11 @@ export declare class IssuesService {
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -114,17 +141,22 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }>;
-    listIssuesBySprint(sprintId: string): import("generated/prisma").Prisma.PrismaPromise<{
+    listIssuesBySprint(sprintId: string): Prisma.PrismaPromise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -133,17 +165,22 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }[]>;
-    listIssuesAssignedToUser(userId: string): import("generated/prisma").Prisma.PrismaPromise<{
+    listIssuesByParent(parentId: string): Prisma.PrismaPromise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -152,15 +189,91 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }[]>;
-    findColumnByIssue(columnId: string): import("generated/prisma").Prisma.Prisma__ColumnClient<{
+    listEpicsByProject(userId: string, projectId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        done: boolean;
+        position: number;
+        orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
+        description: string | null;
+        title: string;
+        key: string;
+        startDate: Date | null;
+        boardId: string;
+        columnId: string;
+        sprintId: string | null;
+        points: number | null;
+        priority: import("generated/prisma").$Enums.Priority;
+        urgent: boolean;
+        reporterId: string | null;
+        epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
+    }[]>;
+    listIssuesByEpic(userId: string, epicId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        done: boolean;
+        position: number;
+        orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
+        description: string | null;
+        title: string;
+        key: string;
+        startDate: Date | null;
+        boardId: string;
+        columnId: string;
+        sprintId: string | null;
+        points: number | null;
+        priority: import("generated/prisma").$Enums.Priority;
+        urgent: boolean;
+        reporterId: string | null;
+        epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
+    }[]>;
+    listIssuesAssignedToUser(userId: string): Prisma.PrismaPromise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        done: boolean;
+        position: number;
+        orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
+        description: string | null;
+        title: string;
+        key: string;
+        startDate: Date | null;
+        boardId: string;
+        columnId: string;
+        sprintId: string | null;
+        points: number | null;
+        priority: import("generated/prisma").$Enums.Priority;
+        urgent: boolean;
+        reporterId: string | null;
+        epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
+    }[]>;
+    findColumnByIssue(columnId: string): Prisma.Prisma__ColumnClient<{
         name: string;
         id: string;
         position: number;
         color: string;
         boardId: string;
         wipLimit: number | null;
-    } | null, null, import("generated/prisma/runtime/client").DefaultArgs, import("generated/prisma").Prisma.PrismaClientOptions>;
+        isDone: boolean;
+    } | null, null, import("generated/prisma/runtime/client").DefaultArgs, Prisma.PrismaClientOptions>;
     listBacklogIssuesByProject(userId: string, projectId: string): Promise<{
         id: string;
         createdAt: Date;
@@ -168,9 +281,11 @@ export declare class IssuesService {
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -179,6 +294,9 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }[]>;
     assignIssueToSprint(userId: string, input: AssignIssueToSprintInput): Promise<{
         id: string;
@@ -187,9 +305,11 @@ export declare class IssuesService {
         done: boolean;
         position: number;
         orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
         description: string | null;
         title: string;
         key: string;
+        startDate: Date | null;
         boardId: string;
         columnId: string;
         sprintId: string | null;
@@ -198,7 +318,67 @@ export declare class IssuesService {
         urgent: boolean;
         reporterId: string | null;
         epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
     }>;
+    assignUserToIssue(currentUserId: string, input: AssignUserToIssueInput): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        done: boolean;
+        position: number;
+        orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
+        description: string | null;
+        title: string;
+        key: string;
+        startDate: Date | null;
+        boardId: string;
+        columnId: string;
+        sprintId: string | null;
+        points: number | null;
+        priority: import("generated/prisma").$Enums.Priority;
+        urgent: boolean;
+        reporterId: string | null;
+        epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
+    }>;
+    unassignUserFromIssue(currentUserId: string, input: AssignUserToIssueInput): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        done: boolean;
+        position: number;
+        orgId: string;
+        type: import("generated/prisma").$Enums.IssueType;
+        description: string | null;
+        title: string;
+        key: string;
+        startDate: Date | null;
+        boardId: string;
+        columnId: string;
+        sprintId: string | null;
+        points: number | null;
+        priority: import("generated/prisma").$Enums.Priority;
+        urgent: boolean;
+        reporterId: string | null;
+        epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
+    }>;
+    listActivityByIssue(userId: string, issueId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        userId: string;
+        orgId: string;
+        action: string;
+        targetType: string | null;
+        targetId: string | null;
+    }[]>;
     removeIssue(userId: string, id: string): Promise<boolean>;
     addSubtaskToIssue(userId: string, input: AddSubtaskInput): Promise<{
         label: string;

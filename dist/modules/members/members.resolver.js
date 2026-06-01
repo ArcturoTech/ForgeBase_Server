@@ -21,6 +21,7 @@ const user_model_1 = require("../../users/models/user.model");
 const enums_1 = require("../../common/graphql/enums");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const invite_member_by_email_input_1 = require("./dto/invite-member-by-email.input");
 let MembersResolver = class MembersResolver {
     membersService;
     constructor(membersService) {
@@ -31,6 +32,9 @@ let MembersResolver = class MembersResolver {
     }
     inviteMember(user, orgId, userId, role, title) {
         return this.membersService.inviteMember(user.id, orgId, userId, role, title);
+    }
+    inviteMemberByEmail(user, input) {
+        return this.membersService.inviteMemberByEmail(user.id, input);
     }
     updateMemberRole(user, membershipId, role) {
         return this.membersService.updateMemberRole(user.id, membershipId, role);
@@ -64,6 +68,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], MembersResolver.prototype, "inviteMember", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => member_model_1.Member),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, invite_member_by_email_input_1.InviteMemberByEmailInput]),
+    __metadata("design:returntype", Promise)
+], MembersResolver.prototype, "inviteMemberByEmail", null);
 __decorate([
     (0, graphql_1.Mutation)(() => member_model_1.Member),
     (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),

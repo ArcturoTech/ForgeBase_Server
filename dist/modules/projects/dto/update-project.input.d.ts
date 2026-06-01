@@ -10,4 +10,5 @@ export declare class UpdateProjectInput {
     budgetCents?: number;
     spentPct?: number;
     dueLabel?: string;
+    deadline?: Date;
 }

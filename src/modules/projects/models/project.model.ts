@@ -37,6 +37,9 @@ export class Project {
   @Field({ nullable: true })
   dueLabel?: string;
 
+  @Field(() => Date, { nullable: true })
+  deadline?: Date;
+
   @Field()
   createdAt: Date;
 

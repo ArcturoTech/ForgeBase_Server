@@ -2,6 +2,9 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
+import { AddProjectMemberInput } from './dto/add-project-member.input';
+import { UpdateProjectMemberInput } from './dto/update-project-member.input';
+import { RemoveProjectMemberInput } from './dto/remove-project-member.input';
 export declare class ProjectsService {
     private readonly prisma;
     private readonly tenancy;
@@ -20,6 +23,7 @@ export declare class ProjectsService {
         budgetCents: number;
         spentPct: number;
         dueLabel: string | null;
+        deadline: Date | null;
     }[]>;
     countSprintsByProject(projectId: string): import("generated/prisma").Prisma.PrismaPromise<number>;
     findProjectById(userId: string, id: string): Promise<{
@@ -36,6 +40,7 @@ export declare class ProjectsService {
         budgetCents: number;
         spentPct: number;
         dueLabel: string | null;
+        deadline: Date | null;
     }>;
     listMilestonesByProject(userId: string, projectId: string): Promise<{
         name: string;
@@ -65,6 +70,59 @@ export declare class ProjectsService {
         hours: number;
         projectId: string;
     })[]>;
+    listProjectMembers(userId: string, projectId: string): Promise<({
+        user: {
+            name: string | null;
+            id: string;
+            email: string;
+            role: import("generated/prisma").$Enums.Role;
+            emailVerified: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        id: string;
+        role: string;
+        userId: string;
+        hours: number;
+        projectId: string;
+    })[]>;
+    private assertTargetUserInProjectOrg;
+    addProjectMember(userId: string, input: AddProjectMemberInput): Promise<{
+        user: {
+            name: string | null;
+            id: string;
+            email: string;
+            role: import("generated/prisma").$Enums.Role;
+            emailVerified: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        id: string;
+        role: string;
+        userId: string;
+        hours: number;
+        projectId: string;
+    }>;
+    updateProjectMember(userId: string, input: UpdateProjectMemberInput): Promise<{
+        user: {
+            name: string | null;
+            id: string;
+            email: string;
+            role: import("generated/prisma").$Enums.Role;
+            emailVerified: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        id: string;
+        role: string;
+        userId: string;
+        hours: number;
+        projectId: string;
+    }>;
+    removeProjectMember(userId: string, input: RemoveProjectMemberInput): Promise<boolean>;
     findUserByProjectMember(userId: string): Promise<{
         name: string | null;
         id: string;
@@ -88,6 +146,7 @@ export declare class ProjectsService {
         budgetCents: number;
         spentPct: number;
         dueLabel: string | null;
+        deadline: Date | null;
     }>;
     updateProject(userId: string, input: UpdateProjectInput): Promise<{
         name: string;
@@ -103,6 +162,7 @@ export declare class ProjectsService {
         budgetCents: number;
         spentPct: number;
         dueLabel: string | null;
+        deadline: Date | null;
     }>;
     removeProject(userId: string, id: string): Promise<boolean>;
     private loadProjectOrThrow;

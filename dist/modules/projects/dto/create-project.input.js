@@ -19,6 +19,7 @@ let CreateProjectInput = class CreateProjectInput {
     client;
     color;
     budgetCents;
+    deadline;
 };
 exports.CreateProjectInput = CreateProjectInput;
 __decorate([
@@ -55,6 +56,11 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateProjectInput.prototype, "budgetCents", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Date)
+], CreateProjectInput.prototype, "deadline", void 0);
 exports.CreateProjectInput = CreateProjectInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateProjectInput);

@@ -18,7 +18,12 @@ let UpdateIssueInput = class UpdateIssueInput {
     title;
     description;
     points;
+    type;
     priority;
+    parentId;
+    startDate;
+    dueDate;
+    goal;
     urgent;
     done;
 };
@@ -48,11 +53,39 @@ __decorate([
     __metadata("design:type", Number)
 ], UpdateIssueInput.prototype, "points", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => enums_1.IssueType, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(enums_1.IssueType),
+    __metadata("design:type", String)
+], UpdateIssueInput.prototype, "type", void 0);
+__decorate([
     (0, graphql_1.Field)(() => enums_1.Priority, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(enums_1.Priority),
     __metadata("design:type", String)
 ], UpdateIssueInput.prototype, "priority", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateIssueInput.prototype, "parentId", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Date)
+], UpdateIssueInput.prototype, "startDate", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Date)
+], UpdateIssueInput.prototype, "dueDate", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateIssueInput.prototype, "goal", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),

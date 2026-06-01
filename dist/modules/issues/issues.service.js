@@ -14,7 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IssuesService = exports.ISSUE_EVENTS = void 0;
 const common_1 = require("@nestjs/common");
+const enums_1 = require("../../common/graphql/enums");
 const graphql_subscriptions_1 = require("graphql-subscriptions");
+const prisma_client_1 = require("../../prisma/prisma-client");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const pubsub_module_1 = require("../../common/pubsub/pubsub.module");
 const tenancy_service_1 = require("../../common/tenancy/tenancy.service");
@@ -25,6 +27,7 @@ exports.ISSUE_EVENTS = {
     updated: 'issueUpdated',
     commented: 'issueCommented',
 };
+const ISSUE_LIST_LIMIT = 500;
 let IssuesService = class IssuesService {
     prisma;
     tenancy;
@@ -42,11 +45,26 @@ let IssuesService = class IssuesService {
             throw new common_1.NotFoundException('Issue não encontrada');
         return issue;
     }
+    async assertValidParent(parentId, orgId, selfId) {
+        if (selfId && parentId === selfId) {
+            throw new common_1.BadRequestException('Uma issue não pode ser pai de si mesma');
+        }
+        const parent = await this.prisma.issue.findUnique({ where: { id: parentId } });
+        if (!parent)
+            throw new common_1.NotFoundException('Issue pai não encontrada');
+        if (parent.orgId !== orgId) {
+            throw new common_1.BadRequestException('Issue pai pertence a outra organização');
+        }
+        if (parent.type !== enums_1.IssueType.EPIC) {
+            throw new common_1.BadRequestException('Issue pai precisa ser do tipo EPIC');
+        }
+    }
     async listIssuesByBoard(userId, boardId) {
         await this.tenancy.assertBoardAccess(userId, boardId);
         return this.prisma.issue.findMany({
             where: { boardId },
             orderBy: [{ columnId: 'asc' }, { position: 'asc' }],
+            take: ISSUE_LIST_LIMIT,
         });
     }
     async findIssueById(userId, id) {
@@ -56,26 +74,32 @@ let IssuesService = class IssuesService {
     }
     async createIssue(userId, input) {
         await this.tenancy.assertOrgMembership(userId, input.orgId);
-        const count = await this.prisma.issue.count({ where: { orgId: input.orgId } });
-        const issue = await this.prisma.issue.create({
-            data: {
-                orgId: input.orgId,
-                boardId: input.boardId,
-                columnId: input.columnId,
-                sprintId: input.sprintId,
-                key: `KAN-${count + 1}`,
-                title: input.title,
-                description: input.description,
-                points: input.points,
-                priority: input.priority,
-                assignees: input.assigneeIds
-                    ? { create: input.assigneeIds.map((assigneeId) => ({ userId: assigneeId })) }
-                    : undefined,
-                labels: input.labelIds
-                    ? { create: input.labelIds.map((labelId) => ({ labelId })) }
-                    : undefined,
-            },
+        if (input.parentId) {
+            await this.assertValidParent(input.parentId, input.orgId);
+        }
+        const buildIssueData = (key) => ({
+            orgId: input.orgId,
+            boardId: input.boardId,
+            columnId: input.columnId,
+            sprintId: input.sprintId,
+            key,
+            title: input.title,
+            description: input.description,
+            points: input.points,
+            type: input.type,
+            priority: input.priority,
+            parentId: input.parentId,
+            startDate: input.startDate,
+            dueDate: input.dueDate,
+            goal: input.goal,
+            assignees: input.assigneeIds
+                ? { create: input.assigneeIds.map((assigneeId) => ({ userId: assigneeId })) }
+                : undefined,
+            labels: input.labelIds
+                ? { create: input.labelIds.map((labelId) => ({ labelId })) }
+                : undefined,
         });
+        const issue = await this.createIssueWithSequentialKey(input.orgId, buildIssueData);
         await this.pubSub.publish(exports.ISSUE_EVENTS.created, {
             [exports.ISSUE_EVENTS.created]: issue,
             boardId: issue.boardId,
@@ -89,9 +113,29 @@ let IssuesService = class IssuesService {
         });
         return issue;
     }
+    isDuplicateKeyError(error) {
+        return error instanceof prisma_client_1.Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+    }
+    async createIssueWithSequentialKey(orgId, buildData) {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            const count = await this.prisma.issue.count({ where: { orgId } });
+            try {
+                return await this.prisma.issue.create({ data: buildData(`KAN-${count + 1 + attempt}`) });
+            }
+            catch (error) {
+                if (this.isDuplicateKeyError(error) && attempt < 4)
+                    continue;
+                throw error;
+            }
+        }
+        throw new common_1.BadRequestException('Não foi possível gerar a chave da issue');
+    }
     async updateIssue(userId, input) {
         const current = await this.loadIssueOrThrow(input.id);
         await this.tenancy.assertOrgMembership(userId, current.orgId);
+        if (input.parentId) {
+            await this.assertValidParent(input.parentId, current.orgId, current.id);
+        }
         const { id, ...data } = input;
         const issue = await this.prisma.issue.update({ where: { id }, data });
         await this.pubSub.publish(exports.ISSUE_EVENTS.updated, {
@@ -103,6 +147,13 @@ let IssuesService = class IssuesService {
     async moveIssue(userId, input) {
         const current = await this.loadIssueOrThrow(input.id);
         await this.tenancy.assertOrgMembership(userId, current.orgId);
+        const targetColumn = await this.prisma.column.findUnique({
+            where: { id: input.toColumnId },
+            select: { boardId: true, isDone: true },
+        });
+        if (!targetColumn || targetColumn.boardId !== current.boardId) {
+            throw new common_1.BadRequestException('Coluna inválida para esta issue');
+        }
         const issue = await this.prisma.$transaction(async (tx) => {
             const destinationIssues = await tx.issue.findMany({
                 where: { columnId: input.toColumnId, id: { not: input.id } },
@@ -116,7 +167,7 @@ let IssuesService = class IssuesService {
                 await tx.issue.update({
                     where: { id: orderedIds[position] },
                     data: orderedIds[position] === input.id
-                        ? { columnId: input.toColumnId, position }
+                        ? { columnId: input.toColumnId, position, done: targetColumn.isDone }
                         : { position },
                 });
             }
@@ -148,6 +199,27 @@ let IssuesService = class IssuesService {
     listIssuesBySprint(sprintId) {
         return this.prisma.issue.findMany({ where: { sprintId }, orderBy: { key: 'asc' } });
     }
+    listIssuesByParent(parentId) {
+        return this.prisma.issue.findMany({
+            where: { parentId },
+            orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+        });
+    }
+    async listEpicsByProject(userId, projectId) {
+        await this.tenancy.assertProjectAccess(userId, projectId);
+        return this.prisma.issue.findMany({
+            where: { type: enums_1.IssueType.EPIC, board: { projectId } },
+            orderBy: [{ startDate: 'asc' }, { createdAt: 'asc' }],
+        });
+    }
+    async listIssuesByEpic(userId, epicId) {
+        const epic = await this.loadIssueOrThrow(epicId);
+        await this.tenancy.assertBoardAccess(userId, epic.boardId);
+        return this.prisma.issue.findMany({
+            where: { parentId: epicId },
+            orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+        });
+    }
     listIssuesAssignedToUser(userId) {
         return this.prisma.issue.findMany({
             where: { assignees: { some: { userId } }, done: false },
@@ -163,6 +235,7 @@ let IssuesService = class IssuesService {
         return this.prisma.issue.findMany({
             where: { sprintId: null, board: { projectId } },
             orderBy: { key: 'asc' },
+            take: ISSUE_LIST_LIMIT,
         });
     }
     async assignIssueToSprint(userId, input) {
@@ -177,6 +250,62 @@ let IssuesService = class IssuesService {
             boardId: updated.boardId,
         });
         return updated;
+    }
+    async assignUserToIssue(currentUserId, input) {
+        const issue = await this.loadIssueOrThrow(input.issueId);
+        await this.tenancy.assertBoardAccess(currentUserId, issue.boardId);
+        const board = await this.prisma.board.findUniqueOrThrow({
+            where: { id: issue.boardId },
+            select: { projectId: true },
+        });
+        const projectMember = await this.prisma.projectMember.findUnique({
+            where: { projectId_userId: { projectId: board.projectId, userId: input.userId } },
+            select: { id: true },
+        });
+        if (!projectMember) {
+            throw new common_1.ForbiddenException('Usuário não é membro do projeto');
+        }
+        await this.prisma.issueAssignee.upsert({
+            where: { issueId_userId: { issueId: input.issueId, userId: input.userId } },
+            create: { issueId: input.issueId, userId: input.userId },
+            update: {},
+        });
+        await this.pubSub.publish(exports.ISSUE_EVENTS.updated, {
+            [exports.ISSUE_EVENTS.updated]: issue,
+            boardId: issue.boardId,
+        });
+        await this.activity.recordActivity({
+            orgId: issue.orgId,
+            userId: currentUserId,
+            action: 'assigned',
+            targetType: 'issue',
+            targetId: issue.key,
+        });
+        return issue;
+    }
+    async unassignUserFromIssue(currentUserId, input) {
+        const issue = await this.loadIssueOrThrow(input.issueId);
+        await this.tenancy.assertBoardAccess(currentUserId, issue.boardId);
+        await this.prisma.issueAssignee.deleteMany({
+            where: { issueId: input.issueId, userId: input.userId },
+        });
+        await this.pubSub.publish(exports.ISSUE_EVENTS.updated, {
+            [exports.ISSUE_EVENTS.updated]: issue,
+            boardId: issue.boardId,
+        });
+        await this.activity.recordActivity({
+            orgId: issue.orgId,
+            userId: currentUserId,
+            action: 'unassigned',
+            targetType: 'issue',
+            targetId: issue.key,
+        });
+        return issue;
+    }
+    async listActivityByIssue(userId, issueId) {
+        const issue = await this.loadIssueOrThrow(issueId);
+        await this.tenancy.assertBoardAccess(userId, issue.boardId);
+        return this.activity.listActivityByIssueKey(userId, issue.orgId, issue.key);
     }
     async removeIssue(userId, id) {
         const issue = await this.loadIssueOrThrow(id);

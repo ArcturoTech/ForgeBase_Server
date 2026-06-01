@@ -2,6 +2,7 @@ import { BoardsService } from './boards.service';
 import { Board } from './models/board.model';
 import { Column } from './models/column.model';
 import { CreateColumnInput } from './dto/create-column.input';
+import { UpdateColumnInput } from './dto/update-column.input';
 import { CreateBoardInput } from './dto/create-board.input';
 import { UpdateBoardInput } from './dto/update-board.input';
 import type { AuthenticatedUser } from "../../common/decorators/current-user.decorator";
@@ -14,6 +15,7 @@ export declare class BoardsResolver {
     updateBoard(user: AuthenticatedUser, input: UpdateBoardInput): Promise<Board>;
     removeBoard(user: AuthenticatedUser, id: string): Promise<boolean>;
     createColumn(user: AuthenticatedUser, input: CreateColumnInput): Promise<Column>;
+    updateColumn(user: AuthenticatedUser, input: UpdateColumnInput): Promise<Column>;
     removeColumn(user: AuthenticatedUser, id: string): Promise<boolean>;
     columns(board: Board): Promise<Column[]>;
 }

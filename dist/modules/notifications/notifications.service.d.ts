@@ -12,34 +12,34 @@ export declare class NotificationsService {
     constructor(prisma: PrismaService, tenancy: TenancyService, pubSub: PubSub);
     listNotifications(userId: string, orgId: string): Promise<{
         id: string;
-        orgId: string;
+        createdAt: Date;
+        body: string | null;
         userId: string;
+        orgId: string;
         type: string;
         title: string;
-        body: string | null;
         read: boolean;
-        createdAt: Date;
     }[]>;
     markNotificationRead(userId: string, id: string): Promise<{
         id: string;
-        orgId: string;
+        createdAt: Date;
+        body: string | null;
         userId: string;
+        orgId: string;
         type: string;
         title: string;
-        body: string | null;
         read: boolean;
-        createdAt: Date;
     }>;
     removeNotification(userId: string, id: string): Promise<boolean>;
     markAllNotificationsRead(userId: string, orgId: string): Promise<number>;
     createNotification(userId: string, input: CreateNotificationInput): Promise<{
         id: string;
-        orgId: string;
+        createdAt: Date;
+        body: string | null;
         userId: string;
+        orgId: string;
         type: string;
         title: string;
-        body: string | null;
         read: boolean;
-        createdAt: Date;
     }>;
 }

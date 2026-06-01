@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { CreateColumnInput } from './dto/create-column.input';
+import { UpdateColumnInput } from './dto/update-column.input';
 import { CreateBoardInput } from './dto/create-board.input';
 import { UpdateBoardInput } from './dto/update-board.input';
 
@@ -22,7 +23,7 @@ export class BoardsService {
           create: [
             { name: 'A fazer', position: 0 },
             { name: 'Em progresso', position: 1 },
-            { name: 'Concluído', position: 2 },
+            { name: 'Concluído', position: 2, isDone: true },
           ],
         },
       },
@@ -78,6 +79,23 @@ export class BoardsService {
         position: input.position,
         wipLimit: input.wipLimit,
         color: input.color ?? 'var(--fb-text-faint)',
+      },
+    });
+  }
+
+  async updateColumn(userId: string, input: UpdateColumnInput) {
+    const column = await this.prisma.column.findUnique({
+      where: { id: input.id },
+      select: { boardId: true },
+    });
+    if (!column) throw new NotFoundException('Coluna não encontrada');
+    await this.tenancy.assertBoardAccess(userId, column.boardId);
+    return this.prisma.column.update({
+      where: { id: input.id },
+      data: {
+        name: input.name,
+        wipLimit: input.wipLimit,
+        color: input.color,
       },
     });
   }

@@ -24,6 +24,7 @@ let UpdateProjectInput = class UpdateProjectInput {
     budgetCents;
     spentPct;
     dueLabel;
+    deadline;
 };
 exports.UpdateProjectInput = UpdateProjectInput;
 __decorate([
@@ -88,6 +89,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProjectInput.prototype, "dueLabel", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Date)
+], UpdateProjectInput.prototype, "deadline", void 0);
 exports.UpdateProjectInput = UpdateProjectInput = __decorate([
     (0, graphql_1.InputType)()
 ], UpdateProjectInput);

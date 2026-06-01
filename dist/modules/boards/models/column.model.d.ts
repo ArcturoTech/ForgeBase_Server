@@ -5,4 +5,5 @@ export declare class Column {
     position: number;
     wipLimit?: number;
     color: string;
+    isDone: boolean;
 }

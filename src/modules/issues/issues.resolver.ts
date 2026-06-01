@@ -22,7 +22,9 @@ import { UpdateIssueInput } from './dto/update-issue.input';
 import { MoveIssueInput } from './dto/move-issue.input';
 import { AddCommentToIssueInput, AddSubtaskInput } from './dto/issue-content.input';
 import { AssignIssueToSprintInput } from './dto/assign-issue-to-sprint.input';
+import { AssignUserToIssueInput } from './dto/assign-user-to-issue.input';
 import { User } from '@/users/models/user.model';
+import { Activity } from '@/modules/activity/models/activity.model';
 import { PUB_SUB } from '@/common/pubsub/pubsub.module';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -109,6 +111,24 @@ export class IssuesResolver {
     return this.issuesService.listBacklogIssuesByProject(user.id, projectId) as Promise<Issue[]>;
   }
 
+  @Query(() => [Issue])
+  @UseGuards(GqlAuthGuard)
+  listEpicsByProject(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('projectId', { type: () => ID }) projectId: string,
+  ): Promise<Issue[]> {
+    return this.issuesService.listEpicsByProject(user.id, projectId) as Promise<Issue[]>;
+  }
+
+  @Query(() => [Issue])
+  @UseGuards(GqlAuthGuard)
+  listIssuesByEpic(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('epicId', { type: () => ID }) epicId: string,
+  ): Promise<Issue[]> {
+    return this.issuesService.listIssuesByEpic(user.id, epicId) as Promise<Issue[]>;
+  }
+
   @Mutation(() => Issue)
   @UseGuards(GqlAuthGuard)
   assignIssueToSprint(
@@ -116,6 +136,33 @@ export class IssuesResolver {
     @Args('input') input: AssignIssueToSprintInput,
   ): Promise<Issue> {
     return this.issuesService.assignIssueToSprint(user.id, input) as Promise<Issue>;
+  }
+
+  @Mutation(() => Issue)
+  @UseGuards(GqlAuthGuard)
+  assignUserToIssue(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: AssignUserToIssueInput,
+  ): Promise<Issue> {
+    return this.issuesService.assignUserToIssue(user.id, input) as Promise<Issue>;
+  }
+
+  @Mutation(() => Issue)
+  @UseGuards(GqlAuthGuard)
+  unassignUserFromIssue(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: AssignUserToIssueInput,
+  ): Promise<Issue> {
+    return this.issuesService.unassignUserFromIssue(user.id, input) as Promise<Issue>;
+  }
+
+  @Query(() => [Activity])
+  @UseGuards(GqlAuthGuard)
+  listActivityByIssue(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('issueId', { type: () => ID }) issueId: string,
+  ): Promise<Activity[]> {
+    return this.issuesService.listActivityByIssue(user.id, issueId) as Promise<Activity[]>;
   }
 
   @Mutation(() => Subtask)
@@ -143,6 +190,11 @@ export class IssuesResolver {
     @Args('input') input: AddCommentToIssueInput,
   ): Promise<IssueComment> {
     return this.issuesService.addCommentToIssue(user.id, input) as Promise<IssueComment>;
+  }
+
+  @ResolveField(() => [Issue], { nullable: true })
+  children(@Parent() issue: Issue): Promise<Issue[]> {
+    return this.issuesService.listIssuesByParent(issue.id) as Promise<Issue[]>;
   }
 
   @ResolveField(() => [User])

@@ -1,4 +1,4 @@
-import { Priority } from "../../../common/graphql/enums";
+import { IssueType, Priority } from "../../../common/graphql/enums";
 export declare class CreateIssueInput {
     orgId: string;
     boardId: string;
@@ -7,7 +7,12 @@ export declare class CreateIssueInput {
     title: string;
     description?: string;
     points?: number;
+    type?: IssueType;
     priority?: Priority;
+    parentId?: string;
+    startDate?: Date;
+    dueDate?: Date;
+    goal?: string;
     assigneeIds?: string[];
     labelIds?: string[];
 }

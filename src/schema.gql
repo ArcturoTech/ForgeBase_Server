@@ -16,6 +16,13 @@ input AddCommentToIssueInput {
   issueId: ID!
 }
 
+input AddProjectMemberInput {
+  hours: Int
+  projectId: ID!
+  role: String
+  userId: ID!
+}
+
 input AddSubtaskInput {
   issueId: ID!
   label: String!
@@ -42,6 +49,11 @@ input AssignIssueToSprintInput {
   sprintId: ID
 }
 
+input AssignUserToIssueInput {
+  issueId: ID!
+  userId: ID!
+}
+
 type AuthTokens {
   accessToken: String!
   refreshToken: String!
@@ -59,6 +71,7 @@ type Column {
   boardId: String!
   color: String!
   id: ID!
+  isDone: Boolean!
   name: String!
   position: Int!
   wipLimit: Int
@@ -141,12 +154,17 @@ input CreateIssueInput {
   boardId: ID!
   columnId: ID!
   description: String
+  dueDate: DateTime
+  goal: String
   labelIds: [ID!]
   orgId: ID!
+  parentId: ID
   points: Int
   priority: Priority
   sprintId: ID
+  startDate: DateTime
   title: String!
+  type: IssueType
 }
 
 input CreateNotificationInput {
@@ -168,6 +186,7 @@ input CreateProjectInput {
   budgetCents: Int
   client: String
   color: String
+  deadline: DateTime
   name: String!
   orgId: ID!
   slug: String!
@@ -239,6 +258,13 @@ type IntegrationStats {
   totalWebhooks: Int!
 }
 
+input InviteMemberByEmailInput {
+  email: String!
+  orgId: ID!
+  role: MemberRole
+  title: String
+}
+
 type Invoice {
   amountCents: Int!
   clientName: String!
@@ -264,24 +290,30 @@ enum InvoiceStatus {
 type Issue {
   assignees: [User!]!
   boardId: String!
+  children: [Issue!]
   column: Column!
   columnId: String!
   comments: [IssueComment!]!
   createdAt: DateTime!
   description: String
   done: Boolean!
+  dueDate: DateTime
   epic: String
+  goal: String
   id: ID!
   key: String!
   labels: [Label!]!
   orgId: String!
+  parentId: String
   points: Int
   position: Int!
   priority: Priority!
   reporterId: String
   sprintId: String
+  startDate: DateTime
   subtasks: [Subtask!]!
   title: String!
+  type: IssueType!
   updatedAt: DateTime!
   urgent: Boolean!
 }
@@ -293,6 +325,13 @@ type IssueComment {
   createdAt: DateTime!
   id: ID!
   issueId: String!
+}
+
+enum IssueType {
+  BUG
+  EPIC
+  STORY
+  TASK
 }
 
 """
@@ -353,8 +392,10 @@ input MoveIssueInput {
 type Mutation {
   addCommentToDocument(body: String!, documentId: ID!): DocumentComment!
   addCommentToIssue(input: AddCommentToIssueInput!): IssueComment!
+  addProjectMember(input: AddProjectMemberInput!): ProjectMember!
   addSubtaskToIssue(input: AddSubtaskInput!): Subtask!
   assignIssueToSprint(input: AssignIssueToSprintInput!): Issue!
+  assignUserToIssue(input: AssignUserToIssueInput!): Issue!
   closeSprint(id: ID!): Sprint!
   createApiKey(input: CreateApiKeyInput!): ApiKey!
   createBoard(input: CreateBoardInput!): Board!
@@ -369,6 +410,7 @@ type Mutation {
   createSprint(input: CreateSprintInput!): Sprint!
   createWebhook(input: CreateWebhookInput!): Webhook!
   inviteMember(orgId: ID!, role: MemberRole, title: String, userId: ID!): Member!
+  inviteMemberByEmail(input: InviteMemberByEmailInput!): Member!
   loginUser(input: LoginUserInput!): AuthTokens!
   logoutUser: Boolean!
   markAllNotificationsRead(orgId: ID!): Int!
@@ -386,6 +428,7 @@ type Mutation {
   removeMember(membershipId: ID!): Boolean!
   removeNotification(id: ID!): Boolean!
   removeProject(id: ID!): Boolean!
+  removeProjectMember(input: RemoveProjectMemberInput!): Boolean!
   removeSprint(id: ID!): Boolean!
   removeWebhook(id: ID!): Boolean!
   renewContract(expiresAt: DateTime!, id: ID!): Contract!
@@ -394,7 +437,9 @@ type Mutation {
   startSprint(id: ID!): Sprint!
   toggleFeatureFlag(key: String!, orgId: ID!): FeatureFlag!
   toggleSubtask(subtaskId: ID!): Subtask!
+  unassignUserFromIssue(input: AssignUserToIssueInput!): Issue!
   updateBoard(input: UpdateBoardInput!): Board!
+  updateColumn(input: UpdateColumnInput!): Column!
   updateContract(input: UpdateContractInput!): Contract!
   updateDocument(input: UpdateDocumentInput!): Document!
   updateInvoice(input: UpdateInvoiceInput!): Invoice!
@@ -402,6 +447,7 @@ type Mutation {
   updateMemberRole(membershipId: ID!, role: MemberRole!): Member!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
   updateProject(input: UpdateProjectInput!): Project!
+  updateProjectMember(input: UpdateProjectMemberInput!): ProjectMember!
   updateSprint(input: UpdateSprintInput!): Sprint!
   updateUserProfile(input: UpdateUserProfileInput!): User!
   updateWebhook(input: UpdateWebhookInput!): Webhook!
@@ -486,6 +532,7 @@ type Project {
   client: String
   color: String!
   createdAt: DateTime!
+  deadline: DateTime
   dueLabel: String
   id: ID!
   members: [ProjectMember!]!
@@ -529,21 +576,25 @@ type Query {
   findProjectById(id: ID!): Project!
   findRevenueSummary(orgId: ID!): RevenueSummary!
   findSprintById(id: ID!): Sprint!
+  listActivityByIssue(issueId: ID!): [Activity!]!
   listActivityFeed(orgId: ID!): [Activity!]!
   listApiKeys(orgId: ID!): [ApiKey!]!
   listBacklogIssuesByProject(projectId: ID!): [Issue!]!
   listBoardsByProject(projectId: ID!): [Board!]!
   listContracts(orgId: ID!, pagination: PaginationInput!): PaginatedContracts!
   listDocuments(orgId: ID!): [Document!]!
+  listEpicsByProject(projectId: ID!): [Issue!]!
   listExpiringContracts(orgId: ID!): [Contract!]!
   listFeatureFlags(orgId: ID!): [FeatureFlag!]!
   listInvoices(orgId: ID!, pagination: PaginationInput!): PaginatedInvoices!
   listIssuesByBoard(boardId: ID!): [Issue!]!
+  listIssuesByEpic(epicId: ID!): [Issue!]!
   listMembers(orgId: ID!): [Member!]!
   listMyAssignedIssues: [Issue!]!
   listMyOrganizations: [Organization!]!
   listNotifications(orgId: ID!): [Notification!]!
   listOrganizations(pagination: PaginationInput!): PaginatedOrganizations!
+  listProjectMembers(projectId: ID!): [ProjectMember!]!
   listProjectMilestones(projectId: ID!): [Milestone!]!
   listProjects(orgId: ID!): [Project!]!
   listSprintBurndown(sprintId: ID!): [SprintSnapshot!]!
@@ -557,6 +608,11 @@ input RegisterUserInput {
   email: String!
   name: String!
   password: String!
+}
+
+input RemoveProjectMemberInput {
+  projectId: ID!
+  userId: ID!
 }
 
 type RevenueSummary {
@@ -636,6 +692,13 @@ input UpdateBoardInput {
   name: String!
 }
 
+input UpdateColumnInput {
+  color: String
+  id: ID!
+  name: String
+  wipLimit: Int
+}
+
 input UpdateContractInput {
   clientName: String
   expiresAt: DateTime
@@ -666,10 +729,15 @@ input UpdateInvoiceInput {
 input UpdateIssueInput {
   description: String
   done: Boolean
+  dueDate: DateTime
+  goal: String
   id: ID!
+  parentId: ID
   points: Int
   priority: Priority
+  startDate: DateTime
   title: String
+  type: IssueType
   urgent: Boolean
 }
 
@@ -687,6 +755,7 @@ input UpdateProjectInput {
   budgetCents: Int
   client: String
   color: String
+  deadline: DateTime
   dueLabel: String
   id: ID!
   name: String
@@ -694,6 +763,13 @@ input UpdateProjectInput {
   slug: String
   spentPct: Int
   status: ProjectStatus
+}
+
+input UpdateProjectMemberInput {
+  hours: Int
+  projectId: ID!
+  role: String
+  userId: ID!
 }
 
 input UpdateSprintInput {

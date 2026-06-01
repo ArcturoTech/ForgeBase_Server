@@ -1,6 +1,7 @@
 import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
 import { MemberRole } from "../../common/graphql/enums";
+import { InviteMemberByEmailInput } from './dto/invite-member-by-email.input';
 export declare class MembersService {
     private readonly prisma;
     private readonly tenancy;
@@ -29,6 +30,15 @@ export declare class MembersService {
         orgId: string;
         title: string | null;
     }>;
+    inviteMemberByEmail(userId: string, input: InviteMemberByEmailInput): Promise<{
+        id: string;
+        role: import("generated/prisma").$Enums.MemberRole;
+        createdAt: Date;
+        userId: string;
+        orgId: string;
+        title: string | null;
+    }>;
+    private findOrCreatePendingUser;
     updateMemberRole(userId: string, membershipId: string, role: MemberRole): Promise<{
         id: string;
         role: import("generated/prisma").$Enums.MemberRole;

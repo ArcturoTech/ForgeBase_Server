@@ -57,6 +57,59 @@ let ProjectsService = class ProjectsService {
             include: { user: { select: USER_FIELDS } },
         });
     }
+    async listProjectMembers(userId, projectId) {
+        await this.tenancy.assertProjectAccess(userId, projectId);
+        return this.listMembersByProject(projectId);
+    }
+    async assertTargetUserInProjectOrg(projectId, targetUserId) {
+        const orgId = await this.tenancy.resolveOrgIdByProject(projectId);
+        const membership = await this.prisma.membership.findUnique({
+            where: { orgId_userId: { orgId, userId: targetUserId } },
+            select: { id: true },
+        });
+        if (!membership) {
+            throw new common_1.BadRequestException('Usuário não é membro da organização');
+        }
+    }
+    async addProjectMember(userId, input) {
+        await this.tenancy.assertProjectAccess(userId, input.projectId);
+        await this.assertTargetUserInProjectOrg(input.projectId, input.userId);
+        return this.prisma.projectMember.upsert({
+            where: { projectId_userId: { projectId: input.projectId, userId: input.userId } },
+            create: {
+                projectId: input.projectId,
+                userId: input.userId,
+                role: input.role ?? 'Member',
+                hours: input.hours ?? 0,
+            },
+            update: {
+                role: input.role,
+                hours: input.hours,
+            },
+            include: { user: { select: USER_FIELDS } },
+        });
+    }
+    async updateProjectMember(userId, input) {
+        await this.tenancy.assertProjectAccess(userId, input.projectId);
+        const member = await this.prisma.projectMember.findUnique({
+            where: { projectId_userId: { projectId: input.projectId, userId: input.userId } },
+            select: { id: true },
+        });
+        if (!member)
+            throw new common_1.NotFoundException('Membro do projeto não encontrado');
+        return this.prisma.projectMember.update({
+            where: { projectId_userId: { projectId: input.projectId, userId: input.userId } },
+            data: { role: input.role, hours: input.hours },
+            include: { user: { select: USER_FIELDS } },
+        });
+    }
+    async removeProjectMember(userId, input) {
+        await this.tenancy.assertProjectAccess(userId, input.projectId);
+        await this.prisma.projectMember.deleteMany({
+            where: { projectId: input.projectId, userId: input.userId },
+        });
+        return true;
+    }
     async findUserByProjectMember(userId) {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
@@ -76,6 +129,8 @@ let ProjectsService = class ProjectsService {
                 client: input.client,
                 color: input.color ?? 'oklch(0.62 0.13 240)',
                 budgetCents: input.budgetCents ?? 0,
+                deadline: input.deadline,
+                members: { create: { userId, role: 'LEAD' } },
             },
         });
     }

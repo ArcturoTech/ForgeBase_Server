@@ -5,4 +5,5 @@ export declare class CreateProjectInput {
     client?: string;
     color?: string;
     budgetCents?: number;
+    deadline?: Date;
 }

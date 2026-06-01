@@ -7,6 +7,7 @@ import { MemberRole } from '@/common/graphql/enums';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '@/common/decorators/current-user.decorator';
+import { InviteMemberByEmailInput } from './dto/invite-member-by-email.input';
 
 @Resolver(() => Member)
 export class MembersResolver {
@@ -31,6 +32,15 @@ export class MembersResolver {
     @Args('title', { nullable: true }) title?: string,
   ): Promise<Member> {
     return this.membersService.inviteMember(user.id, orgId, userId, role, title) as Promise<Member>;
+  }
+
+  @Mutation(() => Member)
+  @UseGuards(GqlAuthGuard)
+  inviteMemberByEmail(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: InviteMemberByEmailInput,
+  ): Promise<Member> {
+    return this.membersService.inviteMemberByEmail(user.id, input) as Promise<Member>;
   }
 
   @Mutation(() => Member)

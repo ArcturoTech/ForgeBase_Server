@@ -65,8 +65,13 @@ exports.AppModule = AppModule = __decorate([
                     autoSchemaFile: (0, path_1.join)(process.cwd(), 'src/schema.gql'),
                     sortSchema: true,
                     playground: false,
+                    introspection: process.env.NODE_ENV !== 'production',
                     validationRules: [(0, graphql_depth_limit_1.default)(10)],
-                    plugins: [(0, default_1.ApolloServerPluginLandingPageLocalDefault)()],
+                    plugins: [
+                        process.env.NODE_ENV === 'production'
+                            ? (0, default_1.ApolloServerPluginLandingPageProductionDefault)({ footer: false })
+                            : (0, default_1.ApolloServerPluginLandingPageLocalDefault)(),
+                    ],
                     subscriptions: {
                         'graphql-ws': {
                             onConnect: (context) => {

@@ -1,4 +1,4 @@
-import { Priority } from "../../../common/graphql/enums";
+import { IssueType, Priority } from "../../../common/graphql/enums";
 import { User } from "../../../users/models/user.model";
 import { Label } from './label.model';
 import { Subtask } from './subtask.model';
@@ -13,14 +13,20 @@ export declare class Issue {
     title: string;
     description?: string;
     points?: number;
+    type: IssueType;
     priority: Priority;
     position: number;
     urgent: boolean;
     done: boolean;
     epic?: string;
+    parentId?: string;
+    startDate?: Date;
+    dueDate?: Date;
+    goal?: string;
     reporterId?: string;
     createdAt: Date;
     updatedAt: Date;
+    children?: Issue[];
     assignees?: User[];
     labels?: Label[];
     subtasks?: Subtask[];

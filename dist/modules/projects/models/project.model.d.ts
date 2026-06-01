@@ -12,6 +12,7 @@ export declare class Project {
     budgetCents: number;
     spentPct: number;
     dueLabel?: string;
+    deadline?: Date;
     createdAt: Date;
     updatedAt: Date;
     members?: ProjectMember[];

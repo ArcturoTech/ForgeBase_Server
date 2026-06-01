@@ -61,6 +61,14 @@ let ActivityService = class ActivityService {
             take: 12,
         });
     }
+    async listActivityByIssueKey(userId, orgId, issueKey) {
+        await this.tenancy.assertOrgMembership(userId, orgId);
+        return this.prisma.activity.findMany({
+            where: { orgId, targetType: 'issue', targetId: issueKey },
+            orderBy: { createdAt: 'desc' },
+            take: 12,
+        });
+    }
     findActivityActor(userId) {
         return this.prisma.user.findUnique({ where: { id: userId }, select: ACTOR_FIELDS });
     }

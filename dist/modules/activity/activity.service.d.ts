@@ -34,6 +34,15 @@ export declare class ActivityService {
         targetType: string | null;
         targetId: string | null;
     }[]>;
+    listActivityByIssueKey(userId: string, orgId: string, issueKey: string): Promise<{
+        id: string;
+        createdAt: Date;
+        userId: string;
+        orgId: string;
+        action: string;
+        targetType: string | null;
+        targetId: string | null;
+    }[]>;
     findActivityActor(userId: string): import("generated/prisma").Prisma.Prisma__UserClient<{
         name: string | null;
         id: string;

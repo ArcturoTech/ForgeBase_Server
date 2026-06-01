@@ -27,7 +27,9 @@ const update_issue_input_1 = require("./dto/update-issue.input");
 const move_issue_input_1 = require("./dto/move-issue.input");
 const issue_content_input_1 = require("./dto/issue-content.input");
 const assign_issue_to_sprint_input_1 = require("./dto/assign-issue-to-sprint.input");
+const assign_user_to_issue_input_1 = require("./dto/assign-user-to-issue.input");
 const user_model_1 = require("../../users/models/user.model");
+const activity_model_1 = require("../activity/models/activity.model");
 const pubsub_module_1 = require("../../common/pubsub/pubsub.module");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
@@ -62,8 +64,23 @@ let IssuesResolver = class IssuesResolver {
     listBacklogIssuesByProject(user, projectId) {
         return this.issuesService.listBacklogIssuesByProject(user.id, projectId);
     }
+    listEpicsByProject(user, projectId) {
+        return this.issuesService.listEpicsByProject(user.id, projectId);
+    }
+    listIssuesByEpic(user, epicId) {
+        return this.issuesService.listIssuesByEpic(user.id, epicId);
+    }
     assignIssueToSprint(user, input) {
         return this.issuesService.assignIssueToSprint(user.id, input);
+    }
+    assignUserToIssue(user, input) {
+        return this.issuesService.assignUserToIssue(user.id, input);
+    }
+    unassignUserFromIssue(user, input) {
+        return this.issuesService.unassignUserFromIssue(user.id, input);
+    }
+    listActivityByIssue(user, issueId) {
+        return this.issuesService.listActivityByIssue(user.id, issueId);
     }
     addSubtaskToIssue(user, input) {
         return this.issuesService.addSubtaskToIssue(user.id, input);
@@ -73,6 +90,9 @@ let IssuesResolver = class IssuesResolver {
     }
     addCommentToIssue(user, input) {
         return this.issuesService.addCommentToIssue(user.id, input);
+    }
+    children(issue) {
+        return this.issuesService.listIssuesByParent(issue.id);
     }
     assignees(issue, loaders) {
         return loaders.issueAssignees.load(issue.id);
@@ -175,6 +195,24 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], IssuesResolver.prototype, "listBacklogIssuesByProject", null);
 __decorate([
+    (0, graphql_1.Query)(() => [issue_model_1.Issue]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], IssuesResolver.prototype, "listEpicsByProject", null);
+__decorate([
+    (0, graphql_1.Query)(() => [issue_model_1.Issue]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('epicId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], IssuesResolver.prototype, "listIssuesByEpic", null);
+__decorate([
     (0, graphql_1.Mutation)(() => issue_model_1.Issue),
     (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -183,6 +221,33 @@ __decorate([
     __metadata("design:paramtypes", [Object, assign_issue_to_sprint_input_1.AssignIssueToSprintInput]),
     __metadata("design:returntype", Promise)
 ], IssuesResolver.prototype, "assignIssueToSprint", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => issue_model_1.Issue),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, assign_user_to_issue_input_1.AssignUserToIssueInput]),
+    __metadata("design:returntype", Promise)
+], IssuesResolver.prototype, "assignUserToIssue", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => issue_model_1.Issue),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, assign_user_to_issue_input_1.AssignUserToIssueInput]),
+    __metadata("design:returntype", Promise)
+], IssuesResolver.prototype, "unassignUserFromIssue", null);
+__decorate([
+    (0, graphql_1.Query)(() => [activity_model_1.Activity]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('issueId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], IssuesResolver.prototype, "listActivityByIssue", null);
 __decorate([
     (0, graphql_1.Mutation)(() => subtask_model_1.Subtask),
     (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
@@ -210,6 +275,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, issue_content_input_1.AddCommentToIssueInput]),
     __metadata("design:returntype", Promise)
 ], IssuesResolver.prototype, "addCommentToIssue", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => [issue_model_1.Issue], { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [issue_model_1.Issue]),
+    __metadata("design:returntype", Promise)
+], IssuesResolver.prototype, "children", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [user_model_1.User]),
     __param(0, (0, graphql_1.Parent)()),

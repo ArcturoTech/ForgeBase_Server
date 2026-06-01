@@ -25,6 +25,7 @@ let Project = class Project {
     budgetCents;
     spentPct;
     dueLabel;
+    deadline;
     createdAt;
     updatedAt;
     members;
@@ -74,6 +75,10 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], Project.prototype, "dueLabel", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Date, { nullable: true }),
+    __metadata("design:type", Date)
+], Project.prototype, "deadline", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)
