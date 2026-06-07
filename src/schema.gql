@@ -54,6 +54,19 @@ input AssignUserToIssueInput {
   userId: ID!
 }
 
+type Attachment {
+  createdAt: DateTime!
+  filename: String!
+  id: ID!
+  mimeType: String!
+  orgId: String!
+  size: Int!
+  targetId: String
+  targetType: String
+  uploaderId: String
+  url: String!
+}
+
 type AuthTokens {
   accessToken: String!
   refreshToken: String!
@@ -65,6 +78,41 @@ type Board {
   id: ID!
   name: String!
   projectId: String!
+}
+
+type Channel {
+  createdAt: DateTime!
+  createdById: String
+  description: String
+  id: ID!
+  lastMessage: Message
+  members: [ChannelMember!]
+  name: String
+  orgId: String!
+  type: ChannelType!
+  unreadCount: Int!
+  updatedAt: DateTime!
+}
+
+type ChannelMember {
+  channelId: String!
+  createdAt: DateTime!
+  id: ID!
+  lastReadAt: DateTime
+  role: ChannelMemberRole!
+  user: User
+  userId: String!
+}
+
+enum ChannelMemberRole {
+  MEMBER
+  OWNER
+}
+
+enum ChannelType {
+  DIRECT
+  GENERAL
+  GROUP
 }
 
 type Column {
@@ -131,11 +179,20 @@ input CreateContractInput {
 }
 
 input CreateDocumentInput {
+  category: DocCategory
   orgId: ID!
+  parentId: ID
   projectId: ID
   status: DocStatus
   title: String!
   version: Int
+}
+
+input CreateGroupChannelInput {
+  description: String
+  memberIds: [ID!]
+  name: String!
+  orgId: ID!
 }
 
 input CreateInvoiceInput {
@@ -182,6 +239,15 @@ input CreateOrganizationInput {
   slug: String!
 }
 
+input CreateProjectEnvVarInput {
+  description: String
+  isSecret: Boolean
+  key: String!
+  projectId: ID!
+  scope: EnvScope!
+  value: String!
+}
+
 input CreateProjectInput {
   budgetCents: Int
   client: String
@@ -190,6 +256,13 @@ input CreateProjectInput {
   name: String!
   orgId: ID!
   slug: String!
+}
+
+input CreateProjectResourceInput {
+  label: String!
+  projectId: ID!
+  type: ResourceType!
+  url: String!
 }
 
 input CreateSprintInput {
@@ -211,6 +284,16 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+enum DocCategory {
+  ADR
+  ARCHITECTURE
+  GENERAL
+  GUIDE
+  MEETING
+  OVERVIEW
+  RUNBOOK
+}
+
 enum DocStatus {
   DRAFT
   PUBLISHED
@@ -220,10 +303,12 @@ enum DocStatus {
 type Document {
   authorId: String
   body: JSON
+  category: DocCategory!
   comments: [DocumentComment!]!
   createdAt: DateTime!
   id: ID!
   orgId: String!
+  parentId: String
   projectId: String
   status: DocStatus!
   title: String!
@@ -239,6 +324,13 @@ type DocumentComment {
   documentId: String!
   id: ID!
   resolved: Boolean!
+}
+
+enum EnvScope {
+  DEVELOPMENT
+  PRODUCTION
+  SHARED
+  STAGING
 }
 
 type FeatureFlag {
@@ -371,6 +463,18 @@ enum MemberRole {
   OWNER
 }
 
+type Message {
+  author: User
+  authorId: String!
+  body: String!
+  channelId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  editedAt: DateTime
+  id: ID!
+  replyToId: String
+}
+
 type Milestone {
   color: String!
   current: Boolean!
@@ -402,23 +506,31 @@ type Mutation {
   createColumn(input: CreateColumnInput!): Column!
   createContract(input: CreateContractInput!): Contract!
   createDocument(input: CreateDocumentInput!): Document!
+  createGroupChannel(input: CreateGroupChannelInput!): Channel!
   createInvoice(input: CreateInvoiceInput!): Invoice!
   createIssue(input: CreateIssueInput!): Issue!
   createNotification(input: CreateNotificationInput!): Notification!
   createOrganization(input: CreateOrganizationInput!): Organization!
   createProject(input: CreateProjectInput!): Project!
+  createProjectEnvVar(input: CreateProjectEnvVarInput!): ProjectEnvVar!
+  createProjectResource(input: CreateProjectResourceInput!): ProjectResource!
   createSprint(input: CreateSprintInput!): Sprint!
   createWebhook(input: CreateWebhookInput!): Webhook!
+  editMessage(body: String!, id: ID!): Message!
+  exportProjectEnvFile(projectId: ID!, scope: EnvScope!): String!
   inviteMember(orgId: ID!, role: MemberRole, title: String, userId: ID!): Member!
   inviteMemberByEmail(input: InviteMemberByEmailInput!): Member!
   loginUser(input: LoginUserInput!): AuthTokens!
   logoutUser: Boolean!
   markAllNotificationsRead(orgId: ID!): Int!
+  markChannelRead(channelId: ID!): Boolean!
   markInvoicePaid(input: MarkInvoicePaidInput!): Invoice!
   markNotificationRead(id: ID!): Notification!
   moveIssue(input: MoveIssueInput!): Issue!
+  openDirectChannel(orgId: ID!, targetUserId: ID!): Channel!
   refreshToken(token: String!): AuthTokens!
   registerUser(input: RegisterUserInput!): AuthTokens!
+  removeAttachment(id: ID!): Boolean!
   removeBoard(id: ID!): Boolean!
   removeColumn(id: ID!): Boolean!
   removeContract(id: ID!): Boolean!
@@ -426,14 +538,21 @@ type Mutation {
   removeInvoice(id: ID!): Boolean!
   removeIssue(id: ID!): Boolean!
   removeMember(membershipId: ID!): Boolean!
+  removeMessage(id: ID!): Boolean!
   removeNotification(id: ID!): Boolean!
   removeProject(id: ID!): Boolean!
+  removeProjectEnvVar(id: ID!): Boolean!
   removeProjectMember(input: RemoveProjectMemberInput!): Boolean!
+  removeProjectResource(id: ID!): Boolean!
   removeSprint(id: ID!): Boolean!
+  removeUserAvatar: User!
   removeWebhook(id: ID!): Boolean!
   renewContract(expiresAt: DateTime!, id: ID!): Contract!
+  resolveDocumentComment(id: ID!, resolved: Boolean!): DocumentComment!
+  revealProjectEnvVar(id: ID!): String!
   revokeApiKey(id: ID!): ApiKey!
   sendInvoice(id: ID!): Invoice!
+  sendMessage(input: SendMessageInput!): Message!
   startSprint(id: ID!): Sprint!
   toggleFeatureFlag(key: String!, orgId: ID!): FeatureFlag!
   toggleSubtask(subtaskId: ID!): Subtask!
@@ -447,8 +566,12 @@ type Mutation {
   updateMemberRole(membershipId: ID!, role: MemberRole!): Member!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
   updateProject(input: UpdateProjectInput!): Project!
+  updateProjectEnvVar(input: UpdateProjectEnvVarInput!): ProjectEnvVar!
   updateProjectMember(input: UpdateProjectMemberInput!): ProjectMember!
+  updateProjectResource(input: UpdateProjectResourceInput!): ProjectResource!
   updateSprint(input: UpdateSprintInput!): Sprint!
+  updateUserPassword(input: UpdateUserPasswordInput!): Boolean!
+  updateUserPreferences(input: UpdateUserPreferencesInput!): User!
   updateUserProfile(input: UpdateUserProfileInput!): User!
   updateWebhook(input: UpdateWebhookInput!): Webhook!
 }
@@ -546,6 +669,18 @@ type Project {
   updatedAt: DateTime!
 }
 
+type ProjectEnvVar {
+  description: String
+  id: ID!
+  isSecret: Boolean!
+  key: String!
+  masked: String!
+  projectId: String!
+  scope: EnvScope!
+  updatedAt: DateTime!
+  value: String
+}
+
 type ProjectMember {
   hours: Int!
   id: ID!
@@ -553,6 +688,15 @@ type ProjectMember {
   role: String!
   user: User!
   userId: String!
+}
+
+type ProjectResource {
+  createdAt: DateTime!
+  id: ID!
+  label: String!
+  projectId: String!
+  type: ResourceType!
+  url: String!
 }
 
 enum ProjectStatus {
@@ -566,6 +710,7 @@ enum ProjectStatus {
 type Query {
   findActiveSprintSummary(orgId: ID!): SprintSummary
   findBoardById(id: ID!): Board!
+  findChannelById(id: ID!): Channel!
   findContractById(id: ID!): Contract!
   findDocumentById(id: ID!): Document
   findIntegrationStats(orgId: ID!): IntegrationStats!
@@ -574,15 +719,18 @@ type Query {
   findMyProfile: User!
   findOrganizationBySlug(slug: String!): Organization!
   findProjectById(id: ID!): Project!
+  findProjectOverview(projectId: ID!): Document
   findRevenueSummary(orgId: ID!): RevenueSummary!
   findSprintById(id: ID!): Sprint!
   listActivityByIssue(issueId: ID!): [Activity!]!
   listActivityFeed(orgId: ID!): [Activity!]!
   listApiKeys(orgId: ID!): [ApiKey!]!
+  listAttachmentsByTarget(orgId: ID!, targetId: ID!, targetType: String!): [Attachment!]!
   listBacklogIssuesByProject(projectId: ID!): [Issue!]!
   listBoardsByProject(projectId: ID!): [Board!]!
   listContracts(orgId: ID!, pagination: PaginationInput!): PaginatedContracts!
   listDocuments(orgId: ID!): [Document!]!
+  listDocumentsByProject(projectId: ID!): [Document!]!
   listEpicsByProject(projectId: ID!): [Issue!]!
   listExpiringContracts(orgId: ID!): [Contract!]!
   listFeatureFlags(orgId: ID!): [FeatureFlag!]!
@@ -590,12 +738,16 @@ type Query {
   listIssuesByBoard(boardId: ID!): [Issue!]!
   listIssuesByEpic(epicId: ID!): [Issue!]!
   listMembers(orgId: ID!): [Member!]!
+  listMessages(before: String, channelId: ID!, limit: Int): [Message!]!
   listMyAssignedIssues: [Issue!]!
+  listMyChannels(orgId: ID!): [Channel!]!
   listMyOrganizations: [Organization!]!
   listNotifications(orgId: ID!): [Notification!]!
   listOrganizations(pagination: PaginationInput!): PaginatedOrganizations!
+  listProjectEnvVars(projectId: ID!): [ProjectEnvVar!]!
   listProjectMembers(projectId: ID!): [ProjectMember!]!
   listProjectMilestones(projectId: ID!): [Milestone!]!
+  listProjectResources(projectId: ID!): [ProjectResource!]!
   listProjects(orgId: ID!): [Project!]!
   listSprintBurndown(sprintId: ID!): [SprintSnapshot!]!
   listSprintVelocity(projectId: ID!): [VelocityPoint!]!
@@ -615,6 +767,16 @@ input RemoveProjectMemberInput {
   userId: ID!
 }
 
+enum ResourceType {
+  DASHBOARD
+  DESIGN
+  DOC
+  OTHER
+  PRODUCTION
+  REPO
+  STAGING
+}
+
 type RevenueSummary {
   mrrCents: Int!
   overdueCents: Int!
@@ -625,6 +787,12 @@ type RevenueSummary {
 enum Role {
   ADMIN
   USER
+}
+
+input SendMessageInput {
+  body: String!
+  channelId: ID!
+  replyToId: ID
 }
 
 type Sprint {
@@ -676,6 +844,7 @@ type Subscription {
   issueCreated(boardId: ID!): Issue!
   issueMoved(boardId: ID!): Issue!
   issueUpdated(boardId: ID!): Issue!
+  messageReceived(channelId: ID!): Message!
   notificationReceived(userId: ID!): Notification!
 }
 
@@ -710,7 +879,9 @@ input UpdateContractInput {
 
 input UpdateDocumentInput {
   body: JSON
+  category: DocCategory
   id: ID!
+  parentId: ID
   status: DocStatus
   title: String
   version: Int
@@ -751,6 +922,13 @@ input UpdateOrganizationInput {
   status: OrgStatus
 }
 
+input UpdateProjectEnvVarInput {
+  description: String
+  id: ID!
+  isSecret: Boolean
+  value: String
+}
+
 input UpdateProjectInput {
   budgetCents: Int
   client: String
@@ -772,6 +950,13 @@ input UpdateProjectMemberInput {
   userId: ID!
 }
 
+input UpdateProjectResourceInput {
+  id: ID!
+  label: String
+  type: ResourceType
+  url: String
+}
+
 input UpdateSprintInput {
   code: String
   endDate: DateTime
@@ -781,7 +966,19 @@ input UpdateSprintInput {
   targetPoints: Int
 }
 
+input UpdateUserPasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input UpdateUserPreferencesInput {
+  locale: String
+  theme: String
+}
+
 input UpdateUserProfileInput {
+  bio: String
+  jobTitle: String
   name: String
 }
 
@@ -793,12 +990,17 @@ input UpdateWebhookInput {
 }
 
 type User {
+  avatarUrl: String
+  bio: String
   createdAt: DateTime!
   email: String!
   emailVerified: Boolean!
   id: ID!
+  jobTitle: String
+  locale: String!
   name: String
   role: Role!
+  theme: String!
   updatedAt: DateTime!
 }
 

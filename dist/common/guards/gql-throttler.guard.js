@@ -14,7 +14,7 @@ let GqlThrottlerGuard = class GqlThrottlerGuard extends throttler_1.ThrottlerGua
     async canActivate(context) {
         if (context.getType() === 'graphql') {
             const gqlContext = graphql_1.GqlExecutionContext.create(context).getContext();
-            if (!gqlContext?.req)
+            if (!gqlContext?.req || !gqlContext.req.res)
                 return true;
         }
         return super.canActivate(context);

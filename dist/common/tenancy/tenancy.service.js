@@ -50,6 +50,27 @@ let TenancyService = class TenancyService {
         const orgId = await this.resolveOrgIdByProject(projectId);
         await this.assertOrgMembership(userId, orgId);
     }
+    async assertProjectManager(userId, projectId) {
+        const orgId = await this.resolveOrgIdByProject(projectId);
+        const membership = await this.prisma.membership.findUnique({
+            where: { orgId_userId: { orgId, userId } },
+            select: { role: true },
+        });
+        if (!membership) {
+            throw new common_1.ForbiddenException('Acesso negado a esta organização');
+        }
+        if (membership.role === 'OWNER' || membership.role === 'ADMIN') {
+            return;
+        }
+        const projectMember = await this.prisma.projectMember.findUnique({
+            where: { projectId_userId: { projectId, userId } },
+            select: { role: true },
+        });
+        if (projectMember?.role === 'LEAD') {
+            return;
+        }
+        throw new common_1.ForbiddenException('Apenas gestores do projeto podem executar esta ação');
+    }
     async assertBoardAccess(userId, boardId) {
         const orgId = await this.resolveOrgIdByBoard(boardId);
         await this.assertOrgMembership(userId, orgId);

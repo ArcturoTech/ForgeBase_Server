@@ -14,6 +14,11 @@ model User {
   password      String?
   role          Role     @default(USER)
   emailVerified Boolean  @default(false)
+  avatarUrl     String?
+  jobTitle      String?
+  bio           String?  @db.Text
+  theme         String   @default("light")
+  locale        String   @default("pt-BR")
   refreshToken  String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -28,6 +33,8 @@ model User {
   documents        Document[]
   activities       Activity[]
   notifications    Notification[]
+  channelMembers   ChannelMember[]
+  messages         Message[]
 
   @@map("users")
 }
@@ -50,17 +57,17 @@ model Subscription {
 }
 
 model Organization {
-  id           String       @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
-  slug         String       @unique
-  plan         OrgPlan      @default(TEAM)
-  status       OrgStatus    @default(ACTIVE)
-  region       String       @default("sa-east-1")
+  slug         String    @unique
+  plan         OrgPlan   @default(TEAM)
+  status       OrgStatus @default(ACTIVE)
+  region       String    @default("sa-east-1")
   databaseName String?
-  mrrCents     Int          @default(0)
+  mrrCents     Int       @default(0)
   trialEndsAt  DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   memberships   Membership[]
   featureFlags  FeatureFlag[]
@@ -74,6 +81,8 @@ model Organization {
   webhooks      Webhook[]
   activities    Activity[]
   notifications Notification[]
+  channels      Channel[]
+  attachments   Attachment[]
 
   @@map("organizations")
 }
@@ -111,22 +120,22 @@ model FeatureFlag {
 }
 
 model Project {
-  id        String        @id @default(uuid())
-  orgId     String
-  name      String
-  slug      String
-  client    String?
-  status    ProjectStatus @default(ACTIVE)
-  progress  Int           @default(0)
-  color     String        @default("oklch(0.62 0.13 240)")
-  budgetCents Int         @default(0)
-  spentPct  Int           @default(0)
-  dueLabel  String?
-  deadline  DateTime?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id          String        @id @default(uuid())
+  orgId       String
+  name        String
+  slug        String
+  client      String?
+  status      ProjectStatus @default(ACTIVE)
+  progress    Int           @default(0)
+  color       String        @default("oklch(0.62 0.13 240)")
+  budgetCents Int           @default(0)
+  spentPct    Int           @default(0)
+  dueLabel    String?
+  deadline    DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  organization Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   members      ProjectMember[]
   milestones   Milestone[]
   sprints      Sprint[]
@@ -134,6 +143,8 @@ model Project {
   documents    Document[]
   contracts    Contract[]
   invoices     Invoice[]
+  envVars      ProjectEnvVar[]
+  resources    ProjectResource[]
 
   @@unique([orgId, slug])
   @@index([orgId, status])
@@ -236,28 +247,28 @@ model Column {
 }
 
 model Issue {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   orgId       String
   boardId     String
   columnId    String
   sprintId    String?
   key         String
   title       String
-  description String?  @db.Text
+  description String?   @db.Text
   points      Int?
   type        IssueType @default(TASK)
-  priority    Priority @default(MED)
-  position    Int      @default(0)
-  urgent      Boolean  @default(false)
-  done        Boolean  @default(false)
+  priority    Priority  @default(MED)
+  position    Int       @default(0)
+  urgent      Boolean   @default(false)
+  done        Boolean   @default(false)
   reporterId  String?
   epic        String?
   parentId    String?
   startDate   DateTime?
   dueDate     DateTime?
-  goal        String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  goal        String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   board        Board             @relation(fields: [boardId], references: [id], onDelete: Cascade)
@@ -345,10 +356,10 @@ model Comment {
 }
 
 model IssueDependency {
-  id              String         @id @default(uuid())
-  issueId         String
+  id               String         @id @default(uuid())
+  issueId          String
   dependsOnIssueId String
-  kind            DependencyKind @default(BLOCKS)
+  kind             DependencyKind @default(BLOCKS)
 
   issue     Issue @relation("IssueDependencyFrom", fields: [issueId], references: [id], onDelete: Cascade)
   dependsOn Issue @relation("IssueDependencyTo", fields: [dependsOnIssueId], references: [id], onDelete: Cascade)
@@ -416,23 +427,30 @@ model Invoice {
 }
 
 model Document {
-  id        String    @id @default(uuid())
+  id        String      @id @default(uuid())
   orgId     String
   projectId String?
+  parentId  String?
   title     String
   authorId  String?
-  version   Int       @default(1)
-  status    DocStatus @default(DRAFT)
+  version   Int         @default(1)
+  status    DocStatus   @default(DRAFT)
+  category  DocCategory @default(GENERAL)
   body      Json?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   project      Project?          @relation(fields: [projectId], references: [id])
   author       User?             @relation(fields: [authorId], references: [id])
+  parent       Document?         @relation("DocumentTree", fields: [parentId], references: [id])
+  children     Document[]        @relation("DocumentTree")
   comments     DocumentComment[]
 
   @@index([orgId])
+  @@index([projectId])
+  @@index([parentId])
+  @@index([authorId])
   @@map("documents")
 }
 
@@ -448,6 +466,7 @@ model DocumentComment {
   author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([documentId])
+  @@index([authorId])
   @@map("document_comments")
 }
 
@@ -517,6 +536,143 @@ model Notification {
 
   @@index([userId, read])
   @@map("notifications")
+}
+
+model Channel {
+  id          String      @id @default(uuid())
+  orgId       String
+  type        ChannelType @default(GROUP)
+  name        String?
+  description String?
+  createdById String?
+  dmKey       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  organization Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  members      ChannelMember[]
+  messages     Message[]
+
+  @@unique([orgId, dmKey])
+  @@index([orgId])
+  @@map("channels")
+}
+
+model ChannelMember {
+  id         String            @id @default(uuid())
+  channelId  String
+  userId     String
+  role       ChannelMemberRole @default(MEMBER)
+  lastReadAt DateTime?
+  createdAt  DateTime          @default(now())
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+  @@index([userId])
+  @@map("channel_members")
+}
+
+model Message {
+  id        String    @id @default(uuid())
+  channelId String
+  authorId  String
+  body      String    @db.Text
+  replyToId String?
+  editedAt  DateTime?
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  channel Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo Message?  @relation("MessageReply", fields: [replyToId], references: [id])
+  replies Message[] @relation("MessageReply")
+
+  @@index([channelId, createdAt])
+  @@map("messages")
+}
+
+model ProjectEnvVar {
+  id          String   @id @default(uuid())
+  projectId   String
+  scope       EnvScope @default(SHARED)
+  key         String
+  valueEnc    String   @db.Text
+  isSecret    Boolean  @default(true)
+  description String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, scope, key])
+  @@index([projectId])
+  @@map("project_env_vars")
+}
+
+model ProjectResource {
+  id        String       @id @default(uuid())
+  projectId String
+  type      ResourceType @default(OTHER)
+  label     String
+  url       String
+  createdAt DateTime     @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_resources")
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  orgId        String
+  uploaderId   String?
+  targetType   String?
+  targetId     String?
+  filename     String
+  mimeType     String
+  size         Int
+  url          String
+  storageKey   String
+  resourceType String?
+  createdAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([targetType, targetId])
+  @@map("attachments")
+}
+
+enum EnvScope {
+  DEVELOPMENT
+  STAGING
+  PRODUCTION
+  SHARED
+}
+
+enum ResourceType {
+  REPO
+  DESIGN
+  STAGING
+  PRODUCTION
+  DASHBOARD
+  DOC
+  OTHER
+}
+
+enum ChannelType {
+  GENERAL
+  GROUP
+  DIRECT
+}
+
+enum ChannelMemberRole {
+  OWNER
+  MEMBER
 }
 
 enum Role {
@@ -608,6 +764,16 @@ enum DocStatus {
   DRAFT
   REVIEW
   PUBLISHED
+}
+
+enum DocCategory {
+  OVERVIEW
+  ARCHITECTURE
+  RUNBOOK
+  ADR
+  GUIDE
+  MEETING
+  GENERAL
 }
 
 enum ApiKeyStatus {

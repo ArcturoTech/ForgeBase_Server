@@ -16,7 +16,9 @@ const enums_1 = require("../../../common/graphql/enums");
 let CreateDocumentInput = class CreateDocumentInput {
     orgId;
     projectId;
+    parentId;
     title;
+    category;
     version;
     status;
 };
@@ -33,10 +35,22 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDocumentInput.prototype, "projectId", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDocumentInput.prototype, "parentId", void 0);
+__decorate([
     (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateDocumentInput.prototype, "title", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => enums_1.DocCategory, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(enums_1.DocCategory),
+    __metadata("design:type", String)
+], CreateDocumentInput.prototype, "category", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
     (0, class_validator_1.IsOptional)(),

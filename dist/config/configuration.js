@@ -21,5 +21,14 @@ exports.default = () => ({
         url: process.env.APP_URL ?? 'http://localhost:3333',
         frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:3000',
     },
+    encryption: {
+        key: process.env.ENCRYPTION_KEY,
+    },
+    cloudinary: {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        apiSecret: process.env.CLOUDINARY_API_SECRET,
+        folder: process.env.CLOUDINARY_FOLDER ?? 'forgebase',
+    },
 });
 //# sourceMappingURL=configuration.js.map

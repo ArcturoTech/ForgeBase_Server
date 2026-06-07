@@ -6,5 +6,6 @@ export declare class TenancyService {
     resolveOrgIdByProject(projectId: string): Promise<string>;
     resolveOrgIdByBoard(boardId: string): Promise<string>;
     assertProjectAccess(userId: string, projectId: string): Promise<void>;
+    assertProjectManager(userId: string, projectId: string): Promise<void>;
     assertBoardAccess(userId: string, boardId: string): Promise<void>;
 }

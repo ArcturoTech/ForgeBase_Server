@@ -22,6 +22,11 @@ export declare class UsersController {
         email: string;
         role: import("generated/prisma").$Enums.Role;
         emailVerified: boolean;
+        avatarUrl: string | null;
+        jobTitle: string | null;
+        bio: string | null;
+        theme: string;
+        locale: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -31,6 +36,25 @@ export declare class UsersController {
         email: string;
         role: import("generated/prisma").$Enums.Role;
         emailVerified: boolean;
+        avatarUrl: string | null;
+        jobTitle: string | null;
+        bio: string | null;
+        theme: string;
+        locale: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    uploadMyAvatar(user: AuthenticatedUser, file: Express.Multer.File): Promise<{
+        name: string | null;
+        id: string;
+        email: string;
+        role: import("generated/prisma").$Enums.Role;
+        emailVerified: boolean;
+        avatarUrl: string | null;
+        jobTitle: string | null;
+        bio: string | null;
+        theme: string;
+        locale: string;
         createdAt: Date;
         updatedAt: Date;
     }>;

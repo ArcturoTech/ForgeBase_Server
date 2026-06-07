@@ -1,7 +1,7 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { IsEnum, IsInt, IsObject, IsOptional, IsString, Min } from 'class-validator';
-import { DocStatus } from '@/common/graphql/enums';
+import { DocCategory, DocStatus } from '@/common/graphql/enums';
 
 @InputType()
 export class UpdateDocumentInput {
@@ -13,6 +13,16 @@ export class UpdateDocumentInput {
   @IsOptional()
   @IsString()
   title?: string;
+
+  @Field(() => DocCategory, { nullable: true })
+  @IsOptional()
+  @IsEnum(DocCategory)
+  category?: DocCategory;
+
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsString()
+  parentId?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()

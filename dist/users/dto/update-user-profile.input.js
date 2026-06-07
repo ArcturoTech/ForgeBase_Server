@@ -14,14 +14,31 @@ const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
 let UpdateUserProfileInput = class UpdateUserProfileInput {
     name;
+    jobTitle;
+    bio;
 };
 exports.UpdateUserProfileInput = UpdateUserProfileInput;
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(80),
     __metadata("design:type", String)
 ], UpdateUserProfileInput.prototype, "name", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(80),
+    __metadata("design:type", String)
+], UpdateUserProfileInput.prototype, "jobTitle", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(280),
+    __metadata("design:type", String)
+], UpdateUserProfileInput.prototype, "bio", void 0);
 exports.UpdateUserProfileInput = UpdateUserProfileInput = __decorate([
     (0, graphql_1.InputType)()
 ], UpdateUserProfileInput);

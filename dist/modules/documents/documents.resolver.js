@@ -31,6 +31,12 @@ let DocumentsResolver = class DocumentsResolver {
     listDocuments(user, orgId) {
         return this.documentsService.listDocuments(user.id, orgId);
     }
+    listDocumentsByProject(user, projectId) {
+        return this.documentsService.listDocumentsByProject(user.id, projectId);
+    }
+    findProjectOverview(user, projectId) {
+        return this.documentsService.findProjectOverviewDocument(user.id, projectId);
+    }
     findDocumentById(user, id) {
         return this.documentsService.findDocumentById(user.id, id);
     }
@@ -46,6 +52,9 @@ let DocumentsResolver = class DocumentsResolver {
     addCommentToDocument(user, documentId, body) {
         return this.documentsService.addCommentToDocument(user.id, documentId, body);
     }
+    resolveDocumentComment(user, id, resolved) {
+        return this.documentsService.resolveDocumentComment(user.id, id, resolved);
+    }
     comments(document) {
         return this.documentsService.listCommentsByDocument(document.id);
     }
@@ -60,6 +69,24 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DocumentsResolver.prototype, "listDocuments", null);
+__decorate([
+    (0, graphql_1.Query)(() => [document_model_1.Document]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "listDocumentsByProject", null);
+__decorate([
+    (0, graphql_1.Query)(() => document_model_1.Document, { nullable: true }),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "findProjectOverview", null);
 __decorate([
     (0, graphql_1.Query)(() => document_model_1.Document, { nullable: true }),
     (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
@@ -106,6 +133,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], DocumentsResolver.prototype, "addCommentToDocument", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => document_comment_model_1.DocumentComment),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
+    __param(2, (0, graphql_1.Args)('resolved')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Boolean]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "resolveDocumentComment", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [document_comment_model_1.DocumentComment]),
     __param(0, (0, graphql_1.Parent)()),

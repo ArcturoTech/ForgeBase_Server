@@ -18,6 +18,8 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
 const user_model_1 = require("./models/user.model");
 const update_user_profile_input_1 = require("./dto/update-user-profile.input");
+const update_user_preferences_input_1 = require("./dto/update-user-preferences.input");
+const update_user_password_input_1 = require("./dto/update-user-password.input");
 const gql_auth_guard_1 = require("../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 let UsersResolver = class UsersResolver {
@@ -29,7 +31,16 @@ let UsersResolver = class UsersResolver {
         return this.usersService.findUserById(user.id);
     }
     updateUserProfile(user, input) {
-        return this.usersService.updateUser(user.id, input);
+        return this.usersService.updateUserProfile(user.id, input);
+    }
+    updateUserPreferences(user, input) {
+        return this.usersService.updateUserPreferences(user.id, input);
+    }
+    updateUserPassword(user, input) {
+        return this.usersService.updateUserPassword(user.id, input);
+    }
+    removeUserAvatar(user) {
+        return this.usersService.removeUserAvatar(user.id);
     }
 };
 exports.UsersResolver = UsersResolver;
@@ -50,6 +61,32 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_user_profile_input_1.UpdateUserProfileInput]),
     __metadata("design:returntype", Promise)
 ], UsersResolver.prototype, "updateUserProfile", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => user_model_1.User),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_user_preferences_input_1.UpdateUserPreferencesInput]),
+    __metadata("design:returntype", Promise)
+], UsersResolver.prototype, "updateUserPreferences", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_user_password_input_1.UpdateUserPasswordInput]),
+    __metadata("design:returntype", Promise)
+], UsersResolver.prototype, "updateUserPassword", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => user_model_1.User),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersResolver.prototype, "removeUserAvatar", null);
 exports.UsersResolver = UsersResolver = __decorate([
     (0, graphql_1.Resolver)(() => user_model_1.User),
     __metadata("design:paramtypes", [users_service_1.UsersService])

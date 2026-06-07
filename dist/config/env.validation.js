@@ -16,6 +16,10 @@ class EnvironmentVariables {
     DATABASE_URL;
     JWT_ACCESS_SECRET;
     JWT_REFRESH_SECRET;
+    ENCRYPTION_KEY;
+    CLOUDINARY_CLOUD_NAME;
+    CLOUDINARY_API_KEY;
+    CLOUDINARY_API_SECRET;
     FRONTEND_URL;
     PORT;
 }
@@ -31,6 +35,23 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], EnvironmentVariables.prototype, "JWT_REFRESH_SECRET", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(32),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "ENCRYPTION_KEY", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "CLOUDINARY_CLOUD_NAME", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "CLOUDINARY_API_KEY", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "CLOUDINARY_API_SECRET", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

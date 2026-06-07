@@ -23,6 +23,27 @@ export class DocumentsResolver {
     return this.documentsService.listDocuments(user.id, orgId) as Promise<Document[]>;
   }
 
+  @Query(() => [Document])
+  @UseGuards(GqlAuthGuard)
+  listDocumentsByProject(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('projectId', { type: () => ID }) projectId: string,
+  ): Promise<Document[]> {
+    return this.documentsService.listDocumentsByProject(user.id, projectId) as Promise<Document[]>;
+  }
+
+  @Query(() => Document, { nullable: true })
+  @UseGuards(GqlAuthGuard)
+  findProjectOverview(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('projectId', { type: () => ID }) projectId: string,
+  ): Promise<Document | null> {
+    return this.documentsService.findProjectOverviewDocument(
+      user.id,
+      projectId,
+    ) as Promise<Document | null>;
+  }
+
   @Query(() => Document, { nullable: true })
   @UseGuards(GqlAuthGuard)
   findDocumentById(
@@ -70,6 +91,20 @@ export class DocumentsResolver {
       user.id,
       documentId,
       body,
+    ) as Promise<DocumentComment>;
+  }
+
+  @Mutation(() => DocumentComment)
+  @UseGuards(GqlAuthGuard)
+  resolveDocumentComment(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('id', { type: () => ID }) id: string,
+    @Args('resolved') resolved: boolean,
+  ): Promise<DocumentComment> {
+    return this.documentsService.resolveDocumentComment(
+      user.id,
+      id,
+      resolved,
     ) as Promise<DocumentComment>;
   }
 

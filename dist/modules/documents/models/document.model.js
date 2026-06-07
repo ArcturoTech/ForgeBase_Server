@@ -18,10 +18,12 @@ let Document = class Document {
     id;
     orgId;
     projectId;
+    parentId;
     title;
     authorId;
     version;
     status;
+    category;
     body;
     createdAt;
     updatedAt;
@@ -41,6 +43,10 @@ __decorate([
     __metadata("design:type", String)
 ], Document.prototype, "projectId", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Document.prototype, "parentId", void 0);
+__decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", String)
 ], Document.prototype, "title", void 0);
@@ -56,6 +62,10 @@ __decorate([
     (0, graphql_1.Field)(() => enums_1.DocStatus),
     __metadata("design:type", String)
 ], Document.prototype, "status", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => enums_1.DocCategory),
+    __metadata("design:type", String)
+], Document.prototype, "category", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
     __metadata("design:type", Object)

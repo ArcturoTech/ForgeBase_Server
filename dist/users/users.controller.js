@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const swagger_1 = require("@nestjs/swagger");
 const users_service_1 = require("./users.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
@@ -28,7 +29,10 @@ let UsersController = class UsersController {
         return this.usersService.findUserById(user.id);
     }
     updateMe(user, dto) {
-        return this.usersService.updateUser(user.id, dto);
+        return this.usersService.updateUserProfile(user.id, dto);
+    }
+    uploadMyAvatar(user, file) {
+        return this.usersService.updateUserAvatar(user.id, file);
     }
     deleteMe(user) {
         return this.usersService.removeUser(user.id);
@@ -52,6 +56,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "updateMe", null);
+__decorate([
+    (0, common_1.Post)('me/avatar'),
+    (0, swagger_1.ApiOperation)({ summary: 'Upload current user avatar' }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { limits: { fileSize: 5 * 1024 * 1024 } })),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "uploadMyAvatar", null);
 __decorate([
     (0, common_1.Delete)('me'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete current user account' }),

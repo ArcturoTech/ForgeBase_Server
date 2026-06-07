@@ -6,4 +6,14 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @ApiPropertyOptional({ example: 'Tech Lead' })
+  @IsString()
+  @IsOptional()
+  jobTitle?: string;
+
+  @ApiPropertyOptional({ example: 'Construindo a plataforma ForgeBase.' })
+  @IsString()
+  @IsOptional()
+  bio?: string;
 }

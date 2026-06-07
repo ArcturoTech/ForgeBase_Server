@@ -19,5 +19,14 @@ declare const _default: () => {
         url: string;
         frontendUrl: string;
     };
+    encryption: {
+        key: string | undefined;
+    };
+    cloudinary: {
+        cloudName: string | undefined;
+        apiKey: string | undefined;
+        apiSecret: string | undefined;
+        folder: string;
+    };
 };
 export default _default;

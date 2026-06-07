@@ -18,6 +18,21 @@ export class User {
   @Field()
   emailVerified: boolean;
 
+  @Field({ nullable: true })
+  avatarUrl?: string;
+
+  @Field({ nullable: true })
+  jobTitle?: string;
+
+  @Field({ nullable: true })
+  bio?: string;
+
+  @Field()
+  theme: string;
+
+  @Field()
+  locale: string;
+
   @Field()
   createdAt: Date;
 

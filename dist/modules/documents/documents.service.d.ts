@@ -14,11 +14,41 @@ export declare class DocumentsService {
         authorId: string | null;
         body: Prisma.JsonValue | null;
         orgId: string;
+        version: number;
         title: string;
         status: import("generated/prisma").$Enums.DocStatus;
         projectId: string | null;
-        version: number;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
     }[]>;
+    listDocumentsByProject(userId: string, projectId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+    }[]>;
+    findProjectOverviewDocument(userId: string, projectId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+    } | null>;
     findDocumentById(userId: string, id: string): Promise<{
         id: string;
         createdAt: Date;
@@ -26,10 +56,12 @@ export declare class DocumentsService {
         authorId: string | null;
         body: Prisma.JsonValue | null;
         orgId: string;
+        version: number;
         title: string;
         status: import("generated/prisma").$Enums.DocStatus;
         projectId: string | null;
-        version: number;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
     }>;
     createDocument(userId: string, input: CreateDocumentInput): Promise<{
         id: string;
@@ -38,10 +70,12 @@ export declare class DocumentsService {
         authorId: string | null;
         body: Prisma.JsonValue | null;
         orgId: string;
+        version: number;
         title: string;
         status: import("generated/prisma").$Enums.DocStatus;
         projectId: string | null;
-        version: number;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
     }>;
     updateDocument(userId: string, input: UpdateDocumentInput): Promise<{
         id: string;
@@ -50,13 +84,23 @@ export declare class DocumentsService {
         authorId: string | null;
         body: Prisma.JsonValue | null;
         orgId: string;
+        version: number;
         title: string;
         status: import("generated/prisma").$Enums.DocStatus;
         projectId: string | null;
-        version: number;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
     }>;
     removeDocument(userId: string, id: string): Promise<boolean>;
     addCommentToDocument(userId: string, documentId: string, body: string): Promise<{
+        id: string;
+        createdAt: Date;
+        authorId: string;
+        body: string;
+        resolved: boolean;
+        documentId: string;
+    }>;
+    resolveDocumentComment(userId: string, commentId: string, resolved: boolean): Promise<{
         id: string;
         createdAt: Date;
         authorId: string;

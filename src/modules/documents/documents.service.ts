@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@/prisma/prisma-client';
+import { DocCategory, Prisma } from '@/prisma/prisma-client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { CreateDocumentInput } from './dto/create-document.input';
@@ -30,6 +30,22 @@ export class DocumentsService {
     });
   }
 
+  async listDocumentsByProject(userId: string, projectId: string) {
+    await this.tenancy.assertProjectAccess(userId, projectId);
+    return this.prisma.document.findMany({
+      where: { projectId },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  async findProjectOverviewDocument(userId: string, projectId: string) {
+    await this.tenancy.assertProjectAccess(userId, projectId);
+    return this.prisma.document.findFirst({
+      where: { projectId, category: DocCategory.OVERVIEW },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
   async findDocumentById(userId: string, id: string) {
     const document = await this.loadDocumentOrThrow(id);
     await this.tenancy.assertOrgMembership(userId, document.orgId);
@@ -42,9 +58,11 @@ export class DocumentsService {
       data: {
         orgId: input.orgId,
         projectId: input.projectId,
+        parentId: input.parentId,
         title: input.title,
         version: input.version,
         status: input.status,
+        category: input.category,
       },
     });
   }
@@ -71,6 +89,17 @@ export class DocumentsService {
     await this.tenancy.assertOrgMembership(userId, document.orgId);
     return this.prisma.documentComment.create({
       data: { documentId, authorId: userId, body },
+    });
+  }
+
+  async resolveDocumentComment(userId: string, commentId: string, resolved: boolean) {
+    const comment = await this.prisma.documentComment.findUnique({ where: { id: commentId } });
+    if (!comment) throw new NotFoundException('Comentário não encontrado');
+    const document = await this.loadDocumentOrThrow(comment.documentId);
+    await this.tenancy.assertOrgMembership(userId, document.orgId);
+    return this.prisma.documentComment.update({
+      where: { id: commentId },
+      data: { resolved },
     });
   }
 

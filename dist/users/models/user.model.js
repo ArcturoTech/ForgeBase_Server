@@ -18,6 +18,11 @@ let User = class User {
     email;
     role;
     emailVerified;
+    avatarUrl;
+    jobTitle;
+    bio;
+    theme;
+    locale;
     createdAt;
     updatedAt;
 };
@@ -42,6 +47,26 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], User.prototype, "emailVerified", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "avatarUrl", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "jobTitle", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "bio", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], User.prototype, "theme", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], User.prototype, "locale", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)

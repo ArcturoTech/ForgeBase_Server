@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DocumentsService = void 0;
 const common_1 = require("@nestjs/common");
+const prisma_client_1 = require("../../prisma/prisma-client");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const tenancy_service_1 = require("../../common/tenancy/tenancy.service");
 const USER_FIELDS = {
@@ -36,6 +37,20 @@ let DocumentsService = class DocumentsService {
             orderBy: { updatedAt: 'desc' },
         });
     }
+    async listDocumentsByProject(userId, projectId) {
+        await this.tenancy.assertProjectAccess(userId, projectId);
+        return this.prisma.document.findMany({
+            where: { projectId },
+            orderBy: { updatedAt: 'desc' },
+        });
+    }
+    async findProjectOverviewDocument(userId, projectId) {
+        await this.tenancy.assertProjectAccess(userId, projectId);
+        return this.prisma.document.findFirst({
+            where: { projectId, category: prisma_client_1.DocCategory.OVERVIEW },
+            orderBy: { updatedAt: 'desc' },
+        });
+    }
     async findDocumentById(userId, id) {
         const document = await this.loadDocumentOrThrow(id);
         await this.tenancy.assertOrgMembership(userId, document.orgId);
@@ -47,9 +62,11 @@ let DocumentsService = class DocumentsService {
             data: {
                 orgId: input.orgId,
                 projectId: input.projectId,
+                parentId: input.parentId,
                 title: input.title,
                 version: input.version,
                 status: input.status,
+                category: input.category,
             },
         });
     }
@@ -73,6 +90,17 @@ let DocumentsService = class DocumentsService {
         await this.tenancy.assertOrgMembership(userId, document.orgId);
         return this.prisma.documentComment.create({
             data: { documentId, authorId: userId, body },
+        });
+    }
+    async resolveDocumentComment(userId, commentId, resolved) {
+        const comment = await this.prisma.documentComment.findUnique({ where: { id: commentId } });
+        if (!comment)
+            throw new common_1.NotFoundException('Comentário não encontrado');
+        const document = await this.loadDocumentOrThrow(comment.documentId);
+        await this.tenancy.assertOrgMembership(userId, document.orgId);
+        return this.prisma.documentComment.update({
+            where: { id: commentId },
+            data: { resolved },
         });
     }
     listCommentsByDocument(documentId) {

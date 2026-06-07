@@ -5,6 +5,11 @@ export declare class User {
     email: string;
     role: Role;
     emailVerified: boolean;
+    avatarUrl?: string;
+    jobTitle?: string;
+    bio?: string;
+    theme: string;
+    locale: string;
     createdAt: Date;
     updatedAt: Date;
 }

@@ -1,43 +1,106 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '@/prisma/prisma.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { StorageService } from '@/common/storage/storage.service';
+import { UpdateUserProfileInput } from './dto/update-user-profile.input';
+import { UpdateUserPreferencesInput } from './dto/update-user-preferences.input';
+import { UpdateUserPasswordInput } from './dto/update-user-password.input';
+
+const PROFILE_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  emailVerified: true,
+  avatarUrl: true,
+  jobTitle: true,
+  bio: true,
+  theme: true,
+  locale: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storage: StorageService,
+  ) {}
 
   async findUserById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        emailVerified: true,
-        createdAt: true,
-        updatedAt: true,
-        subscription: true,
-      },
+      select: { ...PROFILE_SELECT, subscription: true },
     });
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
-  async updateUser(id: string, dto: UpdateUserDto) {
+  async updateUserProfile(id: string, input: UpdateUserProfileInput) {
     await this.findUserById(id);
     return this.prisma.user.update({
       where: { id },
-      data: dto,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        emailVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      data: input,
+      select: PROFILE_SELECT,
+    });
+  }
+
+  async updateUserPreferences(id: string, input: UpdateUserPreferencesInput) {
+    await this.findUserById(id);
+    return this.prisma.user.update({
+      where: { id },
+      data: input,
+      select: PROFILE_SELECT,
+    });
+  }
+
+  async updateUserPassword(id: string, input: UpdateUserPasswordInput) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, password: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.password)
+      throw new BadRequestException('Esta conta não usa senha local');
+
+    const matches = await bcrypt.compare(input.currentPassword, user.password);
+    if (!matches) throw new UnauthorizedException('Senha atual incorreta');
+
+    const hashed = await bcrypt.hash(input.newPassword, 10);
+    await this.prisma.user.update({ where: { id }, data: { password: hashed } });
+    return true;
+  }
+
+  async updateUserAvatar(id: string, file: Express.Multer.File) {
+    if (!file?.buffer) throw new BadRequestException('Arquivo não enviado');
+    if (!file.mimetype.startsWith('image/'))
+      throw new BadRequestException('Envie um arquivo de imagem');
+
+    await this.findUserById(id);
+    const stored = await this.storage.saveFile(
+      file.buffer,
+      file.originalname,
+      'avatars',
+    );
+    return this.prisma.user.update({
+      where: { id },
+      data: { avatarUrl: stored.url },
+      select: PROFILE_SELECT,
+    });
+  }
+
+  async removeUserAvatar(id: string) {
+    await this.findUserById(id);
+    return this.prisma.user.update({
+      where: { id },
+      data: { avatarUrl: null },
+      select: PROFILE_SELECT,
     });
   }
 

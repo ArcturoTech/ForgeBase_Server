@@ -27,6 +27,8 @@ const prisma_service_1 = require("./prisma/prisma.service");
 const loaders_1 = require("./common/dataloader/loaders");
 const gql_throttler_guard_1 = require("./common/guards/gql-throttler.guard");
 const pubsub_module_1 = require("./common/pubsub/pubsub.module");
+const crypto_module_1 = require("./common/crypto/crypto.module");
+const storage_module_1 = require("./common/storage/storage.module");
 const auth_module_1 = require("./auth/auth.module");
 const users_module_1 = require("./users/users.module");
 const stripe_module_1 = require("./stripe/stripe.module");
@@ -43,6 +45,10 @@ const invoices_module_1 = require("./modules/invoices/invoices.module");
 const documents_module_1 = require("./modules/documents/documents.module");
 const integrations_module_1 = require("./modules/integrations/integrations.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
+const chat_module_1 = require("./modules/chat/chat.module");
+const env_vars_module_1 = require("./modules/env-vars/env-vars.module");
+const resources_module_1 = require("./modules/resources/resources.module");
+const attachments_module_1 = require("./modules/attachments/attachments.module");
 const tenancy_module_1 = require("./common/tenancy/tenancy.module");
 const configuration_1 = __importDefault(require("./config/configuration"));
 const env_validation_1 = require("./config/env.validation");
@@ -91,6 +97,8 @@ exports.AppModule = AppModule = __decorate([
             throttler_1.ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
             schedule_1.ScheduleModule.forRoot(),
             pubsub_module_1.PubSubModule,
+            crypto_module_1.CryptoModule,
+            storage_module_1.StorageModule,
             tenancy_module_1.TenancyModule,
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
@@ -109,6 +117,10 @@ exports.AppModule = AppModule = __decorate([
             documents_module_1.DocumentsModule,
             integrations_module_1.IntegrationsModule,
             notifications_module_1.NotificationsModule,
+            chat_module_1.ChatModule,
+            env_vars_module_1.EnvVarsModule,
+            resources_module_1.ResourcesModule,
+            attachments_module_1.AttachmentsModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: gql_throttler_guard_1.GqlThrottlerGuard }],
     })

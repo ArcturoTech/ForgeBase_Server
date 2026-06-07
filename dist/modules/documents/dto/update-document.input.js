@@ -17,6 +17,8 @@ const enums_1 = require("../../../common/graphql/enums");
 let UpdateDocumentInput = class UpdateDocumentInput {
     id;
     title;
+    category;
+    parentId;
     body;
     status;
     version;
@@ -33,6 +35,18 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateDocumentInput.prototype, "title", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => enums_1.DocCategory, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(enums_1.DocCategory),
+    __metadata("design:type", String)
+], UpdateDocumentInput.prototype, "category", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateDocumentInput.prototype, "parentId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
     (0, class_validator_1.IsOptional)(),

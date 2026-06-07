@@ -53,8 +53,8 @@ export declare class OrganizationsService {
         label: string;
         id: string;
         orgId: string;
-        description: string;
         key: string;
+        description: string;
         enabled: boolean;
         locked: boolean;
         enabledAt: Date | null;
@@ -89,8 +89,8 @@ export declare class OrganizationsService {
         label: string;
         id: string;
         orgId: string;
-        description: string;
         key: string;
+        description: string;
         enabled: boolean;
         locked: boolean;
         enabledAt: Date | null;

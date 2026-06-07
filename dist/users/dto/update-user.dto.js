@@ -14,6 +14,8 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class UpdateUserDto {
     name;
+    jobTitle;
+    bio;
 }
 exports.UpdateUserDto = UpdateUserDto;
 __decorate([
@@ -22,4 +24,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Tech Lead' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "jobTitle", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Construindo a plataforma ForgeBase.' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "bio", void 0);
 //# sourceMappingURL=update-user.dto.js.map

@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { IsOptional, IsString, validateSync } from 'class-validator';
+import { IsOptional, IsString, MinLength, validateSync } from 'class-validator';
 
 class EnvironmentVariables {
   @IsString()
@@ -10,6 +10,19 @@ class EnvironmentVariables {
 
   @IsString()
   JWT_REFRESH_SECRET: string;
+
+  @IsString()
+  @MinLength(32)
+  ENCRYPTION_KEY: string;
+
+  @IsString()
+  CLOUDINARY_CLOUD_NAME: string;
+
+  @IsString()
+  CLOUDINARY_API_KEY: string;
+
+  @IsString()
+  CLOUDINARY_API_SECRET: string;
 
   @IsOptional()
   @IsString()

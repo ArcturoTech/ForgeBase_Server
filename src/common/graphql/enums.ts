@@ -12,8 +12,13 @@ import {
   ContractStatus,
   InvoiceStatus,
   DocStatus,
+  DocCategory,
   ApiKeyStatus,
   WebhookStatus,
+  ChannelType,
+  ChannelMemberRole,
+  EnvScope,
+  ResourceType,
 } from '@/prisma/prisma-client';
 
 registerEnumType(Role, { name: 'Role' });
@@ -28,8 +33,13 @@ registerEnumType(DependencyKind, { name: 'DependencyKind' });
 registerEnumType(ContractStatus, { name: 'ContractStatus' });
 registerEnumType(InvoiceStatus, { name: 'InvoiceStatus' });
 registerEnumType(DocStatus, { name: 'DocStatus' });
+registerEnumType(DocCategory, { name: 'DocCategory' });
 registerEnumType(ApiKeyStatus, { name: 'ApiKeyStatus' });
 registerEnumType(WebhookStatus, { name: 'WebhookStatus' });
+registerEnumType(ChannelType, { name: 'ChannelType' });
+registerEnumType(ChannelMemberRole, { name: 'ChannelMemberRole' });
+registerEnumType(EnvScope, { name: 'EnvScope' });
+registerEnumType(ResourceType, { name: 'ResourceType' });
 
 export {
   Role,
@@ -44,6 +54,11 @@ export {
   ContractStatus,
   InvoiceStatus,
   DocStatus,
+  DocCategory,
   ApiKeyStatus,
   WebhookStatus,
+  ChannelType,
+  ChannelMemberRole,
+  EnvScope,
+  ResourceType,
 };

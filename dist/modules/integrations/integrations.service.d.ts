@@ -44,8 +44,8 @@ export declare class IntegrationsService {
         id: string;
         createdAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.WebhookStatus;
         url: string;
+        status: import("generated/prisma").$Enums.WebhookStatus;
         events: string[];
         successRate: number;
         lastDeliveryAt: Date | null;
@@ -54,8 +54,8 @@ export declare class IntegrationsService {
         id: string;
         createdAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.WebhookStatus;
         url: string;
+        status: import("generated/prisma").$Enums.WebhookStatus;
         events: string[];
         successRate: number;
         lastDeliveryAt: Date | null;
@@ -64,8 +64,8 @@ export declare class IntegrationsService {
         id: string;
         createdAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.WebhookStatus;
         url: string;
+        status: import("generated/prisma").$Enums.WebhookStatus;
         events: string[];
         successRate: number;
         lastDeliveryAt: Date | null;

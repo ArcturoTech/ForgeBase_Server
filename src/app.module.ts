@@ -18,6 +18,8 @@ import { PrismaService } from './prisma/prisma.service';
 import { createLoaders } from './common/dataloader/loaders';
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
 import { PubSubModule } from './common/pubsub/pubsub.module';
+import { CryptoModule } from './common/crypto/crypto.module';
+import { StorageModule } from './common/storage/storage.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { StripeModule } from './stripe/stripe.module';
@@ -34,6 +36,10 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { EnvVarsModule } from './modules/env-vars/env-vars.module';
+import { ResourcesModule } from './modules/resources/resources.module';
+import { AttachmentsModule } from './modules/attachments/attachments.module';
 import { TenancyModule } from './common/tenancy/tenancy.module';
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
@@ -82,6 +88,8 @@ import { validateEnv } from './config/env.validation';
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     ScheduleModule.forRoot(),
     PubSubModule,
+    CryptoModule,
+    StorageModule,
     TenancyModule,
     PrismaModule,
     AuthModule,
@@ -100,6 +108,10 @@ import { validateEnv } from './config/env.validation';
     DocumentsModule,
     IntegrationsModule,
     NotificationsModule,
+    ChatModule,
+    EnvVarsModule,
+    ResourcesModule,
+    AttachmentsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: GqlThrottlerGuard }],
 })

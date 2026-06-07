@@ -1,6 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
-import { DocStatus } from '@/common/graphql/enums';
+import { DocCategory, DocStatus } from '@/common/graphql/enums';
 import { DocumentComment } from './document-comment.model';
 
 @ObjectType()
@@ -14,6 +14,9 @@ export class Document {
   @Field({ nullable: true })
   projectId?: string;
 
+  @Field({ nullable: true })
+  parentId?: string;
+
   @Field()
   title: string;
 
@@ -25,6 +28,9 @@ export class Document {
 
   @Field(() => DocStatus)
   status: DocStatus;
+
+  @Field(() => DocCategory)
+  category: DocCategory;
 
   @Field(() => GraphQLJSON, { nullable: true })
   body?: Record<string, unknown>;
