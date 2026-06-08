@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResourceType = exports.EnvScope = exports.ChannelMemberRole = exports.ChannelType = exports.WebhookStatus = exports.ApiKeyStatus = exports.DocCategory = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.IssueType = exports.SprintStatus = exports.ProjectStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
+exports.ResourceType = exports.EnvScope = exports.ChatSpaceRole = exports.ChatSpaceKind = exports.ChannelMemberRole = exports.ChannelType = exports.WebhookStatus = exports.ApiKeyStatus = exports.DocCategory = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.IssueType = exports.SprintStatus = exports.ProjectStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const prisma_client_1 = require("../../prisma/prisma-client");
 Object.defineProperty(exports, "Role", { enumerable: true, get: function () { return prisma_client_1.Role; } });
@@ -20,6 +20,8 @@ Object.defineProperty(exports, "ApiKeyStatus", { enumerable: true, get: function
 Object.defineProperty(exports, "WebhookStatus", { enumerable: true, get: function () { return prisma_client_1.WebhookStatus; } });
 Object.defineProperty(exports, "ChannelType", { enumerable: true, get: function () { return prisma_client_1.ChannelType; } });
 Object.defineProperty(exports, "ChannelMemberRole", { enumerable: true, get: function () { return prisma_client_1.ChannelMemberRole; } });
+Object.defineProperty(exports, "ChatSpaceKind", { enumerable: true, get: function () { return prisma_client_1.ChatSpaceKind; } });
+Object.defineProperty(exports, "ChatSpaceRole", { enumerable: true, get: function () { return prisma_client_1.ChatSpaceRole; } });
 Object.defineProperty(exports, "EnvScope", { enumerable: true, get: function () { return prisma_client_1.EnvScope; } });
 Object.defineProperty(exports, "ResourceType", { enumerable: true, get: function () { return prisma_client_1.ResourceType; } });
 (0, graphql_1.registerEnumType)(prisma_client_1.Role, { name: 'Role' });
@@ -39,6 +41,8 @@ Object.defineProperty(exports, "ResourceType", { enumerable: true, get: function
 (0, graphql_1.registerEnumType)(prisma_client_1.WebhookStatus, { name: 'WebhookStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ChannelType, { name: 'ChannelType' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ChannelMemberRole, { name: 'ChannelMemberRole' });
+(0, graphql_1.registerEnumType)(prisma_client_1.ChatSpaceKind, { name: 'ChatSpaceKind' });
+(0, graphql_1.registerEnumType)(prisma_client_1.ChatSpaceRole, { name: 'ChatSpaceRole' });
 (0, graphql_1.registerEnumType)(prisma_client_1.EnvScope, { name: 'EnvScope' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ResourceType, { name: 'ResourceType' });
 //# sourceMappingURL=enums.js.map

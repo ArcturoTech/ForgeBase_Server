@@ -35,6 +35,8 @@ model User {
   notifications    Notification[]
   channelMembers   ChannelMember[]
   messages         Message[]
+  chatSpaceMembers ChatSpaceMember[]
+  messageReactions MessageReaction[]
 
   @@map("users")
 }
@@ -83,6 +85,7 @@ model Organization {
   notifications Notification[]
   channels      Channel[]
   attachments   Attachment[]
+  chatSpaces    ChatSpace[]
 
   @@map("organizations")
 }
@@ -541,6 +544,7 @@ model Notification {
 model Channel {
   id          String      @id @default(uuid())
   orgId       String
+  spaceId     String?
   type        ChannelType @default(GROUP)
   name        String?
   description String?
@@ -550,12 +554,47 @@ model Channel {
   updatedAt   DateTime    @updatedAt
 
   organization Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  space        ChatSpace?      @relation(fields: [spaceId], references: [id])
   members      ChannelMember[]
   messages     Message[]
 
   @@unique([orgId, dmKey])
   @@index([orgId])
+  @@index([spaceId])
   @@map("channels")
+}
+
+model ChatSpace {
+  id          String        @id @default(uuid())
+  orgId       String
+  name        String
+  description String?
+  kind        ChatSpaceKind @default(CUSTOM)
+  createdById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  members      ChatSpaceMember[]
+  channels     Channel[]
+
+  @@index([orgId])
+  @@map("chat_spaces")
+}
+
+model ChatSpaceMember {
+  id        String        @id @default(uuid())
+  spaceId   String
+  userId    String
+  role      ChatSpaceRole @default(MEMBER)
+  createdAt DateTime      @default(now())
+
+  space ChatSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, userId])
+  @@index([userId])
+  @@map("chat_space_members")
 }
 
 model ChannelMember {
@@ -584,13 +623,42 @@ model Message {
   deletedAt DateTime?
   createdAt DateTime  @default(now())
 
-  channel Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  replyTo Message?  @relation("MessageReply", fields: [replyToId], references: [id])
-  replies Message[] @relation("MessageReply")
+  channel     Channel             @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author      User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo     Message?            @relation("MessageReply", fields: [replyToId], references: [id])
+  replies     Message[]           @relation("MessageReply")
+  reactions   MessageReaction[]
+  attachments MessageAttachment[]
 
   @@index([channelId, createdAt])
   @@map("messages")
+}
+
+model MessageAttachment {
+  messageId    String
+  attachmentId String
+
+  message    Message    @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  attachment Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, attachmentId])
+  @@index([attachmentId])
+  @@map("message_attachments")
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@map("message_reactions")
 }
 
 model ProjectEnvVar {
@@ -640,7 +708,8 @@ model Attachment {
   resourceType String?
   createdAt    DateTime @default(now())
 
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  organization Organization        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  messageLinks MessageAttachment[]
 
   @@index([orgId])
   @@index([targetType, targetId])
@@ -672,6 +741,16 @@ enum ChannelType {
 
 enum ChannelMemberRole {
   OWNER
+  MEMBER
+}
+
+enum ChatSpaceKind {
+  GENERAL
+  CUSTOM
+}
+
+enum ChatSpaceRole {
+  ADMIN
   MEMBER
 }
 

@@ -10,32 +10,32 @@ export declare class MembersService {
         id: string;
         role: import("generated/prisma").$Enums.MemberRole;
         createdAt: Date;
-        userId: string;
         orgId: string;
+        userId: string;
         title: string | null;
     }[]>;
     findMembershipById(membershipId: string): Promise<{
         id: string;
         role: import("generated/prisma").$Enums.MemberRole;
         createdAt: Date;
-        userId: string;
         orgId: string;
+        userId: string;
         title: string | null;
     }>;
     inviteMember(userId: string, orgId: string, memberUserId: string, role?: MemberRole, title?: string): Promise<{
         id: string;
         role: import("generated/prisma").$Enums.MemberRole;
         createdAt: Date;
-        userId: string;
         orgId: string;
+        userId: string;
         title: string | null;
     }>;
     inviteMemberByEmail(userId: string, input: InviteMemberByEmailInput): Promise<{
         id: string;
         role: import("generated/prisma").$Enums.MemberRole;
         createdAt: Date;
-        userId: string;
         orgId: string;
+        userId: string;
         title: string | null;
     }>;
     private findOrCreatePendingUser;
@@ -43,8 +43,8 @@ export declare class MembersService {
         id: string;
         role: import("generated/prisma").$Enums.MemberRole;
         createdAt: Date;
-        userId: string;
         orgId: string;
+        userId: string;
         title: string | null;
     }>;
     removeMember(userId: string, membershipId: string): Promise<boolean>;

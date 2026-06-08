@@ -23,6 +23,11 @@ input AddProjectMemberInput {
   userId: ID!
 }
 
+input AddReactionInput {
+  emoji: String!
+  messageId: ID!
+}
+
 input AddSubtaskInput {
   issueId: ID!
   label: String!
@@ -89,6 +94,7 @@ type Channel {
   members: [ChannelMember!]
   name: String
   orgId: String!
+  spaceId: String
   type: ChannelType!
   unreadCount: Int!
   updatedAt: DateTime!
@@ -113,6 +119,37 @@ enum ChannelType {
   DIRECT
   GENERAL
   GROUP
+}
+
+type ChatSpace {
+  createdAt: DateTime!
+  createdById: String
+  description: String
+  id: ID!
+  kind: ChatSpaceKind!
+  memberCount: Int!
+  name: String!
+  orgId: String!
+  updatedAt: DateTime!
+}
+
+enum ChatSpaceKind {
+  CUSTOM
+  GENERAL
+}
+
+type ChatSpaceMember {
+  createdAt: DateTime!
+  id: ID!
+  role: ChatSpaceRole!
+  spaceId: String!
+  user: User
+  userId: String!
+}
+
+enum ChatSpaceRole {
+  ADMIN
+  MEMBER
 }
 
 type Column {
@@ -159,6 +196,12 @@ input CreateBoardInput {
   projectId: ID!
 }
 
+input CreateChatSpaceInput {
+  description: String
+  name: String!
+  orgId: ID!
+}
+
 input CreateColumnInput {
   boardId: String!
   color: String
@@ -193,6 +236,7 @@ input CreateGroupChannelInput {
   memberIds: [ID!]
   name: String!
   orgId: ID!
+  spaceId: ID!
 }
 
 input CreateInvoiceInput {
@@ -350,6 +394,12 @@ type IntegrationStats {
   totalWebhooks: Int!
 }
 
+input InviteChatSpaceMemberInput {
+  role: ChatSpaceRole
+  spaceId: ID!
+  userId: ID!
+}
+
 input InviteMemberByEmailInput {
   email: String!
   orgId: ID!
@@ -464,6 +514,7 @@ enum MemberRole {
 }
 
 type Message {
+  attachments: [Attachment!]!
   author: User
   authorId: String!
   body: String!
@@ -472,7 +523,22 @@ type Message {
   deletedAt: DateTime
   editedAt: DateTime
   id: ID!
+  reactions: [ReactionGroup!]!
+  replyTo: Message
   replyToId: String
+}
+
+type MessageDeletedEvent {
+  channelId: ID!
+  id: ID!
+}
+
+type MessageReaction {
+  createdAt: DateTime!
+  emoji: String!
+  id: ID!
+  messageId: ID!
+  userId: ID!
 }
 
 type Milestone {
@@ -497,12 +563,14 @@ type Mutation {
   addCommentToDocument(body: String!, documentId: ID!): DocumentComment!
   addCommentToIssue(input: AddCommentToIssueInput!): IssueComment!
   addProjectMember(input: AddProjectMemberInput!): ProjectMember!
+  addReactionToMessage(input: AddReactionInput!): MessageReaction!
   addSubtaskToIssue(input: AddSubtaskInput!): Subtask!
   assignIssueToSprint(input: AssignIssueToSprintInput!): Issue!
   assignUserToIssue(input: AssignUserToIssueInput!): Issue!
   closeSprint(id: ID!): Sprint!
   createApiKey(input: CreateApiKeyInput!): ApiKey!
   createBoard(input: CreateBoardInput!): Board!
+  createChatSpace(input: CreateChatSpaceInput!): ChatSpace!
   createColumn(input: CreateColumnInput!): Column!
   createContract(input: CreateContractInput!): Contract!
   createDocument(input: CreateDocumentInput!): Document!
@@ -518,6 +586,7 @@ type Mutation {
   createWebhook(input: CreateWebhookInput!): Webhook!
   editMessage(body: String!, id: ID!): Message!
   exportProjectEnvFile(projectId: ID!, scope: EnvScope!): String!
+  inviteChatSpaceMember(input: InviteChatSpaceMemberInput!): ChatSpaceMember!
   inviteMember(orgId: ID!, role: MemberRole, title: String, userId: ID!): Member!
   inviteMemberByEmail(input: InviteMemberByEmailInput!): Member!
   loginUser(input: LoginUserInput!): AuthTokens!
@@ -527,11 +596,13 @@ type Mutation {
   markInvoicePaid(input: MarkInvoicePaidInput!): Invoice!
   markNotificationRead(id: ID!): Notification!
   moveIssue(input: MoveIssueInput!): Issue!
-  openDirectChannel(orgId: ID!, targetUserId: ID!): Channel!
+  openDirectChannel(orgId: ID!, spaceId: ID!, targetUserId: ID!): Channel!
   refreshToken(token: String!): AuthTokens!
   registerUser(input: RegisterUserInput!): AuthTokens!
   removeAttachment(id: ID!): Boolean!
   removeBoard(id: ID!): Boolean!
+  removeChatSpace(id: ID!): Boolean!
+  removeChatSpaceMember(spaceId: ID!, targetUserId: ID!): Boolean!
   removeColumn(id: ID!): Boolean!
   removeContract(id: ID!): Boolean!
   removeDocument(id: ID!): Boolean!
@@ -544,6 +615,7 @@ type Mutation {
   removeProjectEnvVar(id: ID!): Boolean!
   removeProjectMember(input: RemoveProjectMemberInput!): Boolean!
   removeProjectResource(id: ID!): Boolean!
+  removeReactionFromMessage(emoji: String!, messageId: ID!): Boolean!
   removeSprint(id: ID!): Boolean!
   removeUserAvatar: User!
   removeWebhook(id: ID!): Boolean!
@@ -558,6 +630,8 @@ type Mutation {
   toggleSubtask(subtaskId: ID!): Subtask!
   unassignUserFromIssue(input: AssignUserToIssueInput!): Issue!
   updateBoard(input: UpdateBoardInput!): Board!
+  updateChatSpace(id: ID!, input: UpdateChatSpaceInput!): ChatSpace!
+  updateChatSpaceMemberRole(role: ChatSpaceRole!, spaceId: ID!, targetUserId: ID!): ChatSpaceMember!
   updateColumn(input: UpdateColumnInput!): Column!
   updateContract(input: UpdateContractInput!): Contract!
   updateDocument(input: UpdateDocumentInput!): Document!
@@ -711,6 +785,7 @@ type Query {
   findActiveSprintSummary(orgId: ID!): SprintSummary
   findBoardById(id: ID!): Board!
   findChannelById(id: ID!): Channel!
+  findChatSpaceById(id: ID!): ChatSpace!
   findContractById(id: ID!): Contract!
   findDocumentById(id: ID!): Document
   findIntegrationStats(orgId: ID!): IntegrationStats!
@@ -728,6 +803,8 @@ type Query {
   listAttachmentsByTarget(orgId: ID!, targetId: ID!, targetType: String!): [Attachment!]!
   listBacklogIssuesByProject(projectId: ID!): [Issue!]!
   listBoardsByProject(projectId: ID!): [Board!]!
+  listChannelsBySpace(spaceId: ID!): [Channel!]!
+  listChatSpaceMembers(spaceId: ID!): [ChatSpaceMember!]!
   listContracts(orgId: ID!, pagination: PaginationInput!): PaginatedContracts!
   listDocuments(orgId: ID!): [Document!]!
   listDocumentsByProject(projectId: ID!): [Document!]!
@@ -741,6 +818,7 @@ type Query {
   listMessages(before: String, channelId: ID!, limit: Int): [Message!]!
   listMyAssignedIssues: [Issue!]!
   listMyChannels(orgId: ID!): [Channel!]!
+  listMyChatSpaces(orgId: ID!): [ChatSpace!]!
   listMyOrganizations: [Organization!]!
   listNotifications(orgId: ID!): [Notification!]!
   listOrganizations(pagination: PaginationInput!): PaginatedOrganizations!
@@ -754,6 +832,19 @@ type Query {
   listSprintsByProject(projectId: ID!): [Sprint!]!
   listWebhookDeliveries(webhookId: ID!): [WebhookDelivery!]!
   listWebhooks(orgId: ID!): [Webhook!]!
+}
+
+type ReactionChangedEvent {
+  channelId: ID!
+  messageId: ID!
+  reactions: [ReactionGroup!]!
+}
+
+type ReactionGroup {
+  count: Int!
+  emoji: String!
+  reactedByMe: Boolean!
+  userIds: [ID!]!
 }
 
 input RegisterUserInput {
@@ -790,7 +881,8 @@ enum Role {
 }
 
 input SendMessageInput {
-  body: String!
+  attachmentIds: [ID!]
+  body: String
   channelId: ID!
   replyToId: ID
 }
@@ -844,8 +936,11 @@ type Subscription {
   issueCreated(boardId: ID!): Issue!
   issueMoved(boardId: ID!): Issue!
   issueUpdated(boardId: ID!): Issue!
+  messageDeleted(channelId: ID!): MessageDeletedEvent!
+  messageEdited(channelId: ID!): Message!
   messageReceived(channelId: ID!): Message!
   notificationReceived(userId: ID!): Notification!
+  reactionChanged(channelId: ID!): ReactionChangedEvent!
 }
 
 type Subtask {
@@ -859,6 +954,11 @@ type Subtask {
 input UpdateBoardInput {
   id: ID!
   name: String!
+}
+
+input UpdateChatSpaceInput {
+  description: String
+  name: String
 }
 
 input UpdateColumnInput {

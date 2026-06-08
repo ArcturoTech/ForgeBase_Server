@@ -1,9 +1,12 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { ChatSpacesModule } from '@/modules/chat-spaces/chat-spaces.module';
 import { ChatResolver } from './chat.resolver';
+import { MessageResolver } from './message.resolver';
 import { ChatService } from './chat.service';
 
 @Module({
-  providers: [ChatResolver, ChatService],
+  imports: [forwardRef(() => ChatSpacesModule)],
+  providers: [ChatResolver, MessageResolver, ChatService],
   exports: [ChatService],
 })
 export class ChatModule {}

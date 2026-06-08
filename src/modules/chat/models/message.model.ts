@@ -1,5 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { User } from '@/users/models/user.model';
+import { Attachment } from '@/modules/attachments/models/attachment.model';
+import { ReactionGroup } from './reaction-group.model';
 
 @ObjectType()
 export class Message {
@@ -29,4 +31,13 @@ export class Message {
 
   @Field(() => User, { nullable: true })
   author?: User;
+
+  @Field(() => [ReactionGroup])
+  reactions: ReactionGroup[];
+
+  @Field(() => [Attachment])
+  attachments: Attachment[];
+
+  @Field(() => Message, { nullable: true })
+  replyTo?: Message;
 }

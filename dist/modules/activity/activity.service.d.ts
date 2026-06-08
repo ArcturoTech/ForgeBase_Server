@@ -19,29 +19,29 @@ export declare class ActivityService {
     recordActivity(input: RecordActivityInput): Promise<{
         id: string;
         createdAt: Date;
-        userId: string;
         orgId: string;
-        action: string;
         targetType: string | null;
         targetId: string | null;
+        userId: string;
+        action: string;
     }>;
     listActivityByOrg(userId: string, orgId: string): Promise<{
         id: string;
         createdAt: Date;
-        userId: string;
         orgId: string;
-        action: string;
         targetType: string | null;
         targetId: string | null;
+        userId: string;
+        action: string;
     }[]>;
     listActivityByIssueKey(userId: string, orgId: string, issueKey: string): Promise<{
         id: string;
         createdAt: Date;
-        userId: string;
         orgId: string;
-        action: string;
         targetType: string | null;
         targetId: string | null;
+        userId: string;
+        action: string;
     }[]>;
     findActivityActor(userId: string): import("generated/prisma").Prisma.Prisma__UserClient<{
         name: string | null;

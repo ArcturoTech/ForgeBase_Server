@@ -1,5 +1,12 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayUnique,
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 @InputType()
 export class SendMessageInput {
@@ -8,14 +15,21 @@ export class SendMessageInput {
   @IsNotEmpty()
   channelId: string;
 
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString()
-  @MinLength(1)
   @MaxLength(4000)
-  body: string;
+  body?: string;
 
   @Field(() => ID, { nullable: true })
   @IsOptional()
   @IsString()
   replyToId?: string;
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  attachmentIds?: string[];
 }

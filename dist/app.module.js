@@ -46,6 +46,7 @@ const documents_module_1 = require("./modules/documents/documents.module");
 const integrations_module_1 = require("./modules/integrations/integrations.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
 const chat_module_1 = require("./modules/chat/chat.module");
+const chat_spaces_module_1 = require("./modules/chat-spaces/chat-spaces.module");
 const env_vars_module_1 = require("./modules/env-vars/env-vars.module");
 const resources_module_1 = require("./modules/resources/resources.module");
 const attachments_module_1 = require("./modules/attachments/attachments.module");
@@ -91,7 +92,26 @@ exports.AppModule = AppModule = __decorate([
                             },
                         },
                     },
-                    context: (ctx) => ({ ...ctx, loaders: (0, loaders_1.createLoaders)(prisma) }),
+                    context: (ctx) => {
+                        const req = ctx.req;
+                        const extra = ctx.extra;
+                        let currentUserId = req?.user?.id ?? extra?.user?.sub ?? null;
+                        if (!currentUserId) {
+                            const header = req?.headers?.authorization;
+                            if (header?.startsWith('Bearer ')) {
+                                try {
+                                    const payload = jwt.verify(header.slice(7), {
+                                        secret: config.get('jwt.accessSecret'),
+                                    });
+                                    currentUserId = payload.sub ?? null;
+                                }
+                                catch {
+                                    currentUserId = null;
+                                }
+                            }
+                        }
+                        return { ...ctx, loaders: (0, loaders_1.createLoaders)(prisma, currentUserId) };
+                    },
                 }),
             }),
             throttler_1.ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
@@ -118,6 +138,7 @@ exports.AppModule = AppModule = __decorate([
             integrations_module_1.IntegrationsModule,
             notifications_module_1.NotificationsModule,
             chat_module_1.ChatModule,
+            chat_spaces_module_1.ChatSpacesModule,
             env_vars_module_1.EnvVarsModule,
             resources_module_1.ResourcesModule,
             attachments_module_1.AttachmentsModule,

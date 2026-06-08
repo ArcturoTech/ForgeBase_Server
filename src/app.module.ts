@@ -37,6 +37,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { ChatSpacesModule } from './modules/chat-spaces/chat-spaces.module';
 import { EnvVarsModule } from './modules/env-vars/env-vars.module';
 import { ResourcesModule } from './modules/resources/resources.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
@@ -82,7 +83,27 @@ import { validateEnv } from './config/env.validation';
             },
           },
         },
-        context: (ctx: Record<string, unknown>) => ({ ...ctx, loaders: createLoaders(prisma) }),
+        context: (ctx: Record<string, unknown>) => {
+          const req = ctx.req as
+            | { user?: { id?: string }; headers?: { authorization?: string } }
+            | undefined;
+          const extra = ctx.extra as { user?: { sub?: string } } | undefined;
+          let currentUserId = req?.user?.id ?? extra?.user?.sub ?? null;
+          if (!currentUserId) {
+            const header = req?.headers?.authorization;
+            if (header?.startsWith('Bearer ')) {
+              try {
+                const payload = jwt.verify<{ sub?: string }>(header.slice(7), {
+                  secret: config.get<string>('jwt.accessSecret'),
+                });
+                currentUserId = payload.sub ?? null;
+              } catch {
+                currentUserId = null;
+              }
+            }
+          }
+          return { ...ctx, loaders: createLoaders(prisma, currentUserId) };
+        },
       }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
@@ -109,6 +130,7 @@ import { validateEnv } from './config/env.validation';
     IntegrationsModule,
     NotificationsModule,
     ChatModule,
+    ChatSpacesModule,
     EnvVarsModule,
     ResourcesModule,
     AttachmentsModule,

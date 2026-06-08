@@ -11,6 +11,9 @@ export class Channel {
   @Field()
   orgId: string;
 
+  @Field({ nullable: true })
+  spaceId?: string;
+
   @Field(() => ChannelType)
   type: ChannelType;
 

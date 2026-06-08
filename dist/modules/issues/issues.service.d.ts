@@ -373,11 +373,11 @@ export declare class IssuesService {
     listActivityByIssue(userId: string, issueId: string): Promise<{
         id: string;
         createdAt: Date;
-        userId: string;
         orgId: string;
-        action: string;
         targetType: string | null;
         targetId: string | null;
+        userId: string;
+        action: string;
     }[]>;
     removeIssue(userId: string, id: string): Promise<boolean>;
     addSubtaskToIssue(userId: string, input: AddSubtaskInput): Promise<{

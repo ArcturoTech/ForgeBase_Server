@@ -4,8 +4,12 @@ import { PubSub } from 'graphql-subscriptions';
 import { ChatService, CHAT_EVENTS } from './chat.service';
 import { Channel } from './models/channel.model';
 import { Message } from './models/message.model';
+import { MessageReaction } from './models/message-reaction.model';
+import { ReactionChangedEvent } from './models/reaction-changed-event.model';
+import { MessageDeletedEvent } from './models/message-deleted-event.model';
 import { CreateGroupChannelInput } from './dto/create-group-channel.input';
 import { SendMessageInput } from './dto/send-message.input';
+import { AddReactionInput } from './dto/add-reaction.input';
 import { PUB_SUB } from '@/common/pubsub/pubsub.module';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -71,8 +75,14 @@ export class ChatResolver {
     @CurrentUser() user: AuthenticatedUser,
     @Args('orgId', { type: () => ID }) orgId: string,
     @Args('targetUserId', { type: () => ID }) targetUserId: string,
+    @Args('spaceId', { type: () => ID }) spaceId: string,
   ): Promise<Channel> {
-    return this.chatService.openDirectChannel(user.id, orgId, targetUserId) as Promise<Channel>;
+    return this.chatService.openDirectChannel(
+      user.id,
+      orgId,
+      targetUserId,
+      spaceId,
+    ) as Promise<Channel>;
   }
 
   @Mutation(() => Message)
@@ -112,11 +122,54 @@ export class ChatResolver {
     return this.chatService.markChannelRead(user.id, channelId);
   }
 
+  @Mutation(() => MessageReaction)
+  @UseGuards(GqlAuthGuard)
+  addReactionToMessage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: AddReactionInput,
+  ): Promise<MessageReaction> {
+    return this.chatService.addReactionToMessage(user.id, input) as Promise<MessageReaction>;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  removeReactionFromMessage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('messageId', { type: () => ID }) messageId: string,
+    @Args('emoji') emoji: string,
+  ): Promise<boolean> {
+    return this.chatService.removeReactionFromMessage(user.id, messageId, emoji);
+  }
+
   @Subscription(() => Message, {
     filter: (payload: MessageEventPayload, variables: { channelId: string }) =>
       payload.channelId === variables.channelId,
   })
   messageReceived(@Args('channelId', { type: () => ID }) _channelId: string) {
     return this.pubSub.asyncIterator(CHAT_EVENTS.messageReceived);
+  }
+
+  @Subscription(() => Message, {
+    filter: (payload: MessageEventPayload, variables: { channelId: string }) =>
+      payload.channelId === variables.channelId,
+  })
+  messageEdited(@Args('channelId', { type: () => ID }) _channelId: string) {
+    return this.pubSub.asyncIterator(CHAT_EVENTS.messageEdited);
+  }
+
+  @Subscription(() => MessageDeletedEvent, {
+    filter: (payload: MessageEventPayload, variables: { channelId: string }) =>
+      payload.channelId === variables.channelId,
+  })
+  messageDeleted(@Args('channelId', { type: () => ID }) _channelId: string) {
+    return this.pubSub.asyncIterator(CHAT_EVENTS.messageDeleted);
+  }
+
+  @Subscription(() => ReactionChangedEvent, {
+    filter: (payload: MessageEventPayload, variables: { channelId: string }) =>
+      payload.channelId === variables.channelId,
+  })
+  reactionChanged(@Args('channelId', { type: () => ID }) _channelId: string) {
+    return this.pubSub.asyncIterator(CHAT_EVENTS.reactionChanged);
   }
 }

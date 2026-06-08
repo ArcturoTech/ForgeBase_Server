@@ -7,6 +7,10 @@ export class CreateGroupChannelInput {
   @IsString()
   orgId: string;
 
+  @Field(() => ID)
+  @IsString()
+  spaceId: string;
+
   @Field()
   @IsString()
   @MaxLength(80)

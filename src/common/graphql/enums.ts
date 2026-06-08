@@ -17,6 +17,8 @@ import {
   WebhookStatus,
   ChannelType,
   ChannelMemberRole,
+  ChatSpaceKind,
+  ChatSpaceRole,
   EnvScope,
   ResourceType,
 } from '@/prisma/prisma-client';
@@ -38,6 +40,8 @@ registerEnumType(ApiKeyStatus, { name: 'ApiKeyStatus' });
 registerEnumType(WebhookStatus, { name: 'WebhookStatus' });
 registerEnumType(ChannelType, { name: 'ChannelType' });
 registerEnumType(ChannelMemberRole, { name: 'ChannelMemberRole' });
+registerEnumType(ChatSpaceKind, { name: 'ChatSpaceKind' });
+registerEnumType(ChatSpaceRole, { name: 'ChatSpaceRole' });
 registerEnumType(EnvScope, { name: 'EnvScope' });
 registerEnumType(ResourceType, { name: 'ResourceType' });
 
@@ -59,6 +63,8 @@ export {
   WebhookStatus,
   ChannelType,
   ChannelMemberRole,
+  ChatSpaceKind,
+  ChatSpaceRole,
   EnvScope,
   ResourceType,
 };

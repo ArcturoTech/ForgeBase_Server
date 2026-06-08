@@ -14,8 +14,8 @@ export declare class NotificationsService {
         id: string;
         createdAt: Date;
         body: string | null;
-        userId: string;
         orgId: string;
+        userId: string;
         type: string;
         title: string;
         read: boolean;
@@ -24,8 +24,8 @@ export declare class NotificationsService {
         id: string;
         createdAt: Date;
         body: string | null;
-        userId: string;
         orgId: string;
+        userId: string;
         type: string;
         title: string;
         read: boolean;
@@ -36,8 +36,8 @@ export declare class NotificationsService {
         id: string;
         createdAt: Date;
         body: string | null;
-        userId: string;
         orgId: string;
+        userId: string;
         type: string;
         title: string;
         read: boolean;
