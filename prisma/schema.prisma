@@ -37,6 +37,7 @@ model User {
   messages         Message[]
   chatSpaceMembers ChatSpaceMember[]
   messageReactions MessageReaction[]
+  invitationsSent  Invitation[]      @relation("InvitationInviter")
 
   @@map("users")
 }
@@ -86,6 +87,7 @@ model Organization {
   channels      Channel[]
   attachments   Attachment[]
   chatSpaces    ChatSpace[]
+  invitations   Invitation[]
 
   @@map("organizations")
 }
@@ -104,6 +106,27 @@ model Membership {
   @@unique([orgId, userId])
   @@index([userId])
   @@map("memberships")
+}
+
+model Invitation {
+  id          String           @id @default(uuid())
+  orgId       String
+  email       String
+  role        MemberRole       @default(MEMBER)
+  token       String           @unique
+  status      InvitationStatus @default(PENDING)
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InvitationInviter", fields: [invitedById], references: [id])
+
+  @@index([orgId])
+  @@index([email])
+  @@map("invitations")
 }
 
 model FeatureFlag {
@@ -757,6 +780,14 @@ enum ChatSpaceRole {
 enum Role {
   USER
   ADMIN
+  SUPERADMIN
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
 }
 
 enum SubscriptionStatus {

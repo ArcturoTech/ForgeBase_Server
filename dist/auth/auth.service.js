@@ -62,12 +62,44 @@ let AuthService = class AuthService {
         if (exists)
             throw new common_1.ConflictException('Email already in use');
         const hashed = await bcrypt.hash(dto.password, 10);
-        const user = await this.prisma.user.create({
-            data: { name: dto.name, email: dto.email, password: hashed },
+        const orgSlug = dto.orgName ? await this.generateUniqueOrgSlug(dto.orgName) : null;
+        const user = await this.prisma.$transaction(async (tx) => {
+            const created = await tx.user.create({
+                data: { name: dto.name, email: dto.email, password: hashed },
+            });
+            if (dto.orgName && orgSlug) {
+                const organization = await tx.organization.create({
+                    data: { name: dto.orgName, slug: orgSlug },
+                });
+                await tx.membership.create({
+                    data: { orgId: organization.id, userId: created.id, role: 'OWNER' },
+                });
+            }
+            return created;
         });
         const tokens = await this.generateTokens(user.id, user.email);
         await this.saveRefreshToken(user.id, tokens.refreshToken);
         return tokens;
+    }
+    slugifyOrgName(value) {
+        const slug = value
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 40);
+        return slug || 'org';
+    }
+    async generateUniqueOrgSlug(name) {
+        const base = this.slugifyOrgName(name);
+        let slug = base;
+        let suffix = 1;
+        while (await this.prisma.organization.findUnique({ where: { slug } })) {
+            slug = `${base}-${suffix}`;
+            suffix += 1;
+        }
+        return slug;
     }
     async loginUser(dto) {
         const user = await this.prisma.user.findUnique({ where: { email: dto.email } });

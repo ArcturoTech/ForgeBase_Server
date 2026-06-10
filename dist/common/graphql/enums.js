@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResourceType = exports.EnvScope = exports.ChatSpaceRole = exports.ChatSpaceKind = exports.ChannelMemberRole = exports.ChannelType = exports.WebhookStatus = exports.ApiKeyStatus = exports.DocCategory = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.IssueType = exports.SprintStatus = exports.ProjectStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
+exports.ResourceType = exports.EnvScope = exports.ChatSpaceRole = exports.ChatSpaceKind = exports.ChannelMemberRole = exports.ChannelType = exports.WebhookStatus = exports.ApiKeyStatus = exports.DocCategory = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.IssueType = exports.SprintStatus = exports.ProjectStatus = exports.InvitationStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const prisma_client_1 = require("../../prisma/prisma-client");
 Object.defineProperty(exports, "Role", { enumerable: true, get: function () { return prisma_client_1.Role; } });
 Object.defineProperty(exports, "OrgPlan", { enumerable: true, get: function () { return prisma_client_1.OrgPlan; } });
 Object.defineProperty(exports, "OrgStatus", { enumerable: true, get: function () { return prisma_client_1.OrgStatus; } });
 Object.defineProperty(exports, "MemberRole", { enumerable: true, get: function () { return prisma_client_1.MemberRole; } });
+Object.defineProperty(exports, "InvitationStatus", { enumerable: true, get: function () { return prisma_client_1.InvitationStatus; } });
 Object.defineProperty(exports, "ProjectStatus", { enumerable: true, get: function () { return prisma_client_1.ProjectStatus; } });
 Object.defineProperty(exports, "SprintStatus", { enumerable: true, get: function () { return prisma_client_1.SprintStatus; } });
 Object.defineProperty(exports, "IssueType", { enumerable: true, get: function () { return prisma_client_1.IssueType; } });
@@ -28,6 +29,7 @@ Object.defineProperty(exports, "ResourceType", { enumerable: true, get: function
 (0, graphql_1.registerEnumType)(prisma_client_1.OrgPlan, { name: 'OrgPlan' });
 (0, graphql_1.registerEnumType)(prisma_client_1.OrgStatus, { name: 'OrgStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.MemberRole, { name: 'MemberRole' });
+(0, graphql_1.registerEnumType)(prisma_client_1.InvitationStatus, { name: 'InvitationStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ProjectStatus, { name: 'ProjectStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.SprintStatus, { name: 'SprintStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.IssueType, { name: 'IssueType' });

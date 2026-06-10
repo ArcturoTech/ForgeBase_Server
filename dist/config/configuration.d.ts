@@ -28,5 +28,10 @@ declare const _default: () => {
         apiSecret: string | undefined;
         folder: string;
     };
+    mail: {
+        apiKey: string | undefined;
+        domain: string | undefined;
+        from: string | undefined;
+    };
 };
 export default _default;

@@ -19,9 +19,9 @@ export declare class ContractsService {
         orgId: string;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
+        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
-        expiresAt: Date | null;
     }>;
     findProjectByContract(projectId: string): import("generated/prisma").Prisma.Prisma__ProjectClient<{
         name: string;
@@ -29,8 +29,8 @@ export declare class ContractsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.ProjectStatus;
         slug: string;
+        status: import("generated/prisma").$Enums.ProjectStatus;
         client: string | null;
         progress: number;
         color: string;
@@ -48,9 +48,9 @@ export declare class ContractsService {
         orgId: string;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
+        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
-        expiresAt: Date | null;
     }[]>;
     createContract(userId: string, input: CreateContractInput): Promise<{
         number: string;
@@ -61,9 +61,9 @@ export declare class ContractsService {
         orgId: string;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
+        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
-        expiresAt: Date | null;
     }>;
     updateContract(userId: string, input: UpdateContractInput): Promise<{
         number: string;
@@ -74,9 +74,9 @@ export declare class ContractsService {
         orgId: string;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
+        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
-        expiresAt: Date | null;
     }>;
     renewContract(userId: string, id: string, expiresAt: Date): Promise<{
         number: string;
@@ -87,9 +87,9 @@ export declare class ContractsService {
         orgId: string;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
+        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
-        expiresAt: Date | null;
     }>;
     removeContract(userId: string, id: string): Promise<boolean>;
     private loadContractOrThrow;

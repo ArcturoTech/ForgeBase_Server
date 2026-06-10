@@ -12,6 +12,8 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
+    private slugifyOrgName;
+    private generateUniqueOrgSlug;
     loginUser(dto: LoginDto): Promise<{
         accessToken: string;
         refreshToken: string;

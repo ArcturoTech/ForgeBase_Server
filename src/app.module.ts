@@ -25,12 +25,15 @@ import { UsersModule } from './users/users.module';
 import { StripeModule } from './stripe/stripe.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { MembersModule } from './modules/members/members.module';
+import { InvitationsModule } from './modules/invitations/invitations.module';
+import { MailModule } from './common/mail/mail.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { SprintsModule } from './modules/sprints/sprints.module';
 import { BoardsModule } from './modules/boards/boards.module';
 import { IssuesModule } from './modules/issues/issues.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { SnapshotsModule } from './modules/snapshots/snapshots.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { DocumentsModule } from './modules/documents/documents.module';
@@ -111,6 +114,7 @@ import { validateEnv } from './config/env.validation';
     PubSubModule,
     CryptoModule,
     StorageModule,
+    MailModule,
     TenancyModule,
     PrismaModule,
     AuthModule,
@@ -118,12 +122,14 @@ import { validateEnv } from './config/env.validation';
     StripeModule,
     OrganizationsModule,
     MembersModule,
+    InvitationsModule,
     ProjectsModule,
     SprintsModule,
     BoardsModule,
     IssuesModule,
     ActivityModule,
     SnapshotsModule,
+    ReportsModule,
     ContractsModule,
     InvoicesModule,
     DocumentsModule,

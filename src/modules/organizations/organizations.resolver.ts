@@ -4,6 +4,9 @@ import { OrganizationsService } from './organizations.service';
 import { Organization } from './models/organization.model';
 import { FeatureFlag } from './models/feature-flag.model';
 import { PaginatedOrganizations } from './models/paginated-organizations.model';
+import { PaginatedAdminOrgRows } from './models/paginated-admin-org-rows.model';
+import { PlatformStats } from './models/platform-stats.model';
+import { OrganizationUsage } from './models/organization-usage.model';
 import { CreateOrganizationInput } from './dto/create-organization.input';
 import { UpdateOrganizationInput } from './dto/update-organization.input';
 import { PaginationInput } from '@/common/pagination/pagination.input';
@@ -13,6 +16,7 @@ import { Roles } from '@/auth/decorators/roles.decorator';
 import { Role } from '@/prisma/prisma-client';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '@/common/decorators/current-user.decorator';
+import { CurrentOrg } from '@/common/decorators/current-org.decorator';
 
 @Resolver(() => Organization)
 export class OrganizationsResolver {
@@ -24,13 +28,54 @@ export class OrganizationsResolver {
     return this.organizationsService.listOrganizationsForUser(user.id) as Promise<Organization[]>;
   }
 
+  @Query(() => Organization, { nullable: true })
+  @UseGuards(GqlAuthGuard)
+  findActiveOrganization(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentOrg() activeOrgId: string | null,
+  ): Promise<Organization | null> {
+    return this.organizationsService.findActiveOrganization(
+      user.id,
+      activeOrgId,
+    ) as Promise<Organization | null>;
+  }
+
   @Query(() => PaginatedOrganizations)
   @UseGuards(GqlAuthGuard, GqlRolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.SUPERADMIN)
   listOrganizations(
     @Args('pagination') pagination: PaginationInput,
   ): Promise<PaginatedOrganizations> {
     return this.organizationsService.listOrganizations(pagination) as Promise<PaginatedOrganizations>;
+  }
+
+  @Query(() => PaginatedAdminOrgRows)
+  @UseGuards(GqlAuthGuard, GqlRolesGuard)
+  @Roles(Role.SUPERADMIN)
+  listOrganizationsForAdmin(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('pagination') pagination: PaginationInput,
+  ): Promise<PaginatedAdminOrgRows> {
+    return this.organizationsService.listOrganizationsForAdmin(
+      user.id,
+      pagination,
+    ) as Promise<PaginatedAdminOrgRows>;
+  }
+
+  @Query(() => PlatformStats)
+  @UseGuards(GqlAuthGuard, GqlRolesGuard)
+  @Roles(Role.SUPERADMIN)
+  findPlatformStats(@CurrentUser() user: AuthenticatedUser): Promise<PlatformStats> {
+    return this.organizationsService.findPlatformStats(user.id);
+  }
+
+  @Query(() => OrganizationUsage)
+  @UseGuards(GqlAuthGuard)
+  findOrganizationUsage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('orgId', { type: () => ID }) orgId: string,
+  ): Promise<OrganizationUsage> {
+    return this.organizationsService.findOrganizationUsage(user.id, orgId);
   }
 
   @Query(() => Organization)
@@ -53,9 +98,12 @@ export class OrganizationsResolver {
 
   @Mutation(() => Organization)
   @UseGuards(GqlAuthGuard, GqlRolesGuard)
-  @Roles(Role.ADMIN)
-  createOrganization(@Args('input') input: CreateOrganizationInput): Promise<Organization> {
-    return this.organizationsService.createOrganization(input) as Promise<Organization>;
+  @Roles(Role.SUPERADMIN)
+  createOrganization(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: CreateOrganizationInput,
+  ): Promise<Organization> {
+    return this.organizationsService.createOrganization(user.id, input) as Promise<Organization>;
   }
 
   @Mutation(() => Organization)

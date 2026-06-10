@@ -28,4 +28,9 @@ export default () => ({
     apiSecret: process.env.CLOUDINARY_API_SECRET,
     folder: process.env.CLOUDINARY_FOLDER ?? 'forgebase',
   },
+  mail: {
+    apiKey: process.env.MAILGUN_API_KEY,
+    domain: process.env.MAILGUN_DOMAIN,
+    from: process.env.MAIL_FROM,
+  },
 });

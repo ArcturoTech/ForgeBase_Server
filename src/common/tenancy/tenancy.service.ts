@@ -5,14 +5,32 @@ import { PrismaService } from '@/prisma/prisma.service';
 export class TenancyService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async isSuperAdmin(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    return user?.role === 'SUPERADMIN';
+  }
+
+  async assertSuperAdmin(userId: string): Promise<void> {
+    if (!(await this.isSuperAdmin(userId))) {
+      throw new ForbiddenException('Acesso restrito a super-administradores');
+    }
+  }
+
   async assertOrgMembership(userId: string, orgId: string): Promise<void> {
     const membership = await this.prisma.membership.findUnique({
       where: { orgId_userId: { orgId, userId } },
       select: { id: true },
     });
-    if (!membership) {
-      throw new ForbiddenException('Acesso negado a esta organização');
+    if (membership) {
+      return;
     }
+    if (await this.isSuperAdmin(userId)) {
+      return;
+    }
+    throw new ForbiddenException('Acesso negado a esta organização');
   }
 
   async resolveOrgIdByProject(projectId: string): Promise<string> {
@@ -49,6 +67,9 @@ export class TenancyService {
       select: { role: true },
     });
     if (!membership) {
+      if (await this.isSuperAdmin(userId)) {
+        return;
+      }
       throw new ForbiddenException('Acesso negado a esta organização');
     }
     if (membership.role === 'OWNER' || membership.role === 'ADMIN') {

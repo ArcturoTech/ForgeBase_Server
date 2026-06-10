@@ -21,8 +21,8 @@ export declare class InvoicesService {
         status: import("generated/prisma").$Enums.InvoiceStatus;
         projectId: string | null;
         dueDate: Date | null;
-        clientName: string;
         amountCents: number;
+        clientName: string;
         issueDate: Date | null;
         paidAt: Date | null;
     }>;
@@ -36,8 +36,8 @@ export declare class InvoicesService {
         status: import("generated/prisma").$Enums.InvoiceStatus;
         projectId: string | null;
         dueDate: Date | null;
-        clientName: string;
         amountCents: number;
+        clientName: string;
         issueDate: Date | null;
         paidAt: Date | null;
     }>;
@@ -50,8 +50,8 @@ export declare class InvoicesService {
         status: import("generated/prisma").$Enums.InvoiceStatus;
         projectId: string | null;
         dueDate: Date | null;
-        clientName: string;
         amountCents: number;
+        clientName: string;
         issueDate: Date | null;
         paidAt: Date | null;
     }>;
@@ -65,8 +65,8 @@ export declare class InvoicesService {
         status: import("generated/prisma").$Enums.InvoiceStatus;
         projectId: string | null;
         dueDate: Date | null;
-        clientName: string;
         amountCents: number;
+        clientName: string;
         issueDate: Date | null;
         paidAt: Date | null;
     }>;
@@ -79,8 +79,8 @@ export declare class InvoicesService {
         status: import("generated/prisma").$Enums.InvoiceStatus;
         projectId: string | null;
         dueDate: Date | null;
-        clientName: string;
         amountCents: number;
+        clientName: string;
         issueDate: Date | null;
         paidAt: Date | null;
     }>;

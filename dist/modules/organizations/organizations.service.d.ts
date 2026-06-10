@@ -1,36 +1,55 @@
 import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
+import { ActivityService } from "../activity/activity.service";
 import { PaginationInput } from "../../common/pagination/pagination.input";
 import { PaginatedInterface } from "../../common/pagination/paginated.type";
 import { Organization } from './models/organization.model';
+import { AdminOrgRow } from './models/admin-org-row.model';
+import { PlatformStats } from './models/platform-stats.model';
+import { OrganizationUsage } from './models/organization-usage.model';
 import { CreateOrganizationInput } from './dto/create-organization.input';
 import { UpdateOrganizationInput } from './dto/update-organization.input';
 export declare class OrganizationsService {
     private readonly prisma;
     private readonly tenancy;
-    constructor(prisma: PrismaService, tenancy: TenancyService);
+    private readonly activity;
+    constructor(prisma: PrismaService, tenancy: TenancyService, activity: ActivityService);
     listOrganizations(pagination: PaginationInput): Promise<PaginatedInterface<Organization>>;
+    listOrganizationsForAdmin(userId: string, pagination: PaginationInput): Promise<PaginatedInterface<AdminOrgRow>>;
     listOrganizationsForUser(userId: string): Promise<{
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("generated/prisma").$Enums.OrgStatus;
-        plan: import("generated/prisma").$Enums.OrgPlan;
         slug: string;
+        plan: import("generated/prisma").$Enums.OrgPlan;
+        status: import("generated/prisma").$Enums.OrgStatus;
         region: string;
         databaseName: string | null;
         mrrCents: number;
         trialEndsAt: Date | null;
     }[]>;
+    findActiveOrganization(userId: string, activeOrgId: string | null): Promise<{
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        slug: string;
+        plan: import("generated/prisma").$Enums.OrgPlan;
+        status: import("generated/prisma").$Enums.OrgStatus;
+        region: string;
+        databaseName: string | null;
+        mrrCents: number;
+        trialEndsAt: Date | null;
+    }>;
     findOrganizationBySlug(userId: string, slug: string): Promise<{
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("generated/prisma").$Enums.OrgStatus;
-        plan: import("generated/prisma").$Enums.OrgPlan;
         slug: string;
+        plan: import("generated/prisma").$Enums.OrgPlan;
+        status: import("generated/prisma").$Enums.OrgStatus;
         region: string;
         databaseName: string | null;
         mrrCents: number;
@@ -41,9 +60,9 @@ export declare class OrganizationsService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("generated/prisma").$Enums.OrgStatus;
-        plan: import("generated/prisma").$Enums.OrgPlan;
         slug: string;
+        plan: import("generated/prisma").$Enums.OrgPlan;
+        status: import("generated/prisma").$Enums.OrgStatus;
         region: string;
         databaseName: string | null;
         mrrCents: number;
@@ -59,27 +78,29 @@ export declare class OrganizationsService {
         locked: boolean;
         enabledAt: Date | null;
     }[]>;
-    createOrganization(input: CreateOrganizationInput): Promise<{
+    createOrganization(userId: string, input: CreateOrganizationInput): Promise<{
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("generated/prisma").$Enums.OrgStatus;
-        plan: import("generated/prisma").$Enums.OrgPlan;
         slug: string;
+        plan: import("generated/prisma").$Enums.OrgPlan;
+        status: import("generated/prisma").$Enums.OrgStatus;
         region: string;
         databaseName: string | null;
         mrrCents: number;
         trialEndsAt: Date | null;
     }>;
+    findPlatformStats(userId: string): Promise<PlatformStats>;
+    findOrganizationUsage(userId: string, orgId: string): Promise<OrganizationUsage>;
     updateOrganization(userId: string, input: UpdateOrganizationInput): Promise<{
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: import("generated/prisma").$Enums.OrgStatus;
-        plan: import("generated/prisma").$Enums.OrgPlan;
         slug: string;
+        plan: import("generated/prisma").$Enums.OrgPlan;
+        status: import("generated/prisma").$Enums.OrgStatus;
         region: string;
         databaseName: string | null;
         mrrCents: number;

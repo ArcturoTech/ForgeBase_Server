@@ -48,6 +48,75 @@ let SnapshotsService = class SnapshotsService {
             orderBy: { capturedOn: 'asc' },
         });
     }
+    async loadSprintForAccess(userId, sprintId) {
+        const sprint = await this.prisma.sprint.findUnique({ where: { id: sprintId } });
+        if (!sprint)
+            throw new common_1.NotFoundException('Sprint não encontrada');
+        await this.tenancy.assertProjectAccess(userId, sprint.projectId);
+        return sprint;
+    }
+    async listSprintTagComposition(userId, sprintId) {
+        await this.loadSprintForAccess(userId, sprintId);
+        const issues = await this.prisma.issue.findMany({
+            where: { sprintId },
+            select: {
+                points: true,
+                labels: { include: { label: { select: { name: true } } } },
+            },
+        });
+        const slicesByTag = new Map();
+        const addToTag = (tag, points) => {
+            const slice = slicesByTag.get(tag) ?? { points: 0, issues: 0 };
+            slice.points += points;
+            slice.issues += 1;
+            slicesByTag.set(tag, slice);
+        };
+        for (const issue of issues) {
+            const points = issue.points ?? 0;
+            if (issue.labels.length === 0) {
+                addToTag('sem tag', points);
+                continue;
+            }
+            for (const link of issue.labels) {
+                addToTag(link.label.name, points);
+            }
+        }
+        return [...slicesByTag.entries()]
+            .map(([tag, slice]) => ({ tag, points: slice.points, issues: slice.issues }))
+            .sort((a, b) => b.points - a.points);
+    }
+    async listSprintMemberLoad(userId, sprintId) {
+        await this.loadSprintForAccess(userId, sprintId);
+        const issues = await this.prisma.issue.findMany({
+            where: { sprintId },
+            select: {
+                points: true,
+                done: true,
+                assignees: { include: { user: { select: { id: true, name: true } } } },
+            },
+        });
+        const loadByUser = new Map();
+        for (const issue of issues) {
+            const points = issue.points ?? 0;
+            for (const assignee of issue.assignees) {
+                const load = loadByUser.get(assignee.userId) ?? {
+                    name: assignee.user.name ?? '—',
+                    done: 0,
+                    doing: 0,
+                    capacity: 0,
+                };
+                load.capacity += points;
+                if (issue.done) {
+                    load.done += points;
+                }
+                else {
+                    load.doing += points;
+                }
+                loadByUser.set(assignee.userId, load);
+            }
+        }
+        return [...loadByUser.values()].sort((a, b) => b.capacity - a.capacity);
+    }
     async listVelocityByProject(userId, projectId) {
         await this.tenancy.assertProjectAccess(userId, projectId);
         const sprints = await this.prisma.sprint.findMany({

@@ -34,12 +34,15 @@ const users_module_1 = require("./users/users.module");
 const stripe_module_1 = require("./stripe/stripe.module");
 const organizations_module_1 = require("./modules/organizations/organizations.module");
 const members_module_1 = require("./modules/members/members.module");
+const invitations_module_1 = require("./modules/invitations/invitations.module");
+const mail_module_1 = require("./common/mail/mail.module");
 const projects_module_1 = require("./modules/projects/projects.module");
 const sprints_module_1 = require("./modules/sprints/sprints.module");
 const boards_module_1 = require("./modules/boards/boards.module");
 const issues_module_1 = require("./modules/issues/issues.module");
 const activity_module_1 = require("./modules/activity/activity.module");
 const snapshots_module_1 = require("./modules/snapshots/snapshots.module");
+const reports_module_1 = require("./modules/reports/reports.module");
 const contracts_module_1 = require("./modules/contracts/contracts.module");
 const invoices_module_1 = require("./modules/invoices/invoices.module");
 const documents_module_1 = require("./modules/documents/documents.module");
@@ -119,6 +122,7 @@ exports.AppModule = AppModule = __decorate([
             pubsub_module_1.PubSubModule,
             crypto_module_1.CryptoModule,
             storage_module_1.StorageModule,
+            mail_module_1.MailModule,
             tenancy_module_1.TenancyModule,
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
@@ -126,12 +130,14 @@ exports.AppModule = AppModule = __decorate([
             stripe_module_1.StripeModule,
             organizations_module_1.OrganizationsModule,
             members_module_1.MembersModule,
+            invitations_module_1.InvitationsModule,
             projects_module_1.ProjectsModule,
             sprints_module_1.SprintsModule,
             boards_module_1.BoardsModule,
             issues_module_1.IssuesModule,
             activity_module_1.ActivityModule,
             snapshots_module_1.SnapshotsModule,
+            reports_module_1.ReportsModule,
             contracts_module_1.ContractsModule,
             invoices_module_1.InvoicesModule,
             documents_module_1.DocumentsModule,

@@ -16,6 +16,7 @@ let RegisterUserInput = class RegisterUserInput {
     name;
     email;
     password;
+    orgName;
 };
 exports.RegisterUserInput = RegisterUserInput;
 __decorate([
@@ -35,6 +36,12 @@ __decorate([
     (0, class_validator_1.MinLength)(6),
     __metadata("design:type", String)
 ], RegisterUserInput.prototype, "password", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RegisterUserInput.prototype, "orgName", void 0);
 exports.RegisterUserInput = RegisterUserInput = __decorate([
     (0, graphql_1.InputType)()
 ], RegisterUserInput);

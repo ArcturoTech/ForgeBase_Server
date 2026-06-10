@@ -14,12 +14,12 @@ export declare class UsersService {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            plan: import("generated/prisma").$Enums.Plan;
+            status: import("generated/prisma").$Enums.SubscriptionStatus;
             stripeCustomerId: string | null;
             stripeSubscriptionId: string | null;
             stripePriceId: string | null;
             stripeCurrentPeriodEnd: Date | null;
-            status: import("generated/prisma").$Enums.SubscriptionStatus;
-            plan: import("generated/prisma").$Enums.Plan;
         } | null;
         id: string;
         email: string;

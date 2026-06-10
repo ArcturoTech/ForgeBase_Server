@@ -35,7 +35,7 @@ async function seed() {
 
   const passwordHash = await bcrypt.hash(OWNER.password, 10)
   const owner = await prisma.user.create({
-    data: { name: OWNER.name, email: OWNER.email, password: passwordHash, emailVerified: true },
+    data: { name: OWNER.name, email: OWNER.email, password: passwordHash, emailVerified: true, role: "SUPERADMIN" },
   })
 
   const organization = await prisma.organization.create({

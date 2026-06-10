@@ -12,6 +12,18 @@ export declare class SnapshotsService {
         capturedOn: Date;
         remainingPoints: number;
     }[]>;
+    private loadSprintForAccess;
+    listSprintTagComposition(userId: string, sprintId: string): Promise<{
+        tag: string;
+        points: number;
+        issues: number;
+    }[]>;
+    listSprintMemberLoad(userId: string, sprintId: string): Promise<{
+        name: string;
+        done: number;
+        doing: number;
+        capacity: number;
+    }[]>;
     listVelocityByProject(userId: string, projectId: string): Promise<{
         sprintNumber: number;
         label: string;

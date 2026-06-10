@@ -4,6 +4,7 @@ import {
   OrgPlan,
   OrgStatus,
   MemberRole,
+  InvitationStatus,
   ProjectStatus,
   SprintStatus,
   IssueType,
@@ -27,6 +28,7 @@ registerEnumType(Role, { name: 'Role' });
 registerEnumType(OrgPlan, { name: 'OrgPlan' });
 registerEnumType(OrgStatus, { name: 'OrgStatus' });
 registerEnumType(MemberRole, { name: 'MemberRole' });
+registerEnumType(InvitationStatus, { name: 'InvitationStatus' });
 registerEnumType(ProjectStatus, { name: 'ProjectStatus' });
 registerEnumType(SprintStatus, { name: 'SprintStatus' });
 registerEnumType(IssueType, { name: 'IssueType' });
@@ -50,6 +52,7 @@ export {
   OrgPlan,
   OrgStatus,
   MemberRole,
+  InvitationStatus,
   ProjectStatus,
   SprintStatus,
   IssueType,

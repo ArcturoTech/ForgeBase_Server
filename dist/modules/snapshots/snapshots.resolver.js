@@ -18,6 +18,8 @@ const common_1 = require("@nestjs/common");
 const snapshots_service_1 = require("./snapshots.service");
 const sprint_snapshot_model_1 = require("./models/sprint-snapshot.model");
 const velocity_point_model_1 = require("./models/velocity-point.model");
+const sprint_tag_slice_model_1 = require("./models/sprint-tag-slice.model");
+const sprint_member_load_model_1 = require("./models/sprint-member-load.model");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 let SnapshotsResolver = class SnapshotsResolver {
@@ -30,6 +32,12 @@ let SnapshotsResolver = class SnapshotsResolver {
     }
     listSprintVelocity(user, projectId) {
         return this.snapshotsService.listVelocityByProject(user.id, projectId);
+    }
+    listSprintTagComposition(user, sprintId) {
+        return this.snapshotsService.listSprintTagComposition(user.id, sprintId);
+    }
+    listSprintMemberLoad(user, sprintId) {
+        return this.snapshotsService.listSprintMemberLoad(user.id, sprintId);
     }
 };
 exports.SnapshotsResolver = SnapshotsResolver;
@@ -51,6 +59,24 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], SnapshotsResolver.prototype, "listSprintVelocity", null);
+__decorate([
+    (0, graphql_1.Query)(() => [sprint_tag_slice_model_1.SprintTagSlice]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('sprintId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SnapshotsResolver.prototype, "listSprintTagComposition", null);
+__decorate([
+    (0, graphql_1.Query)(() => [sprint_member_load_model_1.SprintMemberLoad]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('sprintId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SnapshotsResolver.prototype, "listSprintMemberLoad", null);
 exports.SnapshotsResolver = SnapshotsResolver = __decorate([
     (0, graphql_1.Resolver)(),
     __metadata("design:paramtypes", [snapshots_service_1.SnapshotsService])

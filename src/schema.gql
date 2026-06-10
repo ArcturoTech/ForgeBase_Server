@@ -33,6 +33,21 @@ input AddSubtaskInput {
   label: String!
 }
 
+type AdminOrgRow {
+  createdAt: DateTime!
+  databaseName: String
+  enabledFeatureCount: Int!
+  id: ID!
+  memberCount: Int!
+  mrrCents: Int!
+  name: String!
+  plan: OrgPlan!
+  region: String!
+  slug: String!
+  status: OrgStatus!
+  trialEndsAt: DateTime
+}
+
 type ApiKey {
   callCount: Int!
   createdAt: DateTime!
@@ -394,6 +409,24 @@ type IntegrationStats {
   totalWebhooks: Int!
 }
 
+type Invitation {
+  createdAt: DateTime!
+  email: String!
+  expiresAt: DateTime!
+  id: ID!
+  orgId: String!
+  orgName: String
+  role: MemberRole!
+  status: InvitationStatus!
+}
+
+enum InvitationStatus {
+  ACCEPTED
+  EXPIRED
+  PENDING
+  REVOKED
+}
+
 input InviteChatSpaceMemberInput {
   role: ChatSpaceRole
   spaceId: ID!
@@ -405,6 +438,12 @@ input InviteMemberByEmailInput {
   orgId: ID!
   role: MemberRole
   title: String
+}
+
+input InviteToOrganizationInput {
+  email: String!
+  orgId: ID!
+  role: MemberRole
 }
 
 type Invoice {
@@ -560,6 +599,7 @@ input MoveIssueInput {
 }
 
 type Mutation {
+  acceptInvitation(token: String!): Invitation!
   addCommentToDocument(body: String!, documentId: ID!): DocumentComment!
   addCommentToIssue(input: AddCommentToIssueInput!): IssueComment!
   addProjectMember(input: AddProjectMemberInput!): ProjectMember!
@@ -589,6 +629,7 @@ type Mutation {
   inviteChatSpaceMember(input: InviteChatSpaceMemberInput!): ChatSpaceMember!
   inviteMember(orgId: ID!, role: MemberRole, title: String, userId: ID!): Member!
   inviteMemberByEmail(input: InviteMemberByEmailInput!): Member!
+  inviteToOrganization(input: InviteToOrganizationInput!): Invitation!
   loginUser(input: LoginUserInput!): AuthTokens!
   logoutUser: Boolean!
   markAllNotificationsRead(orgId: ID!): Int!
@@ -620,9 +661,11 @@ type Mutation {
   removeUserAvatar: User!
   removeWebhook(id: ID!): Boolean!
   renewContract(expiresAt: DateTime!, id: ID!): Contract!
+  resendInvitation(invitationId: ID!): Invitation!
   resolveDocumentComment(id: ID!, resolved: Boolean!): DocumentComment!
   revealProjectEnvVar(id: ID!): String!
   revokeApiKey(id: ID!): ApiKey!
+  revokeInvitation(invitationId: ID!): Boolean!
   sendInvoice(id: ID!): Invoice!
   sendMessage(input: SendMessageInput!): Message!
   startSprint(id: ID!): Sprint!
@@ -688,6 +731,24 @@ type Organization {
   updatedAt: DateTime!
 }
 
+type OrganizationUsage {
+  apiKeyCount: Int!
+  memberCount: Int!
+  memberLimit: Int!
+  storageMbLimit: Int!
+  storageMbUsed: Int!
+  webhookCount: Int!
+  webhookLimit: Int!
+}
+
+type PaginatedAdminOrgRows {
+  data: [AdminOrgRow!]!
+  hasNextPage: Boolean!
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
 type PaginatedContracts {
   data: [Contract!]!
   hasNextPage: Boolean!
@@ -716,6 +777,15 @@ input PaginationInput {
   limit: Int! = 20
   page: Int! = 1
   search: String
+}
+
+type PlatformStats {
+  activeOrganizations: Int!
+  suspendedOrganizations: Int!
+  totalMrrCents: Int!
+  totalOrganizations: Int!
+  totalUsers: Int!
+  trialOrganizations: Int!
 }
 
 enum Priority {
@@ -782,6 +852,7 @@ enum ProjectStatus {
 }
 
 type Query {
+  findActiveOrganization: Organization
   findActiveSprintSummary(orgId: ID!): SprintSummary
   findBoardById(id: ID!): Board!
   findChannelById(id: ID!): Channel!
@@ -793,10 +864,14 @@ type Query {
   findIssueById(id: ID!): Issue!
   findMyProfile: User!
   findOrganizationBySlug(slug: String!): Organization!
+  findOrganizationUsage(orgId: ID!): OrganizationUsage!
+  findPlatformStats: PlatformStats!
   findProjectById(id: ID!): Project!
   findProjectOverview(projectId: ID!): Document
   findRevenueSummary(orgId: ID!): RevenueSummary!
   findSprintById(id: ID!): Sprint!
+  findWeeklyReport(orgId: ID!, weekStart: DateTime): WeeklyReport!
+  invitationByToken(token: String!): Invitation!
   listActivityByIssue(issueId: ID!): [Activity!]!
   listActivityFeed(orgId: ID!): [Activity!]!
   listApiKeys(orgId: ID!): [ApiKey!]!
@@ -821,13 +896,17 @@ type Query {
   listMyChatSpaces(orgId: ID!): [ChatSpace!]!
   listMyOrganizations: [Organization!]!
   listNotifications(orgId: ID!): [Notification!]!
+  listOrganizationInvitations(orgId: ID!, status: InvitationStatus): [Invitation!]!
   listOrganizations(pagination: PaginationInput!): PaginatedOrganizations!
+  listOrganizationsForAdmin(pagination: PaginationInput!): PaginatedAdminOrgRows!
   listProjectEnvVars(projectId: ID!): [ProjectEnvVar!]!
   listProjectMembers(projectId: ID!): [ProjectMember!]!
   listProjectMilestones(projectId: ID!): [Milestone!]!
   listProjectResources(projectId: ID!): [ProjectResource!]!
   listProjects(orgId: ID!): [Project!]!
   listSprintBurndown(sprintId: ID!): [SprintSnapshot!]!
+  listSprintMemberLoad(sprintId: ID!): [SprintMemberLoad!]!
+  listSprintTagComposition(sprintId: ID!): [SprintTagSlice!]!
   listSprintVelocity(projectId: ID!): [VelocityPoint!]!
   listSprintsByProject(projectId: ID!): [Sprint!]!
   listWebhookDeliveries(webhookId: ID!): [WebhookDelivery!]!
@@ -850,6 +929,7 @@ type ReactionGroup {
 input RegisterUserInput {
   email: String!
   name: String!
+  orgName: String
   password: String!
 }
 
@@ -877,6 +957,7 @@ type RevenueSummary {
 
 enum Role {
   ADMIN
+  SUPERADMIN
   USER
 }
 
@@ -900,6 +981,13 @@ type Sprint {
   status: SprintStatus!
   targetPoints: Int
   totalPoints: Int!
+}
+
+type SprintMemberLoad {
+  capacity: Int!
+  doing: Int!
+  done: Int!
+  name: String!
 }
 
 type SprintSnapshot {
@@ -928,6 +1016,12 @@ type SprintSummary {
   pointsDone: Int!
   pointsTotal: Int!
   startDate: DateTime
+}
+
+type SprintTagSlice {
+  issues: Int!
+  points: Int!
+  tag: String!
 }
 
 type Subscription {
@@ -1137,4 +1231,22 @@ enum WebhookStatus {
   DEGRADED
   FAILING
   OK
+}
+
+type WeeklyReport {
+  activityCount: Int!
+  contractsCreated: Int!
+  dailyCompleted: [WeeklyReportDay!]!
+  invoicesAmountCents: Int!
+  invoicesCreated: Int!
+  issuesCompleted: Int!
+  pointsCompleted: Int!
+  weekEnd: DateTime!
+  weekStart: DateTime!
+}
+
+type WeeklyReportDay {
+  issues: Int!
+  label: String!
+  points: Int!
 }

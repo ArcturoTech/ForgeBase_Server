@@ -15,8 +15,8 @@ export declare class ProjectsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.ProjectStatus;
         slug: string;
+        status: import("generated/prisma").$Enums.ProjectStatus;
         client: string | null;
         progress: number;
         color: string;
@@ -32,8 +32,8 @@ export declare class ProjectsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.ProjectStatus;
         slug: string;
+        status: import("generated/prisma").$Enums.ProjectStatus;
         client: string | null;
         progress: number;
         color: string;
@@ -138,8 +138,8 @@ export declare class ProjectsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.ProjectStatus;
         slug: string;
+        status: import("generated/prisma").$Enums.ProjectStatus;
         client: string | null;
         progress: number;
         color: string;
@@ -154,8 +154,8 @@ export declare class ProjectsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
-        status: import("generated/prisma").$Enums.ProjectStatus;
         slug: string;
+        status: import("generated/prisma").$Enums.ProjectStatus;
         client: string | null;
         progress: number;
         color: string;
