@@ -13,6 +13,8 @@ FROM base AS build
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --ignore-workspace --no-frozen-lockfile
 COPY . .
+# Drop the vestigial pnpm-workspace.yaml (no `packages` field) so every pnpm invocation stops erroring.
+RUN rm -f pnpm-workspace.yaml
 RUN pnpm prisma generate
 RUN pnpm build
 
