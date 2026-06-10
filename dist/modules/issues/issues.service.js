@@ -113,6 +113,23 @@ let IssuesService = class IssuesService {
         });
         return issue;
     }
+    async createBacklogIssueFromIntake(params) {
+        const issue = await this.createIssueWithSequentialKey(params.orgId, (key) => ({
+            orgId: params.orgId,
+            boardId: params.boardId,
+            columnId: params.columnId,
+            key,
+            title: params.title,
+            description: params.description ?? undefined,
+            type: params.type,
+            priority: params.priority,
+        }));
+        await this.pubSub.publish(exports.ISSUE_EVENTS.created, {
+            [exports.ISSUE_EVENTS.created]: issue,
+            boardId: issue.boardId,
+        });
+        return issue;
+    }
     isDuplicateKeyError(error) {
         return error instanceof prisma_client_1.Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
     }

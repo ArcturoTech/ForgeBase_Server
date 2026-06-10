@@ -1,3 +1,4 @@
+import { IssueType, Priority } from "../../common/graphql/enums";
 import { PubSub } from 'graphql-subscriptions';
 import { Prisma } from "../../prisma/prisma-client";
 import { PrismaService } from "../../prisma/prisma.service";
@@ -72,6 +73,38 @@ export declare class IssuesService {
         goal: string | null;
     }>;
     createIssue(userId: string, input: CreateIssueInput): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        done: boolean;
+        position: number;
+        orgId: string;
+        key: string;
+        type: import("generated/prisma").$Enums.IssueType;
+        description: string | null;
+        title: string;
+        startDate: Date | null;
+        boardId: string;
+        columnId: string;
+        sprintId: string | null;
+        points: number | null;
+        priority: import("generated/prisma").$Enums.Priority;
+        urgent: boolean;
+        reporterId: string | null;
+        epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
+    }>;
+    createBacklogIssueFromIntake(params: {
+        orgId: string;
+        boardId: string;
+        columnId: string;
+        title: string;
+        description?: string | null;
+        type: IssueType;
+        priority: Priority;
+    }): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;

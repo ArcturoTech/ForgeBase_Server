@@ -402,6 +402,20 @@ type FeatureFlag {
   locked: Boolean!
 }
 
+type IntakeForm {
+  active: Boolean!
+  createdAt: DateTime!
+  defaultType: IssueType!
+  id: ID!
+  projectId: String!
+  title: String!
+  token: String!
+}
+
+type IntakeSubmissionResult {
+  ok: Boolean!
+}
+
 type IntegrationStats {
   activeApiKeys: Int!
   averageSuccessRate: Float!
@@ -626,6 +640,7 @@ type Mutation {
   createWebhook(input: CreateWebhookInput!): Webhook!
   editMessage(body: String!, id: ID!): Message!
   exportProjectEnvFile(projectId: ID!, scope: EnvScope!): String!
+  generateProjectIntakeForm(projectId: ID!): IntakeForm!
   inviteChatSpaceMember(input: InviteChatSpaceMemberInput!): ChatSpaceMember!
   inviteMember(orgId: ID!, role: MemberRole, title: String, userId: ID!): Member!
   inviteMemberByEmail(input: InviteMemberByEmailInput!): Member!
@@ -668,7 +683,9 @@ type Mutation {
   revokeInvitation(invitationId: ID!): Boolean!
   sendInvoice(id: ID!): Invoice!
   sendMessage(input: SendMessageInput!): Message!
+  setProjectIntakeFormActive(active: Boolean!, projectId: ID!): IntakeForm!
   startSprint(id: ID!): Sprint!
+  submitIntakeForm(input: SubmitIntakeFormInput!, token: String!): IntakeSubmissionResult!
   toggleFeatureFlag(key: String!, orgId: ID!): FeatureFlag!
   toggleSubtask(subtaskId: ID!): Subtask!
   unassignUserFromIssue(input: AssignUserToIssueInput!): Issue!
@@ -851,6 +868,15 @@ enum ProjectStatus {
   PAUSED
 }
 
+type PublicIntakeForm {
+  defaultType: IssueType!
+  description: String
+  orgName: String!
+  projectName: String!
+  title: String!
+  token: String!
+}
+
 type Query {
   findActiveOrganization: Organization
   findActiveSprintSummary(orgId: ID!): SprintSummary
@@ -871,6 +897,7 @@ type Query {
   findRevenueSummary(orgId: ID!): RevenueSummary!
   findSprintById(id: ID!): Sprint!
   findWeeklyReport(orgId: ID!, weekStart: DateTime): WeeklyReport!
+  intakeFormByToken(token: String!): PublicIntakeForm!
   invitationByToken(token: String!): Invitation!
   listActivityByIssue(issueId: ID!): [Activity!]!
   listActivityFeed(orgId: ID!): [Activity!]!
@@ -911,6 +938,7 @@ type Query {
   listSprintsByProject(projectId: ID!): [Sprint!]!
   listWebhookDeliveries(webhookId: ID!): [WebhookDelivery!]!
   listWebhooks(orgId: ID!): [Webhook!]!
+  projectIntakeForm(projectId: ID!): IntakeForm
 }
 
 type ReactionChangedEvent {
@@ -1022,6 +1050,16 @@ type SprintTagSlice {
   issues: Int!
   points: Int!
   tag: String!
+}
+
+input SubmitIntakeFormInput {
+  company: String
+  description: String
+  priority: Priority
+  reporterEmail: String
+  reporterName: String
+  title: String!
+  type: IssueType
 }
 
 type Subscription {

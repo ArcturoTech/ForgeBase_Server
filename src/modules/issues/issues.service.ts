@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { IssueType } from '@/common/graphql/enums';
+import { IssueType, Priority } from '@/common/graphql/enums';
 import { PubSub } from 'graphql-subscriptions';
 import { Prisma } from '@/prisma/prisma-client';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -111,6 +111,38 @@ export class IssuesService {
       action: 'created',
       targetType: 'issue',
       targetId: issue.key,
+    });
+    return issue;
+  }
+
+  /**
+   * Creates a backlog issue from a public intake-form submission. No user context
+   * (anonymous reporter), no membership check — the caller (IntakeService) is
+   * responsible for resolving a valid form/board/column. The Issue gets the same
+   * sequential org key as any other issue, and the board receives a live event.
+   */
+  async createBacklogIssueFromIntake(params: {
+    orgId: string;
+    boardId: string;
+    columnId: string;
+    title: string;
+    description?: string | null;
+    type: IssueType;
+    priority: Priority;
+  }) {
+    const issue = await this.createIssueWithSequentialKey(params.orgId, (key) => ({
+      orgId: params.orgId,
+      boardId: params.boardId,
+      columnId: params.columnId,
+      key,
+      title: params.title,
+      description: params.description ?? undefined,
+      type: params.type,
+      priority: params.priority,
+    }));
+    await this.pubSub.publish(ISSUE_EVENTS.created, {
+      [ISSUE_EVENTS.created]: issue,
+      boardId: issue.boardId,
     });
     return issue;
   }

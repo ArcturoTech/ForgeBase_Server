@@ -38,6 +38,7 @@ model User {
   chatSpaceMembers ChatSpaceMember[]
   messageReactions MessageReaction[]
   invitationsSent  Invitation[]      @relation("InvitationInviter")
+  intakeForms      IntakeForm[]      @relation("IntakeFormCreator")
 
   @@map("users")
 }
@@ -88,6 +89,7 @@ model Organization {
   attachments   Attachment[]
   chatSpaces    ChatSpace[]
   invitations   Invitation[]
+  intakeForms   IntakeForm[]
 
   @@map("organizations")
 }
@@ -171,6 +173,7 @@ model Project {
   invoices     Invoice[]
   envVars      ProjectEnvVar[]
   resources    ProjectResource[]
+  intakeForms  IntakeForm[]
 
   @@unique([orgId, slug])
   @@index([orgId, status])
@@ -248,9 +251,10 @@ model Board {
   name      String
   createdAt DateTime @default(now())
 
-  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  columns Column[]
-  issues  Issue[]
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  columns     Column[]
+  issues      Issue[]
+  intakeForms IntakeForm[]
 
   @@index([projectId])
   @@map("boards")
@@ -265,8 +269,9 @@ model Column {
   color    String  @default("var(--fb-text-faint)")
   isDone   Boolean @default(false)
 
-  board  Board   @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  issues Issue[]
+  board       Board        @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  issues      Issue[]
+  intakeForms IntakeForm[]
 
   @@index([boardId, position])
   @@map("columns")
@@ -309,6 +314,7 @@ model Issue {
   comments     Comment[]
   dependencies IssueDependency[] @relation("IssueDependencyFrom")
   dependents   IssueDependency[] @relation("IssueDependencyTo")
+  intakeSubmissions IntakeSubmission[]
 
   @@unique([orgId, key])
   @@index([boardId, columnId, position])
@@ -895,4 +901,50 @@ enum WebhookStatus {
   OK
   DEGRADED
   FAILING
+}
+
+/// Public intake form (Jira-like request collector). One per project, generated once,
+/// shared via a stable public token. Submissions land in the project's backlog.
+model IntakeForm {
+  id          String    @id @default(uuid())
+  token       String    @unique
+  orgId       String
+  projectId   String
+  boardId     String
+  columnId    String
+  title       String
+  description String?   @db.Text
+  defaultType IssueType @default(BUG)
+  active      Boolean   @default(true)
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  organization Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project      Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  board        Board              @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  column       Column             @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  createdBy    User?              @relation("IntakeFormCreator", fields: [createdById], references: [id])
+  submissions  IntakeSubmission[]
+
+  @@unique([projectId])
+  @@index([orgId])
+  @@map("intake_forms")
+}
+
+/// One public submission of an intake form. Keeps the reporter's contact (anonymous,
+/// no account) and links to the Issue that was created in the backlog.
+model IntakeSubmission {
+  id            String   @id @default(uuid())
+  formId        String
+  issueId       String?
+  reporterName  String?
+  reporterEmail String?
+  createdAt     DateTime @default(now())
+
+  form  IntakeForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  issue Issue?     @relation(fields: [issueId], references: [id], onDelete: SetNull)
+
+  @@index([formId])
+  @@map("intake_submissions")
 }

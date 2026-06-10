@@ -44,6 +44,7 @@ import { ChatSpacesModule } from './modules/chat-spaces/chat-spaces.module';
 import { EnvVarsModule } from './modules/env-vars/env-vars.module';
 import { ResourcesModule } from './modules/resources/resources.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
+import { IntakeModule } from './modules/intake/intake.module';
 import { TenancyModule } from './common/tenancy/tenancy.module';
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
@@ -140,6 +141,7 @@ import { validateEnv } from './config/env.validation';
     EnvVarsModule,
     ResourcesModule,
     AttachmentsModule,
+    IntakeModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: GqlThrottlerGuard }],
 })
