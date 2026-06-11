@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { EnvScope } from '@/common/graphql/enums';
 import { EnvVarsService } from './env-vars.service';
 import { ProjectEnvVar } from './models/project-env-var.model';
+import { EnvFileExport } from './models/env-file-export.model';
 import { CreateProjectEnvVarInput } from './dto/create-project-env-var.input';
 import { UpdateProjectEnvVarInput } from './dto/update-project-env-var.input';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
@@ -39,6 +40,22 @@ export class EnvVarsResolver {
     @Args('scope', { type: () => EnvScope }) scope: EnvScope,
   ): Promise<string> {
     return this.envVarsService.exportProjectEnvFile(user.id, projectId, scope);
+  }
+
+  @Mutation(() => [EnvFileExport])
+  @UseGuards(GqlAuthGuard)
+  exportProjectEnvFilesByCategory(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @Args('scope', { type: () => EnvScope }) scope: EnvScope,
+    @Args('categories', { type: () => [String] }) categories: string[],
+  ): Promise<EnvFileExport[]> {
+    return this.envVarsService.exportProjectEnvFilesByCategory(
+      user.id,
+      projectId,
+      scope,
+      categories,
+    ) as Promise<EnvFileExport[]>;
   }
 
   @Mutation(() => ProjectEnvVar)

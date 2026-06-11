@@ -61,6 +61,53 @@ export class EnvVarsService {
     return [...merged.entries()].map(([key, value]) => this.toEnvLine(key, value)).join('\n');
   }
 
+  async exportProjectEnvFilesByCategory(
+    userId: string,
+    projectId: string,
+    scope: EnvScope,
+    categories: string[],
+  ) {
+    await this.tenancy.assertProjectManager(userId, projectId);
+    const scopes = scope === EnvScope.SHARED ? [EnvScope.SHARED] : [scope, EnvScope.SHARED];
+    const envVars = await this.prisma.projectEnvVar.findMany({
+      where: { projectId, scope: { in: scopes } },
+      orderBy: [{ scope: 'asc' }, { key: 'asc' }],
+    });
+
+    const files = categories.map((category) => {
+      const normalized = category.trim();
+      const inCategory = envVars.filter((envVar) =>
+        normalized ? envVar.category === normalized : !envVar.category,
+      );
+      const merged = new Map<string, string>();
+      for (const envVar of inCategory) {
+        if (envVar.scope === EnvScope.SHARED && merged.has(envVar.key)) continue;
+        merged.set(envVar.key, this.encryption.decrypt(envVar.valueEnc));
+      }
+      const content = [...merged.entries()]
+        .map(([key, value]) => this.toEnvLine(key, value))
+        .join('\n');
+      return {
+        category: normalized || 'Geral',
+        filename: `${this.slugifyCategory(normalized)}.env`,
+        content,
+      };
+    });
+
+    await this.recordEnvVarActivity(userId, projectId, ENV_VAR_ACTIONS.exported, scope);
+    return files;
+  }
+
+  private slugifyCategory(category: string): string {
+    const slug = category
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return slug || 'geral';
+  }
+
   async createProjectEnvVar(userId: string, input: CreateProjectEnvVarInput) {
     await this.tenancy.assertProjectManager(userId, input.projectId);
     const envVar = await this.prisma.projectEnvVar.create({
@@ -70,6 +117,7 @@ export class EnvVarsService {
         key: input.key,
         valueEnc: this.encryption.encrypt(input.value),
         isSecret: input.isSecret ?? true,
+        category: input.category,
         description: input.description,
         updatedById: userId,
       },
@@ -85,6 +133,7 @@ export class EnvVarsService {
       where: { id: input.id },
       data: {
         isSecret: input.isSecret,
+        category: input.category,
         description: input.description,
         updatedById: userId,
         ...(input.value !== undefined ? { valueEnc: this.encryption.encrypt(input.value) } : {}),
@@ -109,6 +158,7 @@ export class EnvVarsService {
       scope: envVar.scope,
       key: envVar.key,
       isSecret: envVar.isSecret,
+      category: envVar.category ?? undefined,
       description: envVar.description ?? undefined,
       value: envVar.isSecret ? undefined : this.encryption.decrypt(envVar.valueEnc),
       masked: MASK,

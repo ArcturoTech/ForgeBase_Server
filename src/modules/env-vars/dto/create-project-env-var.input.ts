@@ -43,6 +43,12 @@ export class CreateProjectEnvVarInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
+  @MaxLength(60)
+  category?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   @MaxLength(280)
   description?: string;
 }

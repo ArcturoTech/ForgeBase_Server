@@ -213,6 +213,7 @@ input CreateBoardInput {
 
 input CreateChatSpaceInput {
   description: String
+  memberIds: [ID!]
   name: String!
   orgId: ID!
 }
@@ -299,6 +300,7 @@ input CreateOrganizationInput {
 }
 
 input CreateProjectEnvVarInput {
+  category: String
   description: String
   isSecret: Boolean
   key: String!
@@ -383,6 +385,12 @@ type DocumentComment {
   documentId: String!
   id: ID!
   resolved: Boolean!
+}
+
+type EnvFileExport {
+  category: String!
+  content: String!
+  filename: String!
 }
 
 enum EnvScope {
@@ -640,6 +648,7 @@ type Mutation {
   createWebhook(input: CreateWebhookInput!): Webhook!
   editMessage(body: String!, id: ID!): Message!
   exportProjectEnvFile(projectId: ID!, scope: EnvScope!): String!
+  exportProjectEnvFilesByCategory(categories: [String!]!, projectId: ID!, scope: EnvScope!): [EnvFileExport!]!
   generateProjectIntakeForm(projectId: ID!): IntakeForm!
   inviteChatSpaceMember(input: InviteChatSpaceMemberInput!): ChatSpaceMember!
   inviteMember(orgId: ID!, role: MemberRole, title: String, userId: ID!): Member!
@@ -831,6 +840,7 @@ type Project {
 }
 
 type ProjectEnvVar {
+  category: String
   description: String
   id: ID!
   isSecret: Boolean!
@@ -1091,6 +1101,7 @@ input UpdateBoardInput {
 
 input UpdateChatSpaceInput {
   description: String
+  memberIds: [ID!]
   name: String
 }
 
@@ -1156,6 +1167,7 @@ input UpdateOrganizationInput {
 }
 
 input UpdateProjectEnvVarInput {
+  category: String
   description: String
   id: ID!
   isSecret: Boolean

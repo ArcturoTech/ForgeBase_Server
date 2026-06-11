@@ -19,6 +19,9 @@ export class ProjectEnvVar {
   isSecret: boolean;
 
   @Field({ nullable: true })
+  category?: string;
+
+  @Field({ nullable: true })
   description?: string;
 
   @Field({ nullable: true })

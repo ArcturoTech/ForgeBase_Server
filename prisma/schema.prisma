@@ -698,6 +698,7 @@ model ProjectEnvVar {
   key         String
   valueEnc    String   @db.Text
   isSecret    Boolean  @default(true)
+  category    String?
   description String?
   updatedById String?
   createdAt   DateTime @default(now())
