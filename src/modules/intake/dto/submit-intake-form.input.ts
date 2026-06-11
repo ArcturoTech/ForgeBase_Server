@@ -1,5 +1,14 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { Field, ID, InputType } from '@nestjs/graphql';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { IssueType, Priority } from '@/common/graphql/enums';
 
 @InputType()
@@ -37,6 +46,13 @@ export class SubmitIntakeFormInput {
   @IsEmail()
   @MaxLength(160)
   reporterEmail?: string;
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  attachmentIds?: string[];
 
   /**
    * Honeypot. Real users never see this field; bots fill it. If present, the

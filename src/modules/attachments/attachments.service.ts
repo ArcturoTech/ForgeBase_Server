@@ -11,6 +11,9 @@ type UploadedFile = {
   buffer: Buffer;
 };
 
+const INTAKE_PENDING_TARGET = 'intake_pending';
+const ISSUE_TARGET = 'issue';
+
 @Injectable()
 export class AttachmentsService {
   constructor(
@@ -35,6 +38,36 @@ export class AttachmentsService {
         storageKey: stored.key,
         resourceType: stored.resourceType,
       },
+    });
+  }
+
+  async createIntakeAttachment(orgId: string, file: UploadedFile) {
+    const stored = await this.storage.saveFile(file.buffer, file.originalname, orgId);
+    return this.prisma.attachment.create({
+      data: {
+        orgId,
+        uploaderId: null,
+        targetType: INTAKE_PENDING_TARGET,
+        filename: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        url: stored.url,
+        storageKey: stored.key,
+        resourceType: stored.resourceType,
+      },
+    });
+  }
+
+  resolvePendingIntakeAttachments(orgId: string, attachmentIds: string[]) {
+    return this.prisma.attachment.findMany({
+      where: { orgId, id: { in: attachmentIds }, targetType: INTAKE_PENDING_TARGET },
+    });
+  }
+
+  async linkIntakeAttachmentsToIssue(attachmentIds: string[], issueId: string) {
+    await this.prisma.attachment.updateMany({
+      where: { id: { in: attachmentIds }, targetType: INTAKE_PENDING_TARGET },
+      data: { targetType: ISSUE_TARGET, targetId: issueId },
     });
   }
 

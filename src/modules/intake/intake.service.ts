@@ -3,8 +3,11 @@ import { randomBytes } from 'crypto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { IssuesService } from '@/modules/issues/issues.service';
+import { AttachmentsService } from '@/modules/attachments/attachments.service';
 import { IssueType, Priority } from '@/common/graphql/enums';
 import { SubmitIntakeFormInput } from './dto/submit-intake-form.input';
+
+type IntakeAttachmentRef = { filename: string; url: string };
 
 @Injectable()
 export class IntakeService {
@@ -12,6 +15,7 @@ export class IntakeService {
     private readonly prisma: PrismaService,
     private readonly tenancy: TenancyService,
     private readonly issues: IssuesService,
+    private readonly attachments: AttachmentsService,
   ) {}
 
   private generateToken(): string {
@@ -100,6 +104,21 @@ export class IntakeService {
     };
   }
 
+  /** Public: loads an active form by token, used by submit and the public upload. */
+  private async loadActiveForm(token: string) {
+    const form = await this.prisma.intakeForm.findUnique({ where: { token } });
+    if (!form || !form.active) {
+      throw new NotFoundException('Formulário não encontrado ou desativado');
+    }
+    return form;
+  }
+
+  /** Public: resolves the org an active form belongs to (for anonymous uploads). */
+  async resolveActiveFormOrgId(token: string) {
+    const form = await this.loadActiveForm(token);
+    return form.orgId;
+  }
+
   /** Public: a submission. Creates a backlog issue + a submission record. */
   async submitByToken(token: string, input: SubmitIntakeFormInput) {
     // Honeypot: bots fill the hidden field. Pretend success, create nothing.
@@ -107,20 +126,28 @@ export class IntakeService {
       return { ok: true };
     }
 
-    const form = await this.prisma.intakeForm.findUnique({ where: { token } });
-    if (!form || !form.active) {
-      throw new NotFoundException('Formulário não encontrado ou desativado');
-    }
+    const form = await this.loadActiveForm(token);
+
+    const attachments = input.attachmentIds?.length
+      ? await this.attachments.resolvePendingIntakeAttachments(form.orgId, input.attachmentIds)
+      : [];
 
     const issue = await this.issues.createBacklogIssueFromIntake({
       orgId: form.orgId,
       boardId: form.boardId,
       columnId: form.columnId,
       title: input.title,
-      description: this.composeDescription(input),
+      description: this.composeDescription(input, attachments),
       type: input.type ?? form.defaultType,
       priority: input.priority ?? Priority.MED,
     });
+
+    if (attachments.length) {
+      await this.attachments.linkIntakeAttachmentsToIssue(
+        attachments.map((attachment) => attachment.id),
+        issue.id,
+      );
+    }
 
     await this.prisma.intakeSubmission.create({
       data: {
@@ -134,14 +161,24 @@ export class IntakeService {
     return { ok: true };
   }
 
-  /** Folds the reporter's contact into the issue description (anonymous, no account). */
-  private composeDescription(input: SubmitIntakeFormInput): string {
+  /** Folds the reporter's contact and attachment links into the issue description. */
+  private composeDescription(
+    input: SubmitIntakeFormInput,
+    attachments: IntakeAttachmentRef[],
+  ): string {
     const lines: string[] = [];
     if (input.description) lines.push(input.description.trim());
     const who = [input.reporterName, input.reporterEmail].filter(Boolean).join(' · ');
     if (who) {
       if (lines.length) lines.push('');
       lines.push(`— Reportado por ${who} (via formulário público)`);
+    }
+    if (attachments.length) {
+      lines.push('');
+      lines.push('Anexos:');
+      for (const attachment of attachments) {
+        lines.push(`- ${attachment.filename}: ${attachment.url}`);
+      }
     }
     return lines.join('\n');
   }

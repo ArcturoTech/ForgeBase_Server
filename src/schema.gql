@@ -1053,6 +1053,7 @@ type SprintTagSlice {
 }
 
 input SubmitIntakeFormInput {
+  attachmentIds: [ID!]
   company: String
   description: String
   priority: Priority
