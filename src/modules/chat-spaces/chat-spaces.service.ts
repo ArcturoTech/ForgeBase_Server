@@ -158,18 +158,34 @@ export class ChatSpacesService {
     return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
   }
 
-  async updateChatSpace(userId: string, id: string, input: UpdateChatSpaceInput) {
-    await this.assertChatSpaceAdmin(userId, id);
-    const space = await this.prisma.chatSpace.update({
-      where: { id },
-      data: { name: input.name, description: input.description },
-      include: { _count: { select: { members: true } } },
+  private async assertSpaceOrgAdmin(userId: string, spaceId: string) {
+    const space = await this.prisma.chatSpace.findUnique({
+      where: { id: spaceId },
+      select: { orgId: true },
     });
-    return this.decorateChatSpace(space);
+    if (!space) throw new NotFoundException('Espaço não encontrado');
+    await this.tenancy.assertOrgAdmin(userId, space.orgId);
+  }
+
+  async updateChatSpace(userId: string, id: string, input: UpdateChatSpaceInput) {
+    await this.assertSpaceOrgAdmin(userId, id);
+    try {
+      const space = await this.prisma.chatSpace.update({
+        where: { id },
+        data: { name: input.name, description: input.description },
+        include: { _count: { select: { members: true } } },
+      });
+      return this.decorateChatSpace(space);
+    } catch (error) {
+      if (this.isDuplicateNameError(error)) {
+        throw new ConflictException('Já existe um espaço com esse nome');
+      }
+      throw error;
+    }
   }
 
   async removeChatSpace(userId: string, id: string) {
-    await this.assertChatSpaceAdmin(userId, id);
+    await this.assertSpaceOrgAdmin(userId, id);
     const space = await this.prisma.chatSpace.findUnique({
       where: { id },
       select: { kind: true },

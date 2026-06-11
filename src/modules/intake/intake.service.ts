@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
@@ -46,12 +46,27 @@ export class IntakeService {
     });
     if (!project) throw new NotFoundException('Projeto não encontrado');
 
-    const board = project.boards[0];
-    const column = board?.columns[0];
-    if (!board || !column) {
-      throw new BadRequestException(
-        'Crie um quadro com colunas no projeto antes de gerar o formulário de report',
-      );
+    const existingBoard = project.boards[0];
+    let boardId = existingBoard?.id;
+    let columnId = existingBoard?.columns[0]?.id;
+
+    if (!boardId || !columnId) {
+      const board = await this.prisma.board.create({
+        data: {
+          projectId: project.id,
+          name: 'Quadro',
+          columns: {
+            create: [
+              { name: 'A fazer', position: 0 },
+              { name: 'Em progresso', position: 1 },
+              { name: 'Concluído', position: 2, isDone: true },
+            ],
+          },
+        },
+        include: { columns: { orderBy: { position: 'asc' }, take: 1 } },
+      });
+      boardId = board.id;
+      columnId = board.columns[0].id;
     }
 
     return this.prisma.intakeForm.create({
@@ -59,8 +74,8 @@ export class IntakeService {
         token: this.generateToken(),
         orgId: project.orgId,
         projectId: project.id,
-        boardId: board.id,
-        columnId: column.id,
+        boardId,
+        columnId,
         title: `Reportar para ${project.name}`,
         defaultType: IssueType.BUG,
         createdById: userId,
