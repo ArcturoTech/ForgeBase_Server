@@ -25,7 +25,7 @@ export class DocumentsService {
   async listDocuments(userId: string, orgId: string) {
     await this.tenancy.assertOrgMembership(userId, orgId);
     return this.prisma.document.findMany({
-      where: { orgId },
+      where: { orgId, projectId: null },
       orderBy: { updatedAt: 'desc' },
     });
   }
