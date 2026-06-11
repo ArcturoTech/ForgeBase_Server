@@ -607,6 +607,7 @@ model ChatSpace {
   members      ChatSpaceMember[]
   channels     Channel[]
 
+  @@unique([orgId, name])
   @@index([orgId])
   @@map("chat_spaces")
 }

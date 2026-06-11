@@ -1,5 +1,5 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsOptional, IsString, MaxLength } from 'class-validator';
 
 @InputType()
 export class CreateChatSpaceInput {
@@ -17,4 +17,11 @@ export class CreateChatSpaceInput {
   @IsString()
   @MaxLength(280)
   description?: string;
+
+  @Field(() => [ID], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @IsString({ each: true })
+  memberIds?: string[];
 }

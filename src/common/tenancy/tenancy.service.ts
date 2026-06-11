@@ -60,6 +60,20 @@ export class TenancyService {
     await this.assertOrgMembership(userId, orgId);
   }
 
+  async assertOrgAdmin(userId: string, orgId: string): Promise<void> {
+    const membership = await this.prisma.membership.findUnique({
+      where: { orgId_userId: { orgId, userId } },
+      select: { role: true },
+    });
+    if (membership && (membership.role === 'OWNER' || membership.role === 'ADMIN')) {
+      return;
+    }
+    if (await this.isSuperAdmin(userId)) {
+      return;
+    }
+    throw new ForbiddenException('Apenas administradores da organização podem executar esta ação');
+  }
+
   async assertProjectManager(userId: string, projectId: string): Promise<void> {
     const orgId = await this.resolveOrgIdByProject(projectId);
     const membership = await this.prisma.membership.findUnique({

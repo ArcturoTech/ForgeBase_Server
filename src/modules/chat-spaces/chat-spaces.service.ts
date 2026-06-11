@@ -1,5 +1,11 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ChatSpaceKind, ChatSpaceRole } from '@/common/graphql/enums';
+import { Prisma } from '@/prisma/prisma-client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { CreateChatSpaceInput } from './dto/create-chat-space.input';
@@ -102,21 +108,54 @@ export class ChatSpacesService {
   }
 
   async createChatSpace(userId: string, input: CreateChatSpaceInput) {
-    await this.tenancy.assertOrgMembership(userId, input.orgId);
+    await this.tenancy.assertOrgAdmin(userId, input.orgId);
 
-    const space = await this.prisma.chatSpace.create({
-      data: {
-        orgId: input.orgId,
-        name: input.name,
-        description: input.description,
-        kind: ChatSpaceKind.CUSTOM,
-        createdById: userId,
-        members: { create: { userId, role: ChatSpaceRole.ADMIN } },
-      },
-      include: { _count: { select: { members: true } } },
+    const memberIds = await this.resolveSpaceMemberIds(input.orgId, userId, input.memberIds);
+
+    try {
+      const space = await this.prisma.chatSpace.create({
+        data: {
+          orgId: input.orgId,
+          name: input.name,
+          description: input.description,
+          kind: ChatSpaceKind.CUSTOM,
+          createdById: userId,
+          members: {
+            create: memberIds.map((memberId) => ({
+              userId: memberId,
+              role: memberId === userId ? ChatSpaceRole.ADMIN : ChatSpaceRole.MEMBER,
+            })),
+          },
+        },
+        include: { _count: { select: { members: true } } },
+      });
+
+      return this.decorateChatSpace(space);
+    } catch (error) {
+      if (this.isDuplicateNameError(error)) {
+        throw new ConflictException('Já existe um espaço com esse nome');
+      }
+      throw error;
+    }
+  }
+
+  private async resolveSpaceMemberIds(
+    orgId: string,
+    creatorId: string,
+    requestedIds?: string[],
+  ): Promise<string[]> {
+    const candidates = [...new Set([creatorId, ...(requestedIds ?? [])])];
+    const memberships = await this.prisma.membership.findMany({
+      where: { orgId, userId: { in: candidates } },
+      select: { userId: true },
     });
+    const allowed = new Set(memberships.map((membership) => membership.userId));
+    allowed.add(creatorId);
+    return candidates.filter((id) => allowed.has(id));
+  }
 
-    return this.decorateChatSpace(space);
+  private isDuplicateNameError(error: unknown): boolean {
+    return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
   }
 
   async updateChatSpace(userId: string, id: string, input: UpdateChatSpaceInput) {
