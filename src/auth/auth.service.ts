@@ -121,7 +121,7 @@ export class AuthService {
       const expiresAt = new Date(Date.now() + RESET_TTL_MS);
       await this.prisma.passwordReset.create({ data: { userId: user.id, token, expiresAt } });
       const frontendUrl = this.config.get<string>('app.frontendUrl') ?? 'http://localhost:3000';
-      await this.mail.sendPasswordReset({
+      void this.mail.sendPasswordReset({
         to: user.email,
         resetUrl: `${frontendUrl}/reset-password?token=${token}`,
       });
@@ -156,7 +156,7 @@ export class AuthService {
       create: { userId, code, expiresAt },
       update: { code, expiresAt },
     });
-    await this.mail.sendEmailVerification({ to: email, code });
+    void this.mail.sendEmailVerification({ to: email, code });
   }
 
   private async issueTokens(userId: string, email: string) {

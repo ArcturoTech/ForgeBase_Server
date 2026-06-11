@@ -79,7 +79,9 @@ export class InvitationsService {
       },
     });
 
-    await this.dispatchInviteEmail(invitation.id, token, email, role, input.orgId, userId);
+    void this.dispatchInviteEmail(invitation.id, token, email, role, input.orgId, userId).catch(
+      () => undefined,
+    );
     return invitation;
   }
 
@@ -185,14 +187,14 @@ export class InvitationsService {
       data: { token, expiresAt },
     });
 
-    await this.dispatchInviteEmail(
+    void this.dispatchInviteEmail(
       updated.id,
       token,
       updated.email,
       updated.role,
       updated.orgId,
       userId,
-    );
+    ).catch(() => undefined);
     return updated;
   }
 
