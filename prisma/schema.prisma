@@ -39,8 +39,37 @@ model User {
   messageReactions MessageReaction[]
   invitationsSent  Invitation[]      @relation("InvitationInviter")
   intakeForms      IntakeForm[]      @relation("IntakeFormCreator")
+  passwordResets   PasswordReset[]
+  emailVerification EmailVerification?
 
   @@map("users")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verifications")
 }
 
 model Subscription {

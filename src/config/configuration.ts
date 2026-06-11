@@ -29,8 +29,9 @@ export default () => ({
     folder: process.env.CLOUDINARY_FOLDER ?? 'forgebase',
   },
   mail: {
-    apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.MAILGUN_DOMAIN,
+    region: process.env.AWS_SES_REGION,
+    accessKeyId: process.env.AWS_SES_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SES_SECRET_ACCESS_KEY,
     from: process.env.MAIL_FROM,
   },
 });

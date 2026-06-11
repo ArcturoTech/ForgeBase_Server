@@ -42,4 +42,32 @@ export class AuthResolver {
     await this.authService.logoutUser(user.id);
     return true;
   }
+
+  @Mutation(() => Boolean)
+  requestPasswordReset(@Args('email') email: string): Promise<boolean> {
+    return this.authService.requestPasswordReset(email);
+  }
+
+  @Mutation(() => Boolean)
+  resetPassword(
+    @Args('token') token: string,
+    @Args('newPassword') newPassword: string,
+  ): Promise<boolean> {
+    return this.authService.resetPassword(token, newPassword);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  verifyEmailOtp(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('code') code: string,
+  ): Promise<boolean> {
+    return this.authService.verifyEmailOtp(user.id, code);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  resendEmailOtp(@CurrentUser() user: AuthenticatedUser): Promise<boolean> {
+    return this.authService.resendEmailOtp(user.id);
+  }
 }

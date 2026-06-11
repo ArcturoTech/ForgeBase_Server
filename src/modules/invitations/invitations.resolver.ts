@@ -2,6 +2,7 @@ import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
 import { Invitation } from './models/invitation.model';
+import { AuthTokens } from '@/auth/models/auth-tokens.model';
 import { InviteToOrganizationInput } from './dto/invite-to-organization.input';
 import { InvitationStatus } from '@/common/graphql/enums';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
@@ -47,6 +48,15 @@ export class InvitationsResolver {
     @Args('token') token: string,
   ): Promise<Invitation> {
     return this.invitationsService.acceptInvitation(user.id, token) as Promise<Invitation>;
+  }
+
+  @Mutation(() => AuthTokens)
+  registerUserFromInvite(
+    @Args('token') token: string,
+    @Args('name') name: string,
+    @Args('password') password: string,
+  ): Promise<AuthTokens> {
+    return this.invitationsService.registerUserFromInvite(token, name, password);
   }
 
   @Mutation(() => Boolean)

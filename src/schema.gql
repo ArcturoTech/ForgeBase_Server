@@ -664,6 +664,7 @@ type Mutation {
   openDirectChannel(orgId: ID!, spaceId: ID!, targetUserId: ID!): Channel!
   refreshToken(token: String!): AuthTokens!
   registerUser(input: RegisterUserInput!): AuthTokens!
+  registerUserFromInvite(name: String!, password: String!, token: String!): AuthTokens!
   removeAttachment(id: ID!): Boolean!
   removeBoard(id: ID!): Boolean!
   removeChatSpace(id: ID!): Boolean!
@@ -685,7 +686,10 @@ type Mutation {
   removeUserAvatar: User!
   removeWebhook(id: ID!): Boolean!
   renewContract(expiresAt: DateTime!, id: ID!): Contract!
+  requestPasswordReset(email: String!): Boolean!
+  resendEmailOtp: Boolean!
   resendInvitation(invitationId: ID!): Invitation!
+  resetPassword(newPassword: String!, token: String!): Boolean!
   resolveDocumentComment(id: ID!, resolved: Boolean!): DocumentComment!
   revealProjectEnvVar(id: ID!): String!
   revokeApiKey(id: ID!): ApiKey!
@@ -717,6 +721,7 @@ type Mutation {
   updateUserPreferences(input: UpdateUserPreferencesInput!): User!
   updateUserProfile(input: UpdateUserProfileInput!): User!
   updateWebhook(input: UpdateWebhookInput!): Webhook!
+  verifyEmailOtp(code: String!): Boolean!
 }
 
 type Notification {

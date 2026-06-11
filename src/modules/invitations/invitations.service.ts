@@ -10,6 +10,7 @@ import { randomBytes } from 'crypto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { MailService } from '@/common/mail/mail.service';
+import { AuthService } from '@/auth/auth.service';
 import { MemberRole, InvitationStatus } from '@/common/graphql/enums';
 import { InviteToOrganizationInput } from './dto/invite-to-organization.input';
 
@@ -22,6 +23,7 @@ export class InvitationsService {
     private readonly tenancy: TenancyService,
     private readonly mail: MailService,
     private readonly config: ConfigService,
+    private readonly auth: AuthService,
   ) {}
 
   async listOrganizationInvitations(
@@ -118,6 +120,45 @@ export class InvitationsService {
       where: { id: invitation.id },
       data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
     });
+  }
+
+  async registerUserFromInvite(token: string, name: string, password: string) {
+    if (!password || password.length < 6) {
+      throw new BadRequestException('A senha deve ter ao menos 6 caracteres');
+    }
+    const invitation = await this.loadPendingInvitation(token);
+
+    const { user, tokens } = await this.auth.registerInvitedUser({
+      name,
+      email: invitation.email,
+      password,
+    });
+
+    await this.prisma.membership.create({
+      data: { orgId: invitation.orgId, userId: user.id, role: invitation.role },
+    });
+    await this.prisma.invitation.update({
+      where: { id: invitation.id },
+      data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
+    });
+
+    return tokens;
+  }
+
+  private async loadPendingInvitation(token: string) {
+    const invitation = await this.prisma.invitation.findUnique({ where: { token } });
+    if (!invitation) throw new NotFoundException('Convite não encontrado');
+    if (invitation.status !== InvitationStatus.PENDING) {
+      throw new BadRequestException('Convite já utilizado ou cancelado');
+    }
+    if (invitation.expiresAt.getTime() < Date.now()) {
+      await this.prisma.invitation.update({
+        where: { id: invitation.id },
+        data: { status: InvitationStatus.EXPIRED },
+      });
+      throw new BadRequestException('Convite expirado');
+    }
+    return invitation;
   }
 
   async revokeInvitation(userId: string, invitationId: string) {
