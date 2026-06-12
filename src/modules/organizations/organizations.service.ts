@@ -172,13 +172,19 @@ export class OrganizationsService {
     const existing = await this.prisma.organization.findUnique({ where: { slug: input.slug } });
     if (existing) throw new ConflictException('Slug já está em uso');
 
-    const organization = await this.prisma.organization.create({
-      data: {
-        name: input.name,
-        slug: input.slug,
-        plan: input.plan,
-        region: input.region,
-      },
+    const organization = await this.prisma.$transaction(async (tx) => {
+      const org = await tx.organization.create({
+        data: {
+          name: input.name,
+          slug: input.slug,
+          plan: input.plan,
+          region: input.region,
+        },
+      });
+      await tx.membership.create({
+        data: { orgId: org.id, userId, role: 'OWNER' },
+      });
+      return org;
     });
 
     await this.activity.recordActivity({
