@@ -15,4 +15,5 @@ export declare class CreateIssueInput {
     goal?: string;
     assigneeIds?: string[];
     labelIds?: string[];
+    standalone?: boolean;
 }

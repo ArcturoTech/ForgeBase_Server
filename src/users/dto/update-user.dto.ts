@@ -12,7 +12,7 @@ export class UpdateUserDto {
   @IsOptional()
   jobTitle?: string;
 
-  @ApiPropertyOptional({ example: 'Construindo a plataforma ForgeBase.' })
+  @ApiPropertyOptional({ example: 'Construindo a plataforma Entur-Forge.' })
   @IsString()
   @IsOptional()
   bio?: string;

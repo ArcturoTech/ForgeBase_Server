@@ -29,6 +29,7 @@ let CreateIssueInput = class CreateIssueInput {
     goal;
     assigneeIds;
     labelIds;
+    standalone;
 };
 exports.CreateIssueInput = CreateIssueInput;
 __decorate([
@@ -116,6 +117,12 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)
 ], CreateIssueInput.prototype, "labelIds", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateIssueInput.prototype, "standalone", void 0);
 exports.CreateIssueInput = CreateIssueInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateIssueInput);

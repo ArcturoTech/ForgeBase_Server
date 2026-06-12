@@ -29,8 +29,9 @@ declare const _default: () => {
         folder: string;
     };
     mail: {
-        apiKey: string | undefined;
-        domain: string | undefined;
+        region: string | undefined;
+        accessKeyId: string | undefined;
+        secretAccessKey: string | undefined;
         from: string | undefined;
     };
 };

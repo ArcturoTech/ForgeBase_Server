@@ -4,6 +4,7 @@ import { Prisma } from "../../prisma/prisma-client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
 import { ActivityService } from "../activity/activity.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateIssueInput } from './dto/create-issue.input';
 import { UpdateIssueInput } from './dto/update-issue.input';
 import { MoveIssueInput } from './dto/move-issue.input';
@@ -20,8 +21,9 @@ export declare class IssuesService {
     private readonly prisma;
     private readonly tenancy;
     private readonly activity;
+    private readonly notifications;
     private readonly pubSub;
-    constructor(prisma: PrismaService, tenancy: TenancyService, activity: ActivityService, pubSub: PubSub);
+    constructor(prisma: PrismaService, tenancy: TenancyService, activity: ActivityService, notifications: NotificationsService, pubSub: PubSub);
     private loadIssueOrThrow;
     private assertValidParent;
     listIssuesByBoard(userId: string, boardId: string): Promise<{
@@ -42,6 +44,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -66,6 +69,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -90,6 +94,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -122,6 +127,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -148,6 +154,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -172,6 +179,32 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
+        reporterId: string | null;
+        epic: string | null;
+        parentId: string | null;
+        dueDate: Date | null;
+        goal: string | null;
+    } | {
+        _deleted: boolean;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        done: boolean;
+        position: number;
+        orgId: string;
+        key: string;
+        type: import("generated/prisma").$Enums.IssueType;
+        description: string | null;
+        title: string;
+        startDate: Date | null;
+        boardId: string;
+        columnId: string;
+        sprintId: string | null;
+        points: number | null;
+        priority: import("generated/prisma").$Enums.Priority;
+        urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -196,6 +229,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -220,6 +254,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -244,6 +279,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -268,6 +304,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -292,6 +329,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -325,6 +363,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -349,6 +388,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -373,6 +413,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;
@@ -397,6 +438,7 @@ export declare class IssuesService {
         points: number | null;
         priority: import("generated/prisma").$Enums.Priority;
         urgent: boolean;
+        standalone: boolean;
         reporterId: string | null;
         epic: string | null;
         parentId: string | null;

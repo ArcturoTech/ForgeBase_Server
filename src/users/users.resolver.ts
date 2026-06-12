@@ -1,7 +1,8 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './models/user.model';
+import { UserProfile } from './models/user-profile.model';
 import { UpdateUserProfileInput } from './dto/update-user-profile.input';
 import { UpdateUserPreferencesInput } from './dto/update-user-preferences.input';
 import { UpdateUserPasswordInput } from './dto/update-user-password.input';
@@ -53,5 +54,25 @@ export class UsersResolver {
   @UseGuards(GqlAuthGuard)
   removeUserAvatar(@CurrentUser() user: AuthenticatedUser): Promise<User> {
     return this.usersService.removeUserAvatar(user.id) as Promise<User>;
+  }
+
+  @Query(() => UserProfile, { nullable: true })
+  @UseGuards(GqlAuthGuard)
+  userProfile(
+    @Args('userId', { type: () => ID }) userId: string,
+  ): Promise<UserProfile> {
+    return this.usersService.findUserProfile(userId) as Promise<UserProfile>;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  revokeAllSessions(@CurrentUser() user: AuthenticatedUser): Promise<boolean> {
+    return this.usersService.revokeAllUserSessions(user.id);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  deleteMyAccount(@CurrentUser() user: AuthenticatedUser): Promise<boolean> {
+    return this.usersService.deleteMyAccount(user.id);
   }
 }

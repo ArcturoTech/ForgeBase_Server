@@ -30,4 +30,28 @@ export declare class SnapshotsService {
         planned: number;
         done: number;
     }[]>;
+    listIssueTypeDistribution(userId: string, projectId: string, sprintIds?: string[]): Promise<{
+        total: number;
+        epic: number;
+        story: number;
+        task: number;
+        bug: number;
+        sprintId: string;
+        sprintNumber: number;
+        label: string;
+    }[]>;
+    listSprintCompletionRate(userId: string, projectId: string): Promise<{
+        sprintId: string;
+        sprintNumber: number;
+        label: string;
+        total: number;
+        done: number;
+        rate: number;
+    }[]>;
+    listSprintThroughput(userId: string, projectId: string): Promise<{
+        sprintId: string;
+        sprintNumber: number;
+        label: string;
+        completedIssues: number;
+    }[]>;
 }

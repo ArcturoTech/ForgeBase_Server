@@ -46,6 +46,9 @@ import { ResourcesModule } from './modules/resources/resources.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
 import { IntakeModule } from './modules/intake/intake.module';
 import { TenancyModule } from './common/tenancy/tenancy.module';
+import { PresenceModule } from './modules/presence/presence.module';
+import { PersonalBoardModule } from './modules/personal-board/personal-board.module';
+import { TimerModule } from './modules/timer/timer.module';
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 
@@ -142,6 +145,9 @@ import { validateEnv } from './config/env.validation';
     ResourcesModule,
     AttachmentsModule,
     IntakeModule,
+    PresenceModule,
+    PersonalBoardModule,
+    TimerModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: GqlThrottlerGuard }],
 })

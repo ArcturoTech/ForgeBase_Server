@@ -20,6 +20,12 @@ let Organization = class Organization {
     status;
     region;
     databaseName;
+    description;
+    website;
+    cnpj;
+    sector;
+    city;
+    state;
     mrrCents;
     trialEndsAt;
     createdAt;
@@ -54,6 +60,30 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], Organization.prototype, "databaseName", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Organization.prototype, "description", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Organization.prototype, "website", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Organization.prototype, "cnpj", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Organization.prototype, "sector", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Organization.prototype, "city", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], Organization.prototype, "state", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int),
     __metadata("design:type", Number)

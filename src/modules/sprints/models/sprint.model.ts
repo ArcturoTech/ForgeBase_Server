@@ -1,5 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { SprintStatus } from '@/common/graphql/enums';
+import { SprintClosureType, SprintStatus } from '@/common/graphql/enums';
 
 @ObjectType()
 export class Sprint {
@@ -20,6 +20,12 @@ export class Sprint {
 
   @Field(() => SprintStatus)
   status: SprintStatus;
+
+  @Field(() => SprintClosureType, { nullable: true })
+  closedAs?: SprintClosureType;
+
+  @Field(() => ID, { nullable: true })
+  parentSprintId?: string;
 
   @Field({ nullable: true })
   startDate?: Date;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResourceType = exports.EnvScope = exports.ChatSpaceRole = exports.ChatSpaceKind = exports.ChannelMemberRole = exports.ChannelType = exports.WebhookStatus = exports.ApiKeyStatus = exports.DocCategory = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.IssueType = exports.SprintStatus = exports.ProjectStatus = exports.InvitationStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
+exports.CloseSprintAction = exports.PersonalSprintStatus = exports.PersonalTaskStatus = exports.PresenceStatus = exports.ResourceType = exports.EnvScope = exports.ChatSpaceRole = exports.ChatSpaceKind = exports.ChannelMemberRole = exports.ChannelType = exports.WebhookStatus = exports.ApiKeyStatus = exports.DocCategory = exports.DocStatus = exports.InvoiceStatus = exports.ContractStatus = exports.DependencyKind = exports.Priority = exports.IssueType = exports.SprintClosureType = exports.SprintStatus = exports.ProjectStatus = exports.InvitationStatus = exports.MemberRole = exports.OrgStatus = exports.OrgPlan = exports.Role = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const prisma_client_1 = require("../../prisma/prisma-client");
 Object.defineProperty(exports, "Role", { enumerable: true, get: function () { return prisma_client_1.Role; } });
@@ -10,6 +10,7 @@ Object.defineProperty(exports, "MemberRole", { enumerable: true, get: function (
 Object.defineProperty(exports, "InvitationStatus", { enumerable: true, get: function () { return prisma_client_1.InvitationStatus; } });
 Object.defineProperty(exports, "ProjectStatus", { enumerable: true, get: function () { return prisma_client_1.ProjectStatus; } });
 Object.defineProperty(exports, "SprintStatus", { enumerable: true, get: function () { return prisma_client_1.SprintStatus; } });
+Object.defineProperty(exports, "SprintClosureType", { enumerable: true, get: function () { return prisma_client_1.SprintClosureType; } });
 Object.defineProperty(exports, "IssueType", { enumerable: true, get: function () { return prisma_client_1.IssueType; } });
 Object.defineProperty(exports, "Priority", { enumerable: true, get: function () { return prisma_client_1.Priority; } });
 Object.defineProperty(exports, "DependencyKind", { enumerable: true, get: function () { return prisma_client_1.DependencyKind; } });
@@ -25,6 +26,15 @@ Object.defineProperty(exports, "ChatSpaceKind", { enumerable: true, get: functio
 Object.defineProperty(exports, "ChatSpaceRole", { enumerable: true, get: function () { return prisma_client_1.ChatSpaceRole; } });
 Object.defineProperty(exports, "EnvScope", { enumerable: true, get: function () { return prisma_client_1.EnvScope; } });
 Object.defineProperty(exports, "ResourceType", { enumerable: true, get: function () { return prisma_client_1.ResourceType; } });
+Object.defineProperty(exports, "PresenceStatus", { enumerable: true, get: function () { return prisma_client_1.PresenceStatus; } });
+Object.defineProperty(exports, "PersonalTaskStatus", { enumerable: true, get: function () { return prisma_client_1.PersonalTaskStatus; } });
+Object.defineProperty(exports, "PersonalSprintStatus", { enumerable: true, get: function () { return prisma_client_1.PersonalSprintStatus; } });
+var CloseSprintAction;
+(function (CloseSprintAction) {
+    CloseSprintAction["MOVE_TO_BACKLOG"] = "MOVE_TO_BACKLOG";
+    CloseSprintAction["MARK_DONE"] = "MARK_DONE";
+    CloseSprintAction["CLOSE_INCOMPLETE"] = "CLOSE_INCOMPLETE";
+})(CloseSprintAction || (exports.CloseSprintAction = CloseSprintAction = {}));
 (0, graphql_1.registerEnumType)(prisma_client_1.Role, { name: 'Role' });
 (0, graphql_1.registerEnumType)(prisma_client_1.OrgPlan, { name: 'OrgPlan' });
 (0, graphql_1.registerEnumType)(prisma_client_1.OrgStatus, { name: 'OrgStatus' });
@@ -32,6 +42,8 @@ Object.defineProperty(exports, "ResourceType", { enumerable: true, get: function
 (0, graphql_1.registerEnumType)(prisma_client_1.InvitationStatus, { name: 'InvitationStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ProjectStatus, { name: 'ProjectStatus' });
 (0, graphql_1.registerEnumType)(prisma_client_1.SprintStatus, { name: 'SprintStatus' });
+(0, graphql_1.registerEnumType)(prisma_client_1.SprintClosureType, { name: 'SprintClosureType' });
+(0, graphql_1.registerEnumType)(CloseSprintAction, { name: 'CloseSprintAction' });
 (0, graphql_1.registerEnumType)(prisma_client_1.IssueType, { name: 'IssueType' });
 (0, graphql_1.registerEnumType)(prisma_client_1.Priority, { name: 'Priority' });
 (0, graphql_1.registerEnumType)(prisma_client_1.DependencyKind, { name: 'DependencyKind' });
@@ -47,4 +59,7 @@ Object.defineProperty(exports, "ResourceType", { enumerable: true, get: function
 (0, graphql_1.registerEnumType)(prisma_client_1.ChatSpaceRole, { name: 'ChatSpaceRole' });
 (0, graphql_1.registerEnumType)(prisma_client_1.EnvScope, { name: 'EnvScope' });
 (0, graphql_1.registerEnumType)(prisma_client_1.ResourceType, { name: 'ResourceType' });
+(0, graphql_1.registerEnumType)(prisma_client_1.PresenceStatus, { name: 'PresenceStatus' });
+(0, graphql_1.registerEnumType)(prisma_client_1.PersonalTaskStatus, { name: 'PersonalTaskStatus' });
+(0, graphql_1.registerEnumType)(prisma_client_1.PersonalSprintStatus, { name: 'PersonalSprintStatus' });
 //# sourceMappingURL=enums.js.map

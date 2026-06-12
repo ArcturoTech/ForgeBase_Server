@@ -10,11 +10,13 @@ exports.DocumentsModule = void 0;
 const common_1 = require("@nestjs/common");
 const documents_resolver_1 = require("./documents.resolver");
 const documents_service_1 = require("./documents.service");
+const notifications_module_1 = require("../notifications/notifications.module");
 let DocumentsModule = class DocumentsModule {
 };
 exports.DocumentsModule = DocumentsModule;
 exports.DocumentsModule = DocumentsModule = __decorate([
     (0, common_1.Module)({
+        imports: [notifications_module_1.NotificationsModule],
         providers: [documents_resolver_1.DocumentsResolver, documents_resolver_1.DocumentCommentResolver, documents_service_1.DocumentsService],
         exports: [documents_service_1.DocumentsService],
     })

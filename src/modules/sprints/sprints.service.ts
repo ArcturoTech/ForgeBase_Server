@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
-import { SprintStatus } from '@/common/graphql/enums';
+import { CloseSprintAction, SprintClosureType, SprintStatus } from '@/common/graphql/enums';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
 import { CreateSprintInput } from './dto/create-sprint.input';
 import { UpdateSprintInput } from './dto/update-sprint.input';
 
@@ -10,6 +11,7 @@ export class SprintsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenancy: TenancyService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async listSprintsByProject(userId: string, projectId: string) {
@@ -113,19 +115,106 @@ export class SprintsService {
   async startSprintById(userId: string, id: string) {
     const sprint = await this.loadSprintOrThrow(id);
     await this.tenancy.assertProjectAccess(userId, sprint.projectId);
-    return this.prisma.sprint.update({
+    const updated = await this.prisma.sprint.update({
       where: { id },
       data: { status: SprintStatus.ACTIVE },
     });
+    void this.fanOutSprintNotification(sprint.projectId, 'SPRINT_STARTED', `Sprint "${sprint.name}" iniciada`);
+    return updated;
   }
 
   async closeSprintById(userId: string, id: string) {
     const sprint = await this.loadSprintOrThrow(id);
     await this.tenancy.assertProjectAccess(userId, sprint.projectId);
-    return this.prisma.sprint.update({
+    const updated = await this.prisma.sprint.update({
       where: { id },
       data: { status: SprintStatus.CLOSED },
     });
+    void this.fanOutSprintNotification(sprint.projectId, 'SPRINT_CLOSED', `Sprint "${sprint.name}" encerrada`);
+    return updated;
+  }
+
+  async getSprintRemainingCount(userId: string, id: string) {
+    const sprint = await this.loadSprintOrThrow(id);
+    await this.tenancy.assertProjectAccess(userId, sprint.projectId);
+    return this.prisma.issue.count({ where: { sprintId: id, done: false } });
+  }
+
+  async closeSprintWithOptions(userId: string, id: string, action: CloseSprintAction) {
+    const sprint = await this.loadSprintOrThrow(id);
+    await this.tenancy.assertProjectAccess(userId, sprint.projectId);
+
+    if (action === CloseSprintAction.MOVE_TO_BACKLOG) {
+      await this.prisma.issue.updateMany({
+        where: { sprintId: id, done: false },
+        data: { sprintId: null },
+      });
+    } else if (action === CloseSprintAction.MARK_DONE) {
+      await this.prisma.issue.updateMany({
+        where: { sprintId: id, done: false },
+        data: { done: true },
+      });
+    }
+
+    const closedAs =
+      action === CloseSprintAction.CLOSE_INCOMPLETE
+        ? SprintClosureType.INCOMPLETE
+        : SprintClosureType.COMPLETE;
+
+    const updated = await this.prisma.sprint.update({
+      where: { id },
+      data: { status: SprintStatus.CLOSED, closedAs },
+    });
+
+    void this.fanOutSprintNotification(sprint.projectId, 'SPRINT_CLOSED', `Sprint "${sprint.name}" encerrada`);
+    return updated;
+  }
+
+  async restartSprint(userId: string, id: string) {
+    const sprint = await this.loadSprintOrThrow(id);
+    await this.tenancy.assertProjectAccess(userId, sprint.projectId);
+
+    if (sprint.status !== SprintStatus.CLOSED) {
+      throw new BadRequestException('Apenas sprints encerradas podem ser reiniciadas');
+    }
+
+    const lastSprint = await this.prisma.sprint.findFirst({
+      where: { projectId: sprint.projectId },
+      orderBy: { number: 'desc' },
+      select: { number: true },
+    });
+
+    return this.prisma.sprint.create({
+      data: {
+        projectId: sprint.projectId,
+        parentSprintId: id,
+        number: (lastSprint?.number ?? sprint.number) + 1,
+        name: `${sprint.name} (Reinício)`,
+        targetPoints: sprint.targetPoints,
+      },
+    });
+  }
+
+  private async fanOutSprintNotification(projectId: string, type: string, title: string) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { orgId: true },
+    });
+    if (!project) return;
+    const members = await this.prisma.projectMember.findMany({
+      where: { projectId },
+      select: { userId: true },
+    });
+    await Promise.all(
+      members.map((m) =>
+        this.notifications.createNotificationInternal({
+          orgId: project.orgId,
+          userId: m.userId,
+          type,
+          title,
+        }),
+      ),
+    );
   }
 
   private async loadSprintOrThrow(id: string) {

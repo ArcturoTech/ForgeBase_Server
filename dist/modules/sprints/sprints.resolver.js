@@ -22,6 +22,7 @@ const sprint_summary_model_1 = require("./models/sprint-summary.model");
 const issue_model_1 = require("../issues/models/issue.model");
 const create_sprint_input_1 = require("./dto/create-sprint.input");
 const update_sprint_input_1 = require("./dto/update-sprint.input");
+const close_sprint_with_options_input_1 = require("./dto/close-sprint-with-options.input");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 let SprintsResolver = class SprintsResolver {
@@ -54,6 +55,15 @@ let SprintsResolver = class SprintsResolver {
     }
     closeSprint(user, id) {
         return this.sprintsService.closeSprintById(user.id, id);
+    }
+    getSprintRemainingCount(user, id) {
+        return this.sprintsService.getSprintRemainingCount(user.id, id);
+    }
+    closeSprintWithOptions(user, input) {
+        return this.sprintsService.closeSprintWithOptions(user.id, input.id, input.action);
+    }
+    restartSprint(user, id) {
+        return this.sprintsService.restartSprint(user.id, id);
     }
     issues(sprint) {
         return this.issuesService.listIssuesBySprint(sprint.id);
@@ -132,6 +142,33 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], SprintsResolver.prototype, "closeSprint", null);
+__decorate([
+    (0, graphql_1.Query)(() => graphql_1.Int),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SprintsResolver.prototype, "getSprintRemainingCount", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => sprint_model_1.Sprint),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, close_sprint_with_options_input_1.CloseSprintWithOptionsInput]),
+    __metadata("design:returntype", Promise)
+], SprintsResolver.prototype, "closeSprintWithOptions", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => sprint_model_1.Sprint),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SprintsResolver.prototype, "restartSprint", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [issue_model_1.Issue]),
     __param(0, (0, graphql_1.Parent)()),

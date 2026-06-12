@@ -19,6 +19,8 @@ let Sprint = class Sprint {
     name;
     code;
     status;
+    closedAs;
+    parentSprintId;
     startDate;
     endDate;
     totalPoints;
@@ -50,6 +52,14 @@ __decorate([
     (0, graphql_1.Field)(() => enums_1.SprintStatus),
     __metadata("design:type", String)
 ], Sprint.prototype, "status", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => enums_1.SprintClosureType, { nullable: true }),
+    __metadata("design:type", String)
+], Sprint.prototype, "closedAs", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    __metadata("design:type", String)
+], Sprint.prototype, "parentSprintId", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", Date)

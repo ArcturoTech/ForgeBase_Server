@@ -2,6 +2,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
 import { CreateNotificationInput } from './dto/create-notification.input';
+import { UpdateNotificationPrefsInput } from './dto/update-notification-prefs.input';
 export declare const NOTIFICATION_EVENTS: {
     readonly received: "notificationReceived";
 };
@@ -41,5 +42,31 @@ export declare class NotificationsService {
         type: string;
         title: string;
         read: boolean;
+    }>;
+    createNotificationInternal(input: Omit<CreateNotificationInput, never>): Promise<{
+        id: string;
+        createdAt: Date;
+        body: string | null;
+        orgId: string;
+        userId: string;
+        type: string;
+        title: string;
+        read: boolean;
+    }>;
+    findNotificationPreferencesByUserId(userId: string): Promise<{
+        userId: string;
+        leadAssigned: boolean;
+        dealUpdate: boolean;
+        taskDue: boolean;
+        chatMessage: boolean;
+        weeklyDigest: boolean;
+    }>;
+    updateNotificationPreferencesByUserId(userId: string, input: UpdateNotificationPrefsInput): Promise<{
+        userId: string;
+        leadAssigned: boolean;
+        dealUpdate: boolean;
+        taskDue: boolean;
+        chatMessage: boolean;
+        weeklyDigest: boolean;
     }>;
 }

@@ -27,6 +27,11 @@ export declare class UsersController {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -41,6 +46,11 @@ export declare class UsersController {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -55,6 +65,11 @@ export declare class UsersController {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;

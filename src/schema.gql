@@ -107,6 +107,7 @@ type Channel {
   id: ID!
   lastMessage: Message
   members: [ChannelMember!]
+  muted: Boolean!
   name: String
   orgId: String!
   spaceId: String
@@ -120,6 +121,7 @@ type ChannelMember {
   createdAt: DateTime!
   id: ID!
   lastReadAt: DateTime
+  mutedAt: DateTime
   role: ChannelMemberRole!
   user: User
   userId: String!
@@ -165,6 +167,28 @@ type ChatSpaceMember {
 enum ChatSpaceRole {
   ADMIN
   MEMBER
+}
+
+enum ClosePersonalSprintAction {
+  CLOSE_INCOMPLETE
+  MARK_DONE
+  MOVE_TO_BACKLOG
+}
+
+input ClosePersonalSprintInput {
+  action: ClosePersonalSprintAction
+  sprintId: ID!
+}
+
+enum CloseSprintAction {
+  CLOSE_INCOMPLETE
+  MARK_DONE
+  MOVE_TO_BACKLOG
+}
+
+input CloseSprintWithOptionsInput {
+  action: CloseSprintAction!
+  id: ID!
 }
 
 type Column {
@@ -239,6 +263,7 @@ input CreateContractInput {
 
 input CreateDocumentInput {
   category: DocCategory
+  isFolder: Boolean
   orgId: ID!
   parentId: ID
   projectId: ID
@@ -279,6 +304,7 @@ input CreateIssueInput {
   points: Int
   priority: Priority
   sprintId: ID
+  standalone: Boolean
   startDate: DateTime
   title: String!
   type: IssueType
@@ -297,6 +323,22 @@ input CreateOrganizationInput {
   plan: OrgPlan
   region: String
   slug: String!
+}
+
+input CreatePersonalSprintInput {
+  endDate: DateTime
+  name: String!
+  orgId: ID!
+  startDate: DateTime
+  targetPoints: Int
+}
+
+input CreatePersonalTaskInput {
+  dueDate: DateTime
+  orgId: ID!
+  priority: Priority
+  status: PersonalTaskStatus
+  title: String!
 }
 
 input CreateProjectEnvVarInput {
@@ -368,6 +410,8 @@ type Document {
   comments: [DocumentComment!]!
   createdAt: DateTime!
   id: ID!
+  isFolder: Boolean!
+  isPrivate: Boolean!
   orgId: String!
   parentId: String
   projectId: String
@@ -385,6 +429,14 @@ type DocumentComment {
   documentId: String!
   id: ID!
   resolved: Boolean!
+}
+
+type DocumentShare {
+  createdAt: DateTime!
+  documentId: String!
+  grantedById: String!
+  id: ID!
+  sharedWithUserId: String!
 }
 
 type EnvFileExport {
@@ -513,6 +565,7 @@ type Issue {
   priority: Priority!
   reporterId: String
   sprintId: String
+  standalone: Boolean!
   startDate: DateTime
   subtasks: [Subtask!]!
   title: String!
@@ -629,7 +682,9 @@ type Mutation {
   addSubtaskToIssue(input: AddSubtaskInput!): Subtask!
   assignIssueToSprint(input: AssignIssueToSprintInput!): Issue!
   assignUserToIssue(input: AssignUserToIssueInput!): Issue!
+  closePersonalSprint(input: ClosePersonalSprintInput!): PersonalSprint!
   closeSprint(id: ID!): Sprint!
+  closeSprintWithOptions(input: CloseSprintWithOptionsInput!): Sprint!
   createApiKey(input: CreateApiKeyInput!): ApiKey!
   createBoard(input: CreateBoardInput!): Board!
   createChatSpace(input: CreateChatSpaceInput!): ChatSpace!
@@ -641,11 +696,14 @@ type Mutation {
   createIssue(input: CreateIssueInput!): Issue!
   createNotification(input: CreateNotificationInput!): Notification!
   createOrganization(input: CreateOrganizationInput!): Organization!
+  createPersonalSprint(input: CreatePersonalSprintInput!): PersonalSprint!
+  createPersonalTask(input: CreatePersonalTaskInput!): PersonalTask!
   createProject(input: CreateProjectInput!): Project!
   createProjectEnvVar(input: CreateProjectEnvVarInput!): ProjectEnvVar!
   createProjectResource(input: CreateProjectResourceInput!): ProjectResource!
   createSprint(input: CreateSprintInput!): Sprint!
   createWebhook(input: CreateWebhookInput!): Webhook!
+  deleteMyAccount: Boolean!
   editMessage(body: String!, id: ID!): Message!
   exportProjectEnvFile(projectId: ID!, scope: EnvScope!): String!
   exportProjectEnvFilesByCategory(categories: [String!]!, projectId: ID!, scope: EnvScope!): [EnvFileExport!]!
@@ -662,6 +720,7 @@ type Mutation {
   markNotificationRead(id: ID!): Notification!
   moveIssue(input: MoveIssueInput!): Issue!
   openDirectChannel(orgId: ID!, spaceId: ID!, targetUserId: ID!): Channel!
+  pingUser(input: PingUserInput!): Boolean!
   refreshToken(token: String!): AuthTokens!
   registerUser(input: RegisterUserInput!): AuthTokens!
   registerUserFromInvite(name: String!, password: String!, token: String!): AuthTokens!
@@ -677,6 +736,8 @@ type Mutation {
   removeMember(membershipId: ID!): Boolean!
   removeMessage(id: ID!): Boolean!
   removeNotification(id: ID!): Boolean!
+  removePersonalSprint(sprintId: ID!): Boolean!
+  removePersonalTask(id: ID!): Boolean!
   removeProject(id: ID!): Boolean!
   removeProjectEnvVar(id: ID!): Boolean!
   removeProjectMember(input: RemoveProjectMemberInput!): Boolean!
@@ -691,13 +752,22 @@ type Mutation {
   resendInvitation(invitationId: ID!): Invitation!
   resetPassword(newPassword: String!, token: String!): Boolean!
   resolveDocumentComment(id: ID!, resolved: Boolean!): DocumentComment!
+  restartPersonalSprint(sprintId: ID!): PersonalSprint!
+  restartSprint(id: ID!): Sprint!
   revealProjectEnvVar(id: ID!): String!
+  revokeAllSessions: Boolean!
   revokeApiKey(id: ID!): ApiKey!
   revokeInvitation(invitationId: ID!): Boolean!
   sendInvoice(id: ID!): Invoice!
   sendMessage(input: SendMessageInput!): Message!
+  setDocumentPrivacy(documentId: ID!, isPrivate: Boolean!): Document!
+  setMyStatus(input: SetStatusInput!): UserStatus!
   setProjectIntakeFormActive(active: Boolean!, projectId: ID!): IntakeForm!
+  shareDocument(documentId: ID!, targetUserId: ID!): DocumentShare!
+  startPersonalSprint(sprintId: ID!): PersonalSprint!
   startSprint(id: ID!): Sprint!
+  startTimer(input: StartTimerInput!): TimeEntry!
+  stopTimer: TimeEntry!
   submitIntakeForm(input: SubmitIntakeFormInput!, token: String!): IntakeSubmissionResult!
   toggleFeatureFlag(key: String!, orgId: ID!): FeatureFlag!
   toggleSubtask(subtaskId: ID!): Subtask!
@@ -708,10 +778,14 @@ type Mutation {
   updateColumn(input: UpdateColumnInput!): Column!
   updateContract(input: UpdateContractInput!): Contract!
   updateDocument(input: UpdateDocumentInput!): Document!
+  updateGroupChannel(input: UpdateGroupChannelInput!): Channel!
   updateInvoice(input: UpdateInvoiceInput!): Invoice!
   updateIssue(input: UpdateIssueInput!): Issue!
   updateMemberRole(membershipId: ID!, role: MemberRole!): Member!
+  updateNotificationPreferences(input: UpdateNotificationPrefsInput!): NotificationPreference!
   updateOrganization(input: UpdateOrganizationInput!): Organization!
+  updatePersonalSprint(input: UpdatePersonalSprintInput!): PersonalSprint!
+  updatePersonalTask(input: UpdatePersonalTaskInput!): PersonalTask!
   updateProject(input: UpdateProjectInput!): Project!
   updateProjectEnvVar(input: UpdateProjectEnvVarInput!): ProjectEnvVar!
   updateProjectMember(input: UpdateProjectMemberInput!): ProjectMember!
@@ -735,6 +809,15 @@ type Notification {
   userId: String!
 }
 
+type NotificationPreference {
+  chatMessage: Boolean!
+  dealUpdate: Boolean!
+  leadAssigned: Boolean!
+  taskDue: Boolean!
+  userId: ID!
+  weeklyDigest: Boolean!
+}
+
 enum OrgPlan {
   SCALE
   STARTER
@@ -749,17 +832,23 @@ enum OrgStatus {
 }
 
 type Organization {
+  city: String
+  cnpj: String
   createdAt: DateTime!
   databaseName: String
+  description: String
   id: ID!
   mrrCents: Int!
   name: String!
   plan: OrgPlan!
   region: String!
+  sector: String
   slug: String!
+  state: String
   status: OrgStatus!
   trialEndsAt: DateTime
   updatedAt: DateTime!
+  website: String
 }
 
 type OrganizationUsage {
@@ -810,6 +899,69 @@ input PaginationInput {
   search: String
 }
 
+type PersonalSprint {
+  createdAt: DateTime!
+  endDate: DateTime
+  id: ID!
+  name: String!
+  parentSprintId: String
+  startDate: DateTime
+  status: PersonalSprintStatus!
+  targetPoints: Int
+  updatedAt: DateTime!
+}
+
+type PersonalSprintSnapshot {
+  capturedOn: DateTime!
+  completedTasks: Int!
+  id: ID!
+  remainingTasks: Int!
+  sprintId: String!
+  totalTasks: Int!
+}
+
+enum PersonalSprintStatus {
+  ACTIVE
+  CLOSED
+  INCOMPLETE
+  PLANNING
+}
+
+type PersonalTask {
+  columnKey: String!
+  createdAt: DateTime!
+  dueDate: DateTime
+  id: ID!
+  isSprintMapped: Boolean!
+  position: Int!
+  priority: Priority!
+  sprint: PersonalSprint
+  sprintId: String
+  status: PersonalTaskStatus!
+  title: String!
+  updatedAt: DateTime!
+}
+
+enum PersonalTaskStatus {
+  DONE
+  IN_PROGRESS
+  TODO
+}
+
+type PersonalVelocityPoint {
+  completedTasks: Int!
+  endDate: DateTime
+  name: String!
+  sprintId: String!
+  startDate: DateTime
+  totalTasks: Int!
+}
+
+input PingUserInput {
+  orgId: ID!
+  targetUserId: ID!
+}
+
 type PlatformStats {
   activeOrganizations: Int!
   suspendedOrganizations: Int!
@@ -817,6 +969,14 @@ type PlatformStats {
   totalOrganizations: Int!
   totalUsers: Int!
   trialOrganizations: Int!
+}
+
+enum PresenceStatus {
+  BUSY
+  HIBERNATING
+  LUNCH
+  OFFLINE
+  ONLINE
 }
 
 enum Priority {
@@ -893,6 +1053,7 @@ type PublicIntakeForm {
 }
 
 type Query {
+  activeTimer: TimeEntry
   findActiveOrganization: Organization
   findActiveSprintSummary(orgId: ID!): SprintSummary
   findBoardById(id: ID!): Board!
@@ -903,6 +1064,7 @@ type Query {
   findIntegrationStats(orgId: ID!): IntegrationStats!
   findInvoiceById(id: ID!): Invoice!
   findIssueById(id: ID!): Issue!
+  findMyNotificationPreferences: NotificationPreference!
   findMyProfile: User!
   findOrganizationBySlug(slug: String!): Organization!
   findOrganizationUsage(orgId: ID!): OrganizationUsage!
@@ -912,6 +1074,7 @@ type Query {
   findRevenueSummary(orgId: ID!): RevenueSummary!
   findSprintById(id: ID!): Sprint!
   findWeeklyReport(orgId: ID!, weekStart: DateTime): WeeklyReport!
+  getSprintRemainingCount(id: ID!): Int!
   intakeFormByToken(token: String!): PublicIntakeForm!
   invitationByToken(token: String!): Invitation!
   listActivityByIssue(issueId: ID!): [Activity!]!
@@ -923,8 +1086,10 @@ type Query {
   listChannelsBySpace(spaceId: ID!): [Channel!]!
   listChatSpaceMembers(spaceId: ID!): [ChatSpaceMember!]!
   listContracts(orgId: ID!, pagination: PaginationInput!): PaginatedContracts!
+  listDocumentChildren(orgId: ID!, parentId: ID!): [Document!]!
   listDocuments(orgId: ID!): [Document!]!
   listDocumentsByProject(projectId: ID!): [Document!]!
+  listDocumentsSharedWithMe(orgId: ID!): [Document!]!
   listEpicsByProject(projectId: ID!): [Issue!]!
   listExpiringContracts(orgId: ID!): [Contract!]!
   listFeatureFlags(orgId: ID!): [FeatureFlag!]!
@@ -936,24 +1101,36 @@ type Query {
   listMyAssignedIssues: [Issue!]!
   listMyChannels(orgId: ID!): [Channel!]!
   listMyChatSpaces(orgId: ID!): [ChatSpace!]!
+  listMyDocuments(orgId: ID!): [Document!]!
   listMyOrganizations: [Organization!]!
   listNotifications(orgId: ID!): [Notification!]!
   listOrganizationInvitations(orgId: ID!, status: InvitationStatus): [Invitation!]!
   listOrganizations(pagination: PaginationInput!): PaginatedOrganizations!
   listOrganizationsForAdmin(pagination: PaginationInput!): PaginatedAdminOrgRows!
+  listPersonalSprintSnapshots(sprintId: ID!): [PersonalSprintSnapshot!]!
+  listPersonalSprints(orgId: ID!): [PersonalSprint!]!
+  listPersonalTasks(orgId: ID!): [PersonalTask!]!
+  listPersonalVelocityData(orgId: ID!): [PersonalVelocityPoint!]!
   listProjectEnvVars(projectId: ID!): [ProjectEnvVar!]!
   listProjectMembers(projectId: ID!): [ProjectMember!]!
   listProjectMilestones(projectId: ID!): [Milestone!]!
   listProjectResources(projectId: ID!): [ProjectResource!]!
   listProjects(orgId: ID!): [Project!]!
+  listPublicDocuments(orgId: ID!): [Document!]!
+  listRootDocuments(orgId: ID!): [Document!]!
   listSprintBurndown(sprintId: ID!): [SprintSnapshot!]!
+  listSprintCompletionRate(projectId: ID!): [SprintCompletionRate!]!
   listSprintMemberLoad(sprintId: ID!): [SprintMemberLoad!]!
   listSprintTagComposition(sprintId: ID!): [SprintTagSlice!]!
+  listSprintThroughput(projectId: ID!): [SprintThroughput!]!
+  listSprintTypeDistribution(projectId: ID!, sprintIds: [ID!]): [SprintTypeDistribution!]!
   listSprintVelocity(projectId: ID!): [VelocityPoint!]!
   listSprintsByProject(projectId: ID!): [Sprint!]!
   listWebhookDeliveries(webhookId: ID!): [WebhookDelivery!]!
   listWebhooks(orgId: ID!): [Webhook!]!
+  orgMemberStatuses(orgId: ID!): [UserStatus!]!
   projectIntakeForm(projectId: ID!): IntakeForm
+  userProfile(userId: ID!): UserProfile
 }
 
 type ReactionChangedEvent {
@@ -1011,7 +1188,15 @@ input SendMessageInput {
   replyToId: ID
 }
 
+input SetStatusInput {
+  customText: String
+  emoji: String
+  isManual: Boolean
+  status: PresenceStatus!
+}
+
 type Sprint {
+  closedAs: SprintClosureType
   code: String
   createdAt: DateTime!
   endDate: DateTime
@@ -1019,11 +1204,26 @@ type Sprint {
   issues: [Issue!]!
   name: String!
   number: Int!
+  parentSprintId: ID
   projectId: String!
   startDate: DateTime
   status: SprintStatus!
   targetPoints: Int
   totalPoints: Int!
+}
+
+enum SprintClosureType {
+  COMPLETE
+  INCOMPLETE
+}
+
+type SprintCompletionRate {
+  done: Int!
+  label: String!
+  rate: Float!
+  sprintId: ID!
+  sprintNumber: Int!
+  total: Int!
 }
 
 type SprintMemberLoad {
@@ -1067,6 +1267,29 @@ type SprintTagSlice {
   tag: String!
 }
 
+type SprintThroughput {
+  completedIssues: Int!
+  label: String!
+  sprintId: ID!
+  sprintNumber: Int!
+}
+
+type SprintTypeDistribution {
+  bug: Int!
+  epic: Int!
+  label: String!
+  sprintId: ID!
+  sprintNumber: Int!
+  story: Int!
+  task: Int!
+  total: Int!
+}
+
+input StartTimerInput {
+  issueId: ID
+  orgId: ID!
+}
+
 input SubmitIntakeFormInput {
   attachmentIds: [ID!]
   company: String
@@ -1080,6 +1303,7 @@ input SubmitIntakeFormInput {
 
 type Subscription {
   activityRecorded(orgId: ID!): Activity!
+  channelUpdated(channelId: ID!): Channel!
   issueCommented(boardId: ID!): Issue!
   issueCreated(boardId: ID!): Issue!
   issueMoved(boardId: ID!): Issue!
@@ -1089,6 +1313,7 @@ type Subscription {
   messageReceived(channelId: ID!): Message!
   notificationReceived(userId: ID!): Notification!
   reactionChanged(channelId: ID!): ReactionChangedEvent!
+  userStatusChanged(orgId: ID!): UserStatus!
 }
 
 type Subtask {
@@ -1097,6 +1322,16 @@ type Subtask {
   issueId: String!
   label: String!
   position: Int!
+}
+
+type TimeEntry {
+  duration: Int
+  id: ID!
+  issueId: String
+  orgId: String!
+  startedAt: DateTime!
+  stoppedAt: DateTime
+  userId: String!
 }
 
 input UpdateBoardInput {
@@ -1136,6 +1371,13 @@ input UpdateDocumentInput {
   version: Int
 }
 
+input UpdateGroupChannelInput {
+  channelId: ID!
+  description: String
+  muted: Boolean
+  name: String
+}
+
 input UpdateInvoiceInput {
   amountCents: Int
   clientName: String
@@ -1161,14 +1403,47 @@ input UpdateIssueInput {
   urgent: Boolean
 }
 
+input UpdateNotificationPrefsInput {
+  chatMessage: Boolean
+  dealUpdate: Boolean
+  leadAssigned: Boolean
+  taskDue: Boolean
+  weeklyDigest: Boolean
+}
+
 input UpdateOrganizationInput {
+  city: String
+  cnpj: String
+  description: String
   id: ID!
   mrrCents: Int
   name: String
   plan: OrgPlan
   region: String
+  sector: String
   slug: String
+  state: String
   status: OrgStatus
+  website: String
+}
+
+input UpdatePersonalSprintInput {
+  endDate: DateTime
+  id: ID!
+  name: String
+  startDate: DateTime
+  targetPoints: Int
+}
+
+input UpdatePersonalTaskInput {
+  columnKey: String
+  dueDate: DateTime
+  id: ID!
+  position: Int
+  priority: Priority
+  sprintId: String
+  status: PersonalTaskStatus
+  title: String
 }
 
 input UpdateProjectEnvVarInput {
@@ -1222,14 +1497,19 @@ input UpdateUserPasswordInput {
 }
 
 input UpdateUserPreferencesInput {
+  currency: String
+  dateFormat: String
   locale: String
   theme: String
+  timezone: String
 }
 
 input UpdateUserProfileInput {
   bio: String
   jobTitle: String
+  linkedIn: String
   name: String
+  phone: String
 }
 
 input UpdateWebhookInput {
@@ -1243,15 +1523,39 @@ type User {
   avatarUrl: String
   bio: String
   createdAt: DateTime!
+  currency: String!
+  dateFormat: String!
   email: String!
   emailVerified: Boolean!
   id: ID!
   jobTitle: String
+  linkedIn: String
   locale: String!
   name: String
+  phone: String
   role: Role!
   theme: String!
+  timezone: String!
   updatedAt: DateTime!
+}
+
+type UserProfile {
+  avatarUrl: String
+  bio: String
+  createdAt: DateTime!
+  id: ID!
+  jobTitle: String
+  name: String
+  userStatus: UserStatus
+}
+
+type UserStatus {
+  customText: String
+  emoji: String
+  isManual: Boolean!
+  setAt: DateTime!
+  status: PresenceStatus!
+  userId: ID!
 }
 
 type VelocityPoint {

@@ -4,6 +4,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { PUB_SUB } from '@/common/pubsub/pubsub.module';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { CreateNotificationInput } from './dto/create-notification.input';
+import { UpdateNotificationPrefsInput } from './dto/update-notification-prefs.input';
 
 export const NOTIFICATION_EVENTS = {
   received: 'notificationReceived',
@@ -60,6 +61,10 @@ export class NotificationsService {
 
   async createNotification(userId: string, input: CreateNotificationInput) {
     await this.tenancy.assertOrgMembership(userId, input.orgId);
+    return this.createNotificationInternal(input);
+  }
+
+  async createNotificationInternal(input: Omit<CreateNotificationInput, never>) {
     const notification = await this.prisma.notification.create({
       data: {
         orgId: input.orgId,
@@ -74,5 +79,21 @@ export class NotificationsService {
       userId: notification.userId,
     });
     return notification;
+  }
+
+  async findNotificationPreferencesByUserId(userId: string) {
+    return this.prisma.notificationPreference.upsert({
+      where: { userId },
+      create: { userId },
+      update: {},
+    });
+  }
+
+  async updateNotificationPreferencesByUserId(userId: string, input: UpdateNotificationPrefsInput) {
+    return this.prisma.notificationPreference.upsert({
+      where: { userId },
+      create: { userId, ...input },
+      update: input,
+    });
   }
 }

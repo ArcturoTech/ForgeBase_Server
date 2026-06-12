@@ -31,6 +31,7 @@ let Issue = class Issue {
     position;
     urgent;
     done;
+    standalone;
     epic;
     parentId;
     startDate;
@@ -102,6 +103,10 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], Issue.prototype, "done", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", Boolean)
+], Issue.prototype, "standalone", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)

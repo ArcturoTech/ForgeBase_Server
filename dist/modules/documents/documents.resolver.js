@@ -17,6 +17,7 @@ const graphql_1 = require("@nestjs/graphql");
 const common_1 = require("@nestjs/common");
 const documents_service_1 = require("./documents.service");
 const document_model_1 = require("./models/document.model");
+const document_share_model_1 = require("./models/document-share.model");
 const document_comment_model_1 = require("./models/document-comment.model");
 const create_document_input_1 = require("./dto/create-document.input");
 const update_document_input_1 = require("./dto/update-document.input");
@@ -54,6 +55,27 @@ let DocumentsResolver = class DocumentsResolver {
     }
     resolveDocumentComment(user, id, resolved) {
         return this.documentsService.resolveDocumentComment(user.id, id, resolved);
+    }
+    listPublicDocuments(user, orgId) {
+        return this.documentsService.listPublicDocuments(user.id, orgId);
+    }
+    listMyDocuments(user, orgId) {
+        return this.documentsService.listMyDocuments(user.id, orgId);
+    }
+    listDocumentsSharedWithMe(user, orgId) {
+        return this.documentsService.listDocumentsSharedWithMe(user.id, orgId);
+    }
+    listRootDocuments(user, orgId) {
+        return this.documentsService.listRootDocuments(user.id, orgId);
+    }
+    listDocumentChildren(user, orgId, parentId) {
+        return this.documentsService.listDocumentChildren(user.id, orgId, parentId);
+    }
+    shareDocument(user, documentId, targetUserId) {
+        return this.documentsService.shareDocument(user.id, documentId, targetUserId);
+    }
+    setDocumentPrivacy(user, documentId, isPrivate) {
+        return this.documentsService.setDocumentPrivacy(user.id, documentId, isPrivate);
     }
     comments(document) {
         return this.documentsService.listCommentsByDocument(document.id);
@@ -143,6 +165,72 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Boolean]),
     __metadata("design:returntype", Promise)
 ], DocumentsResolver.prototype, "resolveDocumentComment", null);
+__decorate([
+    (0, graphql_1.Query)(() => [document_model_1.Document]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('orgId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "listPublicDocuments", null);
+__decorate([
+    (0, graphql_1.Query)(() => [document_model_1.Document]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('orgId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "listMyDocuments", null);
+__decorate([
+    (0, graphql_1.Query)(() => [document_model_1.Document]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('orgId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "listDocumentsSharedWithMe", null);
+__decorate([
+    (0, graphql_1.Query)(() => [document_model_1.Document]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('orgId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "listRootDocuments", null);
+__decorate([
+    (0, graphql_1.Query)(() => [document_model_1.Document]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('orgId', { type: () => graphql_1.ID })),
+    __param(2, (0, graphql_1.Args)('parentId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "listDocumentChildren", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => document_share_model_1.DocumentShare),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('documentId', { type: () => graphql_1.ID })),
+    __param(2, (0, graphql_1.Args)('targetUserId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "shareDocument", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => document_model_1.Document),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('documentId', { type: () => graphql_1.ID })),
+    __param(2, (0, graphql_1.Args)('isPrivate')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Boolean]),
+    __metadata("design:returntype", Promise)
+], DocumentsResolver.prototype, "setDocumentPrivacy", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [document_comment_model_1.DocumentComment]),
     __param(0, (0, graphql_1.Parent)()),

@@ -25,6 +25,8 @@ let Document = class Document {
     status;
     category;
     body;
+    isPrivate;
+    isFolder;
     createdAt;
     updatedAt;
     comments;
@@ -70,6 +72,14 @@ __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
     __metadata("design:type", Object)
 ], Document.prototype, "body", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: false }),
+    __metadata("design:type", Boolean)
+], Document.prototype, "isPrivate", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: false }),
+    __metadata("design:type", Boolean)
+], Document.prototype, "isFolder", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)

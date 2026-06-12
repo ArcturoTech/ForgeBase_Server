@@ -33,6 +33,21 @@ export class User {
   @Field()
   locale: string;
 
+  @Field({ nullable: true })
+  phone?: string;
+
+  @Field({ nullable: true })
+  linkedIn?: string;
+
+  @Field()
+  timezone: string;
+
+  @Field()
+  dateFormat: string;
+
+  @Field()
+  currency: string;
+
   @Field()
   createdAt: Date;
 

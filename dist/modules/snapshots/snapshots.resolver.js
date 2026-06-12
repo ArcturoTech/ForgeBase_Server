@@ -20,6 +20,9 @@ const sprint_snapshot_model_1 = require("./models/sprint-snapshot.model");
 const velocity_point_model_1 = require("./models/velocity-point.model");
 const sprint_tag_slice_model_1 = require("./models/sprint-tag-slice.model");
 const sprint_member_load_model_1 = require("./models/sprint-member-load.model");
+const sprint_type_distribution_model_1 = require("./models/sprint-type-distribution.model");
+const sprint_completion_rate_model_1 = require("./models/sprint-completion-rate.model");
+const sprint_throughput_model_1 = require("./models/sprint-throughput.model");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 let SnapshotsResolver = class SnapshotsResolver {
@@ -38,6 +41,15 @@ let SnapshotsResolver = class SnapshotsResolver {
     }
     listSprintMemberLoad(user, sprintId) {
         return this.snapshotsService.listSprintMemberLoad(user.id, sprintId);
+    }
+    listSprintTypeDistribution(user, projectId, sprintIds) {
+        return this.snapshotsService.listIssueTypeDistribution(user.id, projectId, sprintIds);
+    }
+    listSprintCompletionRate(user, projectId) {
+        return this.snapshotsService.listSprintCompletionRate(user.id, projectId);
+    }
+    listSprintThroughput(user, projectId) {
+        return this.snapshotsService.listSprintThroughput(user.id, projectId);
     }
 };
 exports.SnapshotsResolver = SnapshotsResolver;
@@ -77,6 +89,34 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], SnapshotsResolver.prototype, "listSprintMemberLoad", null);
+__decorate([
+    (0, graphql_1.Query)(() => [sprint_type_distribution_model_1.SprintTypeDistribution]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
+    __param(2, (0, graphql_1.Args)('sprintIds', { type: () => [graphql_1.ID], nullable: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Array]),
+    __metadata("design:returntype", Promise)
+], SnapshotsResolver.prototype, "listSprintTypeDistribution", null);
+__decorate([
+    (0, graphql_1.Query)(() => [sprint_completion_rate_model_1.SprintCompletionRate]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SnapshotsResolver.prototype, "listSprintCompletionRate", null);
+__decorate([
+    (0, graphql_1.Query)(() => [sprint_throughput_model_1.SprintThroughput]),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SnapshotsResolver.prototype, "listSprintThroughput", null);
 exports.SnapshotsResolver = SnapshotsResolver = __decorate([
     (0, graphql_1.Resolver)(),
     __metadata("design:paramtypes", [snapshots_service_1.SnapshotsService])

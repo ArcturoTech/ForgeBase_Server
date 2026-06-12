@@ -12,6 +12,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { PUB_SUB } from '@/common/pubsub/pubsub.module';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { ActivityService } from '@/modules/activity/activity.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
 import { CreateIssueInput } from './dto/create-issue.input';
 import { UpdateIssueInput } from './dto/update-issue.input';
 import { MoveIssueInput } from './dto/move-issue.input';
@@ -34,6 +35,7 @@ export class IssuesService {
     private readonly prisma: PrismaService,
     private readonly tenancy: TenancyService,
     private readonly activity: ActivityService,
+    private readonly notifications: NotificationsService,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
@@ -82,6 +84,7 @@ export class IssuesService {
       boardId: input.boardId,
       columnId: input.columnId,
       sprintId: input.sprintId,
+      standalone: input.standalone ?? false,
       key,
       title: input.title,
       description: input.description,
@@ -115,12 +118,6 @@ export class IssuesService {
     return issue;
   }
 
-  /**
-   * Creates a backlog issue from a public intake-form submission. No user context
-   * (anonymous reporter), no membership check — the caller (IntakeService) is
-   * responsible for resolving a valid form/board/column. The Issue gets the same
-   * sequential org key as any other issue, and the board receives a live event.
-   */
   async createBacklogIssueFromIntake(params: {
     orgId: string;
     boardId: string;
@@ -227,6 +224,15 @@ export class IssuesService {
 
       return tx.issue.findUniqueOrThrow({ where: { id: input.id } });
     });
+
+    if (issue.standalone && targetColumn.isDone) {
+      await this.pubSub.publish(ISSUE_EVENTS.moved, {
+        [ISSUE_EVENTS.moved]: issue,
+        boardId: issue.boardId,
+      });
+      await this.prisma.issue.delete({ where: { id: issue.id } });
+      return { ...issue, _deleted: true };
+    }
 
     await this.pubSub.publish(ISSUE_EVENTS.moved, {
       [ISSUE_EVENTS.moved]: issue,
@@ -335,6 +341,15 @@ export class IssuesService {
       targetType: 'issue',
       targetId: issue.key,
     });
+    if (input.userId !== currentUserId) {
+      void this.notifications.createNotificationInternal({
+        orgId: issue.orgId,
+        userId: input.userId,
+        type: 'ISSUE_ASSIGNED',
+        title: `Você foi atribuído a ${issue.key}`,
+        body: issue.title,
+      });
+    }
     return issue;
   }
 

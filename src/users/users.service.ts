@@ -20,8 +20,13 @@ const PROFILE_SELECT = {
   avatarUrl: true,
   jobTitle: true,
   bio: true,
+  phone: true,
+  linkedIn: true,
   theme: true,
   locale: true,
+  timezone: true,
+  dateFormat: true,
+  currency: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -108,5 +113,37 @@ export class UsersService {
     await this.findUserById(id);
     await this.prisma.user.delete({ where: { id } });
     return { message: 'User deleted' };
+  }
+
+  async revokeAllUserSessions(userId: string) {
+    await this.findUserById(userId);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
+    return true;
+  }
+
+  async deleteMyAccount(userId: string) {
+    await this.findUserById(userId);
+    await this.prisma.user.delete({ where: { id: userId } });
+    return true;
+  }
+
+  async findUserProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        avatarUrl: true,
+        jobTitle: true,
+        bio: true,
+        createdAt: true,
+        userStatus: true,
+      },
+    });
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+    return user;
   }
 }

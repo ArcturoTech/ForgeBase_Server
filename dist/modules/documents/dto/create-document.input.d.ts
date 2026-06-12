@@ -7,4 +7,5 @@ export declare class CreateDocumentInput {
     category?: DocCategory;
     version?: number;
     status?: DocStatus;
+    isFolder?: boolean;
 }

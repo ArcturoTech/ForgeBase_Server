@@ -55,6 +55,9 @@ const resources_module_1 = require("./modules/resources/resources.module");
 const attachments_module_1 = require("./modules/attachments/attachments.module");
 const intake_module_1 = require("./modules/intake/intake.module");
 const tenancy_module_1 = require("./common/tenancy/tenancy.module");
+const presence_module_1 = require("./modules/presence/presence.module");
+const personal_board_module_1 = require("./modules/personal-board/personal-board.module");
+const timer_module_1 = require("./modules/timer/timer.module");
 const configuration_1 = __importDefault(require("./config/configuration"));
 const env_validation_1 = require("./config/env.validation");
 let AppModule = class AppModule {
@@ -150,6 +153,9 @@ exports.AppModule = AppModule = __decorate([
             resources_module_1.ResourcesModule,
             attachments_module_1.AttachmentsModule,
             intake_module_1.IntakeModule,
+            presence_module_1.PresenceModule,
+            personal_board_module_1.PersonalBoardModule,
+            timer_module_1.TimerModule,
         ],
         providers: [{ provide: core_1.APP_GUARD, useClass: gql_throttler_guard_1.GqlThrottlerGuard }],
     })

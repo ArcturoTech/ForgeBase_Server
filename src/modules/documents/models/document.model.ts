@@ -35,6 +35,12 @@ export class Document {
   @Field(() => GraphQLJSON, { nullable: true })
   body?: Record<string, unknown>;
 
+  @Field({ defaultValue: false })
+  isPrivate: boolean;
+
+  @Field({ defaultValue: false })
+  isFolder: boolean;
+
   @Field()
   createdAt: Date;
 

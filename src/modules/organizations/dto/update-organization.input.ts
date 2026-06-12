@@ -33,6 +33,36 @@ export class UpdateOrganizationInput {
   @IsString()
   region?: string;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  website?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  cnpj?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  sector?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  state?: string;
+
   @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsInt()

@@ -48,6 +48,18 @@ let AuthResolver = class AuthResolver {
         await this.authService.logoutUser(user.id);
         return true;
     }
+    requestPasswordReset(email) {
+        return this.authService.requestPasswordReset(email);
+    }
+    resetPassword(token, newPassword) {
+        return this.authService.resetPassword(token, newPassword);
+    }
+    verifyEmailOtp(user, code) {
+        return this.authService.verifyEmailOtp(user.id, code);
+    }
+    resendEmailOtp(user) {
+        return this.authService.resendEmailOtp(user.id);
+    }
 };
 exports.AuthResolver = AuthResolver;
 __decorate([
@@ -79,6 +91,38 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthResolver.prototype, "logoutUser", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, graphql_1.Args)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthResolver.prototype, "requestPasswordReset", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, graphql_1.Args)('token')),
+    __param(1, (0, graphql_1.Args)('newPassword')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], AuthResolver.prototype, "resetPassword", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('code')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], AuthResolver.prototype, "verifyEmailOtp", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthResolver.prototype, "resendEmailOtp", null);
 exports.AuthResolver = AuthResolver = __decorate([
     (0, graphql_1.Resolver)(),
     __metadata("design:paramtypes", [auth_service_1.AuthService,

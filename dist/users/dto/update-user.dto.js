@@ -31,7 +31,7 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "jobTitle", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'Construindo a plataforma ForgeBase.' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Construindo a plataforma Entur-Forge.' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

@@ -18,7 +18,9 @@ const common_1 = require("@nestjs/common");
 const graphql_subscriptions_1 = require("graphql-subscriptions");
 const notifications_service_1 = require("./notifications.service");
 const notification_model_1 = require("./models/notification.model");
+const notification_preference_model_1 = require("./models/notification-preference.model");
 const create_notification_input_1 = require("./dto/create-notification.input");
+const update_notification_prefs_input_1 = require("./dto/update-notification-prefs.input");
 const pubsub_module_1 = require("../../common/pubsub/pubsub.module");
 const gql_auth_guard_1 = require("../../common/guards/gql-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
@@ -43,6 +45,12 @@ let NotificationsResolver = class NotificationsResolver {
     }
     createNotification(user, input) {
         return this.notificationsService.createNotification(user.id, input);
+    }
+    findMyNotificationPreferences(user) {
+        return this.notificationsService.findNotificationPreferencesByUserId(user.id);
+    }
+    updateNotificationPreferences(user, input) {
+        return this.notificationsService.updateNotificationPreferencesByUserId(user.id, input);
     }
     notificationReceived(_userId) {
         return this.pubSub.asyncIterator(notifications_service_1.NOTIFICATION_EVENTS.received);
@@ -94,6 +102,23 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_notification_input_1.CreateNotificationInput]),
     __metadata("design:returntype", Promise)
 ], NotificationsResolver.prototype, "createNotification", null);
+__decorate([
+    (0, graphql_1.Query)(() => notification_preference_model_1.NotificationPreference),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NotificationsResolver.prototype, "findMyNotificationPreferences", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => notification_preference_model_1.NotificationPreference),
+    (0, common_1.UseGuards)(gql_auth_guard_1.GqlAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('input')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_notification_prefs_input_1.UpdateNotificationPrefsInput]),
+    __metadata("design:returntype", Promise)
+], NotificationsResolver.prototype, "updateNotificationPreferences", null);
 __decorate([
     (0, graphql_1.Subscription)(() => notification_model_1.Notification, {
         filter: (payload, variables) => payload.userId === variables.userId,

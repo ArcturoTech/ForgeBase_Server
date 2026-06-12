@@ -8,6 +8,7 @@ import { MessageReaction } from './models/message-reaction.model';
 import { ReactionChangedEvent } from './models/reaction-changed-event.model';
 import { MessageDeletedEvent } from './models/message-deleted-event.model';
 import { CreateGroupChannelInput } from './dto/create-group-channel.input';
+import { UpdateGroupChannelInput } from './dto/update-group-channel.input';
 import { SendMessageInput } from './dto/send-message.input';
 import { AddReactionInput } from './dto/add-reaction.input';
 import { PUB_SUB } from '@/common/pubsub/pubsub.module';
@@ -67,6 +68,15 @@ export class ChatResolver {
     @Args('input') input: CreateGroupChannelInput,
   ): Promise<Channel> {
     return this.chatService.createGroupChannel(user.id, input) as Promise<Channel>;
+  }
+
+  @Mutation(() => Channel)
+  @UseGuards(GqlAuthGuard)
+  updateGroupChannel(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: UpdateGroupChannelInput,
+  ): Promise<Channel> {
+    return this.chatService.updateGroupChannel(user.id, input) as Promise<Channel>;
   }
 
   @Mutation(() => Channel)
@@ -171,5 +181,13 @@ export class ChatResolver {
   })
   reactionChanged(@Args('channelId', { type: () => ID }) _channelId: string) {
     return this.pubSub.asyncIterator(CHAT_EVENTS.reactionChanged);
+  }
+
+  @Subscription(() => Channel, {
+    filter: (payload: MessageEventPayload, variables: { channelId: string }) =>
+      payload.channelId === variables.channelId,
+  })
+  channelUpdated(@Args('channelId', { type: () => ID }) _channelId: string) {
+    return this.pubSub.asyncIterator(CHAT_EVENTS.channelUpdated);
   }
 }

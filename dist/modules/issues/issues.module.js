@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const issues_resolver_1 = require("./issues.resolver");
 const issues_service_1 = require("./issues.service");
 const activity_module_1 = require("../activity/activity.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let IssuesModule = class IssuesModule {
 };
 exports.IssuesModule = IssuesModule;
 exports.IssuesModule = IssuesModule = __decorate([
     (0, common_1.Module)({
-        imports: [activity_module_1.ActivityModule],
+        imports: [activity_module_1.ActivityModule, notifications_module_1.NotificationsModule],
         providers: [issues_resolver_1.IssuesResolver, issues_service_1.IssuesService],
         exports: [issues_service_1.IssuesService],
     })

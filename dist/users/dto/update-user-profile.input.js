@@ -16,6 +16,8 @@ let UpdateUserProfileInput = class UpdateUserProfileInput {
     name;
     jobTitle;
     bio;
+    phone;
+    linkedIn;
 };
 exports.UpdateUserProfileInput = UpdateUserProfileInput;
 __decorate([
@@ -36,9 +38,23 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(280),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], UpdateUserProfileInput.prototype, "bio", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
+    __metadata("design:type", String)
+], UpdateUserProfileInput.prototype, "phone", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(120),
+    __metadata("design:type", String)
+], UpdateUserProfileInput.prototype, "linkedIn", void 0);
 exports.UpdateUserProfileInput = UpdateUserProfileInput = __decorate([
     (0, graphql_1.InputType)()
 ], UpdateUserProfileInput);

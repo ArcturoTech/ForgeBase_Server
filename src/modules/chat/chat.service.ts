@@ -12,7 +12,10 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { PUB_SUB } from '@/common/pubsub/pubsub.module';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
 import { ChatSpacesService } from '@/modules/chat-spaces/chat-spaces.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { PresenceService } from '@/modules/presence/presence.service';
 import { CreateGroupChannelInput } from './dto/create-group-channel.input';
+import { UpdateGroupChannelInput } from './dto/update-group-channel.input';
 import { SendMessageInput } from './dto/send-message.input';
 import { AddReactionInput } from './dto/add-reaction.input';
 import { ReactionGroup } from './models/reaction-group.model';
@@ -22,6 +25,7 @@ export const CHAT_EVENTS = {
   messageEdited: 'messageEdited',
   messageDeleted: 'messageDeleted',
   reactionChanged: 'reactionChanged',
+  channelUpdated: 'channelUpdated',
 } as const;
 
 const USER_SELECT = {
@@ -43,6 +47,8 @@ export class ChatService {
     private readonly tenancy: TenancyService,
     @Inject(forwardRef(() => ChatSpacesService))
     private readonly chatSpaces: ChatSpacesService,
+    private readonly notifications: NotificationsService,
+    private readonly presence: PresenceService,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
@@ -163,6 +169,39 @@ export class ChatService {
     return this.findChannelById(userId, channel.id);
   }
 
+  async updateGroupChannel(userId: string, input: UpdateGroupChannelInput) {
+    const channel = await this.prisma.channel.findUnique({
+      where: { id: input.channelId },
+      select: { id: true, orgId: true, type: true },
+    });
+    if (!channel) throw new NotFoundException('Canal não encontrado');
+    await this.assertChannelMembership(userId, input.channelId);
+
+    if (input.name !== undefined || input.description !== undefined) {
+      await this.prisma.channel.update({
+        where: { id: input.channelId },
+        data: {
+          ...(input.name !== undefined && { name: input.name }),
+          ...(input.description !== undefined && { description: input.description }),
+        },
+      });
+    }
+
+    if (input.muted !== undefined) {
+      await this.prisma.channelMember.update({
+        where: { channelId_userId: { channelId: input.channelId, userId } },
+        data: { mutedAt: input.muted ? new Date() : null },
+      });
+    }
+
+    const updated = await this.findChannelById(userId, input.channelId);
+    await this.pubSub.publish(CHAT_EVENTS.channelUpdated, {
+      [CHAT_EVENTS.channelUpdated]: updated,
+      channelId: input.channelId,
+    });
+    return updated;
+  }
+
   async sendMessage(userId: string, input: SendMessageInput) {
     const body = input.body?.trim() ?? '';
     const attachmentIds = input.attachmentIds ?? [];
@@ -221,7 +260,42 @@ export class ChatService {
       channelId: message.channelId,
     });
 
+    void this.fanOutMessageNotifications(userId, channel.orgId, message.channelId, message.body);
+    void this.presence.setUserOnline(userId);
+
     return message;
+  }
+
+  private async fanOutMessageNotifications(
+    authorId: string,
+    orgId: string,
+    channelId: string,
+    body: string,
+  ) {
+    const members = await this.prisma.channelMember.findMany({
+      where: { channelId, userId: { not: authorId } },
+      select: { userId: true },
+    });
+
+    const author = await this.prisma.user.findUnique({
+      where: { id: authorId },
+      select: { name: true },
+    });
+
+    const senderName = author?.name ?? 'Alguém';
+    const preview = body.length > 80 ? body.slice(0, 77) + '...' : body;
+
+    await Promise.all(
+      members.map((member) =>
+        this.notifications.createNotificationInternal({
+          orgId,
+          userId: member.userId,
+          type: 'MESSAGE',
+          title: senderName,
+          body: preview || 'Enviou um anexo',
+        }),
+      ),
+    );
   }
 
   private async assertAttachmentsOwnership(
@@ -362,11 +436,12 @@ export class ChatService {
   }
 
   private async decorateChannel(
-    channel: { id: string; members: { userId: string; lastReadAt: Date | null }[] },
+    channel: { id: string; members: { userId: string; lastReadAt: Date | null; mutedAt?: Date | null }[] },
     userId: string,
   ) {
     const membership = channel.members.find((member) => member.userId === userId);
     const lastReadAt = membership?.lastReadAt ?? null;
+    const muted = !!membership?.mutedAt;
 
     const [lastMessage, unreadCount] = await Promise.all([
       this.prisma.message.findFirst({
@@ -384,7 +459,7 @@ export class ChatService {
       }),
     ]);
 
-    return { ...channel, lastMessage, unreadCount };
+    return { ...channel, lastMessage, unreadCount, muted };
   }
 
   private async assertChannelMembership(userId: string, channelId: string) {

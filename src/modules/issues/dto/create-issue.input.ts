@@ -1,5 +1,5 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
-import { IsArray, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { IssueType, Priority } from '@/common/graphql/enums';
 
 @InputType()
@@ -73,4 +73,9 @@ export class CreateIssueInput {
   @IsOptional()
   @IsArray()
   labelIds?: string[];
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  standalone?: boolean;
 }

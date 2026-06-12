@@ -19,11 +19,17 @@ model User {
   bio           String?  @db.Text
   theme         String   @default("light")
   locale        String   @default("pt-BR")
+  phone         String?
+  linkedIn      String?
+  timezone      String   @default("America/Sao_Paulo")
+  dateFormat    String   @default("DD/MM/YYYY")
+  currency      String   @default("BRL")
   refreshToken  String?  @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  subscription     Subscription?
+  subscription           Subscription?
+  notificationPreferences NotificationPreference?
   memberships      Membership[]
   projectMembers   ProjectMember[]
   assignedIssues   IssueAssignee[]
@@ -41,6 +47,14 @@ model User {
   intakeForms      IntakeForm[]      @relation("IntakeFormCreator")
   passwordResets   PasswordReset[]
   emailVerification EmailVerification?
+  userStatus       UserStatus?
+  pingsSent        PingRecord[]      @relation("PingSender")
+  pingsReceived    PingRecord[]      @relation("PingRecipient")
+  documentSharesGranted  DocumentShare[] @relation("DocumentShareGrantor")
+  documentSharesReceived DocumentShare[] @relation("DocumentShareTarget")
+  personalTasks    PersonalTask[]
+  personalSprints  PersonalSprint[]
+  timeEntries      TimeEntry[]
 
   @@map("users")
 }
@@ -89,6 +103,19 @@ model Subscription {
   @@map("subscriptions")
 }
 
+model NotificationPreference {
+  userId       String  @id
+  leadAssigned Boolean @default(true)
+  dealUpdate   Boolean @default(true)
+  taskDue      Boolean @default(true)
+  chatMessage  Boolean @default(false)
+  weeklyDigest Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
 model Organization {
   id           String    @id @default(uuid())
   name         String
@@ -97,6 +124,12 @@ model Organization {
   status       OrgStatus @default(ACTIVE)
   region       String    @default("sa-east-1")
   databaseName String?
+  description  String?
+  website      String?
+  cnpj         String?
+  sector       String?
+  city         String?
+  state        String?
   mrrCents     Int       @default(0)
   trialEndsAt  DateTime?
   createdAt    DateTime  @default(now())
@@ -119,6 +152,9 @@ model Organization {
   chatSpaces    ChatSpace[]
   invitations   Invitation[]
   intakeForms   IntakeForm[]
+  personalTasks   PersonalTask[]
+  personalSprints PersonalSprint[]
+  timeEntries     TimeEntry[]
 
   @@map("organizations")
 }
@@ -241,20 +277,24 @@ model Milestone {
 }
 
 model Sprint {
-  id           String       @id @default(uuid())
-  projectId    String
-  number       Int
-  name         String
-  code         String?
-  status       SprintStatus @default(PLANNING)
-  startDate    DateTime?
-  endDate      DateTime?
-  totalPoints  Int          @default(0)
-  targetPoints Int?
-  createdAt    DateTime     @default(now())
+  id             String             @id @default(uuid())
+  projectId      String
+  number         Int
+  name           String
+  code           String?
+  status         SprintStatus       @default(PLANNING)
+  closedAs       SprintClosureType?
+  parentSprintId String?
+  startDate      DateTime?
+  endDate        DateTime?
+  totalPoints    Int                @default(0)
+  targetPoints   Int?
+  createdAt      DateTime           @default(now())
 
-  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  issues    Issue[]
+  project  Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent   Sprint?          @relation("SprintRestart", fields: [parentSprintId], references: [id])
+  restarts Sprint[]         @relation("SprintRestart")
+  issues   Issue[]
   snapshots SprintSnapshot[]
 
   @@index([projectId, status])
@@ -321,6 +361,7 @@ model Issue {
   position    Int       @default(0)
   urgent      Boolean   @default(false)
   done        Boolean   @default(false)
+  standalone  Boolean   @default(false)
   reporterId  String?
   epic        String?
   parentId    String?
@@ -344,6 +385,7 @@ model Issue {
   dependencies IssueDependency[] @relation("IssueDependencyFrom")
   dependents   IssueDependency[] @relation("IssueDependencyTo")
   intakeSubmissions IntakeSubmission[]
+  timeEntries  TimeEntry[]
 
   @@unique([orgId, key])
   @@index([boardId, columnId, position])
@@ -501,12 +543,16 @@ model Document {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
+  isPrivate    Boolean     @default(false)
+  isFolder     Boolean     @default(false)
+
   organization Organization      @relation(fields: [orgId], references: [id], onDelete: Cascade)
   project      Project?          @relation(fields: [projectId], references: [id])
   author       User?             @relation(fields: [authorId], references: [id])
   parent       Document?         @relation("DocumentTree", fields: [parentId], references: [id])
   children     Document[]        @relation("DocumentTree")
   comments     DocumentComment[]
+  shares       DocumentShare[]
 
   @@index([orgId])
   @@index([projectId])
@@ -662,6 +708,7 @@ model ChannelMember {
   userId     String
   role       ChannelMemberRole @default(MEMBER)
   lastReadAt DateTime?
+  mutedAt    DateTime?
   createdAt  DateTime          @default(now())
 
   channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
@@ -874,6 +921,11 @@ enum SprintStatus {
   CLOSED
 }
 
+enum SprintClosureType {
+  COMPLETE
+  INCOMPLETE
+}
+
 enum IssueType {
   EPIC
   STORY
@@ -978,4 +1030,145 @@ model IntakeSubmission {
 
   @@index([formId])
   @@map("intake_submissions")
+}
+
+model UserStatus {
+  userId     String         @id
+  status     PresenceStatus @default(OFFLINE)
+  emoji      String?
+  customText String?
+  setAt      DateTime       @default(now())
+  isManual   Boolean        @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_statuses")
+}
+
+model PingRecord {
+  id         String   @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  sentAt     DateTime @default(now())
+
+  from User @relation("PingSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+  to   User @relation("PingRecipient", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([fromUserId, toUserId, sentAt])
+  @@map("ping_records")
+}
+
+model DocumentShare {
+  id               String   @id @default(uuid())
+  documentId       String
+  sharedWithUserId String
+  grantedById      String
+  createdAt        DateTime @default(now())
+
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  sharedWith User     @relation("DocumentShareTarget", fields: [sharedWithUserId], references: [id], onDelete: Cascade)
+  grantedBy  User     @relation("DocumentShareGrantor", fields: [grantedById], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, sharedWithUserId])
+  @@index([sharedWithUserId])
+  @@map("document_shares")
+}
+
+model PersonalTask {
+  id             String             @id @default(uuid())
+  orgId          String
+  userId         String
+  sprintId       String?
+  title          String
+  status         PersonalTaskStatus @default(TODO)
+  priority       Priority           @default(MED)
+  dueDate        DateTime?
+  columnKey      String             @default("TODO")
+  position       Int                @default(0)
+  isSprintMapped Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sprint       PersonalSprint? @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, userId])
+  @@map("personal_tasks")
+}
+
+model PersonalSprint {
+  id             String               @id @default(uuid())
+  orgId          String
+  userId         String
+  name           String
+  status         PersonalSprintStatus @default(PLANNING)
+  startDate      DateTime?
+  endDate        DateTime?
+  targetPoints   Int?
+  parentSprintId String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  organization  Organization            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user          User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks         PersonalTask[]
+  snapshots     PersonalSprintSnapshot[]
+  parentSprint  PersonalSprint?         @relation("SprintRestart", fields: [parentSprintId], references: [id], onDelete: SetNull)
+  restarts      PersonalSprint[]        @relation("SprintRestart")
+
+  @@index([orgId, userId])
+  @@map("personal_sprints")
+}
+
+model PersonalSprintSnapshot {
+  id             String         @id @default(uuid())
+  sprintId       String
+  capturedOn     DateTime       @default(now())
+  totalTasks     Int
+  completedTasks Int
+  remainingTasks Int
+
+  sprint PersonalSprint @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+
+  @@index([sprintId, capturedOn])
+  @@map("personal_sprint_snapshots")
+}
+
+enum PersonalSprintStatus {
+  PLANNING
+  ACTIVE
+  CLOSED
+  INCOMPLETE
+}
+
+model TimeEntry {
+  id        String    @id @default(uuid())
+  orgId     String
+  userId    String
+  issueId   String?
+  startedAt DateTime  @default(now())
+  stoppedAt DateTime?
+  duration  Int?
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issue        Issue?       @relation(fields: [issueId], references: [id], onDelete: SetNull)
+
+  @@index([userId, startedAt])
+  @@map("time_entries")
+}
+
+enum PresenceStatus {
+  ONLINE
+  BUSY
+  LUNCH
+  HIBERNATING
+  OFFLINE
+}
+
+enum PersonalTaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
 }

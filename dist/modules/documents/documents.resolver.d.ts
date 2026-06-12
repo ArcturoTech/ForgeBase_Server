@@ -1,5 +1,6 @@
 import { DocumentsService } from './documents.service';
 import { Document } from './models/document.model';
+import { DocumentShare } from './models/document-share.model';
 import { DocumentComment } from './models/document-comment.model';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
@@ -17,6 +18,13 @@ export declare class DocumentsResolver {
     removeDocument(user: AuthenticatedUser, id: string): Promise<boolean>;
     addCommentToDocument(user: AuthenticatedUser, documentId: string, body: string): Promise<DocumentComment>;
     resolveDocumentComment(user: AuthenticatedUser, id: string, resolved: boolean): Promise<DocumentComment>;
+    listPublicDocuments(user: AuthenticatedUser, orgId: string): Promise<Document[]>;
+    listMyDocuments(user: AuthenticatedUser, orgId: string): Promise<Document[]>;
+    listDocumentsSharedWithMe(user: AuthenticatedUser, orgId: string): Promise<Document[]>;
+    listRootDocuments(user: AuthenticatedUser, orgId: string): Promise<Document[]>;
+    listDocumentChildren(user: AuthenticatedUser, orgId: string, parentId: string): Promise<Document[]>;
+    shareDocument(user: AuthenticatedUser, documentId: string, targetUserId: string): Promise<DocumentShare>;
+    setDocumentPrivacy(user: AuthenticatedUser, documentId: string, isPrivate: boolean): Promise<Document>;
     comments(document: Document): Promise<DocumentComment[]>;
 }
 export declare class DocumentCommentResolver {

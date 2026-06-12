@@ -5,6 +5,7 @@ import { SprintSummary } from './models/sprint-summary.model';
 import { Issue } from "../issues/models/issue.model";
 import { CreateSprintInput } from './dto/create-sprint.input';
 import { UpdateSprintInput } from './dto/update-sprint.input';
+import { CloseSprintWithOptionsInput } from './dto/close-sprint-with-options.input';
 import type { AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 export declare class SprintsResolver {
     private readonly sprintsService;
@@ -18,5 +19,8 @@ export declare class SprintsResolver {
     removeSprint(user: AuthenticatedUser, id: string): Promise<boolean>;
     startSprint(user: AuthenticatedUser, id: string): Promise<Sprint>;
     closeSprint(user: AuthenticatedUser, id: string): Promise<Sprint>;
+    getSprintRemainingCount(user: AuthenticatedUser, id: string): Promise<number>;
+    closeSprintWithOptions(user: AuthenticatedUser, input: CloseSprintWithOptionsInput): Promise<Sprint>;
+    restartSprint(user: AuthenticatedUser, id: string): Promise<Sprint>;
     issues(sprint: Sprint): Promise<Issue[]>;
 }

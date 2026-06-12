@@ -132,4 +132,71 @@ export class SnapshotsService {
       done: sprint.issues.filter((issue) => issue.done).reduce((total, issue) => total + (issue.points ?? 0), 0),
     }));
   }
+
+  async listIssueTypeDistribution(userId: string, projectId: string, sprintIds?: string[]) {
+    await this.tenancy.assertProjectAccess(userId, projectId);
+    const sprints = await this.prisma.sprint.findMany({
+      where: {
+        projectId,
+        ...(sprintIds?.length ? { id: { in: sprintIds } } : {}),
+      },
+      orderBy: { number: 'asc' },
+      include: {
+        issues: { select: { type: true } },
+      },
+    });
+
+    return sprints.map((sprint) => {
+      const counts = { epic: 0, story: 0, task: 0, bug: 0 };
+      for (const issue of sprint.issues) {
+        const key = issue.type.toLowerCase() as keyof typeof counts;
+        if (key in counts) counts[key] += 1;
+      }
+      return {
+        sprintId: sprint.id,
+        sprintNumber: sprint.number,
+        label: `S${sprint.number}`,
+        ...counts,
+        total: sprint.issues.length,
+      };
+    });
+  }
+
+  async listSprintCompletionRate(userId: string, projectId: string) {
+    await this.tenancy.assertProjectAccess(userId, projectId);
+    const sprints = await this.prisma.sprint.findMany({
+      where: { projectId },
+      orderBy: { number: 'asc' },
+      include: { issues: { select: { done: true } } },
+    });
+
+    return sprints.map((sprint) => {
+      const total = sprint.issues.length;
+      const done = sprint.issues.filter((i) => i.done).length;
+      return {
+        sprintId: sprint.id,
+        sprintNumber: sprint.number,
+        label: `S${sprint.number}`,
+        total,
+        done,
+        rate: total > 0 ? Math.round((done / total) * 100) : 0,
+      };
+    });
+  }
+
+  async listSprintThroughput(userId: string, projectId: string) {
+    await this.tenancy.assertProjectAccess(userId, projectId);
+    const sprints = await this.prisma.sprint.findMany({
+      where: { projectId },
+      orderBy: { number: 'asc' },
+      include: { issues: { select: { done: true } } },
+    });
+
+    return sprints.map((sprint) => ({
+      sprintId: sprint.id,
+      sprintNumber: sprint.number,
+      label: `S${sprint.number}`,
+      completedIssues: sprint.issues.filter((i) => i.done).length,
+    }));
+  }
 }

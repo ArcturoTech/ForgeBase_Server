@@ -10,6 +10,11 @@ export declare class User {
     bio?: string;
     theme: string;
     locale: string;
+    phone?: string;
+    linkedIn?: string;
+    timezone: string;
+    dateFormat: string;
+    currency: string;
     createdAt: Date;
     updatedAt: Date;
 }

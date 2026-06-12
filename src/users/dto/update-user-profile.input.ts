@@ -18,6 +18,18 @@ export class UpdateUserProfileInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  @MaxLength(280)
+  @MaxLength(200)
   bio?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  phone?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  linkedIn?: string;
 }

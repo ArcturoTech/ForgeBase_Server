@@ -1,12 +1,14 @@
 import { Prisma } from "../../prisma/prisma-client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
 export declare class DocumentsService {
     private readonly prisma;
     private readonly tenancy;
-    constructor(prisma: PrismaService, tenancy: TenancyService);
+    private readonly notifications;
+    constructor(prisma: PrismaService, tenancy: TenancyService, notifications: NotificationsService);
     listDocuments(userId: string, orgId: string): Promise<{
         id: string;
         createdAt: Date;
@@ -20,6 +22,8 @@ export declare class DocumentsService {
         projectId: string | null;
         parentId: string | null;
         category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
     }[]>;
     listDocumentsByProject(userId: string, projectId: string): Promise<{
         id: string;
@@ -34,6 +38,8 @@ export declare class DocumentsService {
         projectId: string | null;
         parentId: string | null;
         category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
     }[]>;
     findProjectOverviewDocument(userId: string, projectId: string): Promise<{
         id: string;
@@ -48,6 +54,8 @@ export declare class DocumentsService {
         projectId: string | null;
         parentId: string | null;
         category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
     } | null>;
     findDocumentById(userId: string, id: string): Promise<{
         id: string;
@@ -62,6 +70,8 @@ export declare class DocumentsService {
         projectId: string | null;
         parentId: string | null;
         category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
     }>;
     createDocument(userId: string, input: CreateDocumentInput): Promise<{
         id: string;
@@ -76,7 +86,25 @@ export declare class DocumentsService {
         projectId: string | null;
         parentId: string | null;
         category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
     }>;
+    listRootDocuments(userId: string, orgId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
+    }[]>;
     updateDocument(userId: string, input: UpdateDocumentInput): Promise<{
         id: string;
         createdAt: Date;
@@ -90,6 +118,8 @@ export declare class DocumentsService {
         projectId: string | null;
         parentId: string | null;
         category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
     }>;
     removeDocument(userId: string, id: string): Promise<boolean>;
     addCommentToDocument(userId: string, documentId: string, body: string): Promise<{
@@ -124,6 +154,93 @@ export declare class DocumentsService {
         emailVerified: boolean;
         createdAt: Date;
         updatedAt: Date;
+    }>;
+    listPublicDocuments(userId: string, orgId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
+    }[]>;
+    listMyDocuments(userId: string, orgId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
+    }[]>;
+    listDocumentsSharedWithMe(userId: string, orgId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
+    }[]>;
+    listDocumentChildren(userId: string, orgId: string, parentId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
+    }[]>;
+    shareDocument(userId: string, documentId: string, targetUserId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        documentId: string;
+        sharedWithUserId: string;
+        grantedById: string;
+    }>;
+    setDocumentPrivacy(userId: string, documentId: string, isPrivate: boolean): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        authorId: string | null;
+        body: Prisma.JsonValue | null;
+        orgId: string;
+        version: number;
+        title: string;
+        status: import("generated/prisma").$Enums.DocStatus;
+        projectId: string | null;
+        parentId: string | null;
+        category: import("generated/prisma").$Enums.DocCategory;
+        isFolder: boolean;
+        isPrivate: boolean;
     }>;
     private loadDocumentOrThrow;
 }

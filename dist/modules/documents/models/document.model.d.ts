@@ -11,6 +11,8 @@ export declare class Document {
     status: DocStatus;
     category: DocCategory;
     body?: Record<string, unknown>;
+    isPrivate: boolean;
+    isFolder: boolean;
     createdAt: Date;
     updatedAt: Date;
     comments?: DocumentComment[];

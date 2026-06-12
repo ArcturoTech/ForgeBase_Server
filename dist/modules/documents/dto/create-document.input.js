@@ -21,6 +21,7 @@ let CreateDocumentInput = class CreateDocumentInput {
     category;
     version;
     status;
+    isFolder;
 };
 exports.CreateDocumentInput = CreateDocumentInput;
 __decorate([
@@ -64,6 +65,12 @@ __decorate([
     (0, class_validator_1.IsEnum)(enums_1.DocStatus),
     __metadata("design:type", String)
 ], CreateDocumentInput.prototype, "status", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateDocumentInput.prototype, "isFolder", void 0);
 exports.CreateDocumentInput = CreateDocumentInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateDocumentInput);

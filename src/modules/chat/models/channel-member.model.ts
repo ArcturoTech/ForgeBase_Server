@@ -19,6 +19,9 @@ export class ChannelMember {
   @Field({ nullable: true })
   lastReadAt?: Date;
 
+  @Field({ nullable: true })
+  mutedAt?: Date;
+
   @Field()
   createdAt: Date;
 

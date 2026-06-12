@@ -23,6 +23,11 @@ let User = class User {
     bio;
     theme;
     locale;
+    phone;
+    linkedIn;
+    timezone;
+    dateFormat;
+    currency;
     createdAt;
     updatedAt;
 };
@@ -67,6 +72,26 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", String)
 ], User.prototype, "locale", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "phone", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "linkedIn", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], User.prototype, "timezone", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], User.prototype, "dateFormat", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], User.prototype, "currency", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)

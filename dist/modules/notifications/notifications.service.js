@@ -71,6 +71,9 @@ let NotificationsService = class NotificationsService {
     }
     async createNotification(userId, input) {
         await this.tenancy.assertOrgMembership(userId, input.orgId);
+        return this.createNotificationInternal(input);
+    }
+    async createNotificationInternal(input) {
         const notification = await this.prisma.notification.create({
             data: {
                 orgId: input.orgId,
@@ -85,6 +88,20 @@ let NotificationsService = class NotificationsService {
             userId: notification.userId,
         });
         return notification;
+    }
+    async findNotificationPreferencesByUserId(userId) {
+        return this.prisma.notificationPreference.upsert({
+            where: { userId },
+            create: { userId },
+            update: {},
+        });
+    }
+    async updateNotificationPreferencesByUserId(userId, input) {
+        return this.prisma.notificationPreference.upsert({
+            where: { userId },
+            create: { userId, ...input },
+            update: input,
+        });
     }
 };
 exports.NotificationsService = NotificationsService;

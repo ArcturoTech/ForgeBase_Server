@@ -1,5 +1,6 @@
 import { UsersService } from './users.service';
 import { User } from './models/user.model';
+import { UserProfile } from './models/user-profile.model';
 import { UpdateUserProfileInput } from './dto/update-user-profile.input';
 import { UpdateUserPreferencesInput } from './dto/update-user-preferences.input';
 import { UpdateUserPasswordInput } from './dto/update-user-password.input';
@@ -12,4 +13,7 @@ export declare class UsersResolver {
     updateUserPreferences(user: AuthenticatedUser, input: UpdateUserPreferencesInput): Promise<User>;
     updateUserPassword(user: AuthenticatedUser, input: UpdateUserPasswordInput): Promise<boolean>;
     removeUserAvatar(user: AuthenticatedUser): Promise<User>;
+    userProfile(userId: string): Promise<UserProfile>;
+    revokeAllSessions(user: AuthenticatedUser): Promise<boolean>;
+    deleteMyAccount(user: AuthenticatedUser): Promise<boolean>;
 }

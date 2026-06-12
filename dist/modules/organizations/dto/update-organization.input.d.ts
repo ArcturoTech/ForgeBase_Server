@@ -6,5 +6,11 @@ export declare class UpdateOrganizationInput {
     plan?: OrgPlan;
     status?: OrgStatus;
     region?: string;
+    description?: string;
+    website?: string;
+    cnpj?: string;
+    sector?: string;
+    city?: string;
+    state?: string;
     mrrCents?: number;
 }

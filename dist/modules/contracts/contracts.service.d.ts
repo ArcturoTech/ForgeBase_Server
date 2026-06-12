@@ -17,9 +17,9 @@ export declare class ContractsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
+        expiresAt: Date | null;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
-        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
     }>;
@@ -46,9 +46,9 @@ export declare class ContractsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
+        expiresAt: Date | null;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
-        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
     }[]>;
@@ -59,9 +59,9 @@ export declare class ContractsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
+        expiresAt: Date | null;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
-        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
     }>;
@@ -72,9 +72,9 @@ export declare class ContractsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
+        expiresAt: Date | null;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
-        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
     }>;
@@ -85,9 +85,9 @@ export declare class ContractsService {
         createdAt: Date;
         updatedAt: Date;
         orgId: string;
+        expiresAt: Date | null;
         status: import("generated/prisma").$Enums.ContractStatus;
         projectId: string | null;
-        expiresAt: Date | null;
         clientName: string;
         valueLabel: string;
     }>;

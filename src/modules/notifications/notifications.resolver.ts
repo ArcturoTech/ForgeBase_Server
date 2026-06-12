@@ -3,7 +3,9 @@ import { Inject, UseGuards } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 import { NotificationsService, NOTIFICATION_EVENTS } from './notifications.service';
 import { Notification } from './models/notification.model';
+import { NotificationPreference } from './models/notification-preference.model';
 import { CreateNotificationInput } from './dto/create-notification.input';
+import { UpdateNotificationPrefsInput } from './dto/update-notification-prefs.input';
 import { PUB_SUB } from '@/common/pubsub/pubsub.module';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -63,6 +65,23 @@ export class NotificationsResolver {
     @Args('input') input: CreateNotificationInput,
   ): Promise<Notification> {
     return this.notificationsService.createNotification(user.id, input) as Promise<Notification>;
+  }
+
+  @Query(() => NotificationPreference)
+  @UseGuards(GqlAuthGuard)
+  findMyNotificationPreferences(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<NotificationPreference> {
+    return this.notificationsService.findNotificationPreferencesByUserId(user.id) as Promise<NotificationPreference>;
+  }
+
+  @Mutation(() => NotificationPreference)
+  @UseGuards(GqlAuthGuard)
+  updateNotificationPreferences(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: UpdateNotificationPrefsInput,
+  ): Promise<NotificationPreference> {
+    return this.notificationsService.updateNotificationPreferencesByUserId(user.id, input) as Promise<NotificationPreference>;
   }
 
   @Subscription(() => Notification, {

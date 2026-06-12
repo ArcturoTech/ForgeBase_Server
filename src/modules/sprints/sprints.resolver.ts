@@ -1,4 +1,4 @@
-import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { SprintsService } from './sprints.service';
 import { IssuesService } from '@/modules/issues/issues.service';
@@ -7,6 +7,7 @@ import { SprintSummary } from './models/sprint-summary.model';
 import { Issue } from '@/modules/issues/models/issue.model';
 import { CreateSprintInput } from './dto/create-sprint.input';
 import { UpdateSprintInput } from './dto/update-sprint.input';
+import { CloseSprintWithOptionsInput } from './dto/close-sprint-with-options.input';
 import { GqlAuthGuard } from '@/common/guards/gql-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '@/common/decorators/current-user.decorator';
@@ -88,6 +89,33 @@ export class SprintsResolver {
     @Args('id', { type: () => ID }) id: string,
   ): Promise<Sprint> {
     return this.sprintsService.closeSprintById(user.id, id) as Promise<Sprint>;
+  }
+
+  @Query(() => Int)
+  @UseGuards(GqlAuthGuard)
+  getSprintRemainingCount(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<number> {
+    return this.sprintsService.getSprintRemainingCount(user.id, id);
+  }
+
+  @Mutation(() => Sprint)
+  @UseGuards(GqlAuthGuard)
+  closeSprintWithOptions(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('input') input: CloseSprintWithOptionsInput,
+  ): Promise<Sprint> {
+    return this.sprintsService.closeSprintWithOptions(user.id, input.id, input.action) as Promise<Sprint>;
+  }
+
+  @Mutation(() => Sprint)
+  @UseGuards(GqlAuthGuard)
+  restartSprint(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<Sprint> {
+    return this.sprintsService.restartSprint(user.id, id) as Promise<Sprint>;
   }
 
   @ResolveField(() => [Issue])

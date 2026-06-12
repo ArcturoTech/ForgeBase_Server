@@ -1,22 +1,27 @@
 import { PrismaService } from "../../prisma/prisma.service";
 import { TenancyService } from "../../common/tenancy/tenancy.service";
+import { CloseSprintAction } from "../../common/graphql/enums";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateSprintInput } from './dto/create-sprint.input';
 import { UpdateSprintInput } from './dto/update-sprint.input';
 export declare class SprintsService {
     private readonly prisma;
     private readonly tenancy;
-    constructor(prisma: PrismaService, tenancy: TenancyService);
+    private readonly notifications;
+    constructor(prisma: PrismaService, tenancy: TenancyService, notifications: NotificationsService);
     listSprintsByProject(userId: string, projectId: string): Promise<{
         number: number;
         name: string;
         id: string;
         createdAt: Date;
+        code: string | null;
         status: import("generated/prisma").$Enums.SprintStatus;
         projectId: string;
-        code: string | null;
         targetPoints: number | null;
         startDate: Date | null;
         endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
         totalPoints: number;
     }[]>;
     findActiveSprintSummary(userId: string, orgId: string): Promise<{
@@ -38,12 +43,14 @@ export declare class SprintsService {
         name: string;
         id: string;
         createdAt: Date;
+        code: string | null;
         status: import("generated/prisma").$Enums.SprintStatus;
         projectId: string;
-        code: string | null;
         targetPoints: number | null;
         startDate: Date | null;
         endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
         totalPoints: number;
     }>;
     createSprint(userId: string, input: CreateSprintInput): Promise<{
@@ -51,12 +58,14 @@ export declare class SprintsService {
         name: string;
         id: string;
         createdAt: Date;
+        code: string | null;
         status: import("generated/prisma").$Enums.SprintStatus;
         projectId: string;
-        code: string | null;
         targetPoints: number | null;
         startDate: Date | null;
         endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
         totalPoints: number;
     }>;
     updateSprint(userId: string, input: UpdateSprintInput): Promise<{
@@ -64,12 +73,14 @@ export declare class SprintsService {
         name: string;
         id: string;
         createdAt: Date;
+        code: string | null;
         status: import("generated/prisma").$Enums.SprintStatus;
         projectId: string;
-        code: string | null;
         targetPoints: number | null;
         startDate: Date | null;
         endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
         totalPoints: number;
     }>;
     removeSprint(userId: string, id: string): Promise<boolean>;
@@ -78,12 +89,14 @@ export declare class SprintsService {
         name: string;
         id: string;
         createdAt: Date;
+        code: string | null;
         status: import("generated/prisma").$Enums.SprintStatus;
         projectId: string;
-        code: string | null;
         targetPoints: number | null;
         startDate: Date | null;
         endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
         totalPoints: number;
     }>;
     closeSprintById(userId: string, id: string): Promise<{
@@ -91,13 +104,47 @@ export declare class SprintsService {
         name: string;
         id: string;
         createdAt: Date;
+        code: string | null;
         status: import("generated/prisma").$Enums.SprintStatus;
         projectId: string;
-        code: string | null;
         targetPoints: number | null;
         startDate: Date | null;
         endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
         totalPoints: number;
     }>;
+    getSprintRemainingCount(userId: string, id: string): Promise<number>;
+    closeSprintWithOptions(userId: string, id: string, action: CloseSprintAction): Promise<{
+        number: number;
+        name: string;
+        id: string;
+        createdAt: Date;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        projectId: string;
+        targetPoints: number | null;
+        startDate: Date | null;
+        endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
+        totalPoints: number;
+    }>;
+    restartSprint(userId: string, id: string): Promise<{
+        number: number;
+        name: string;
+        id: string;
+        createdAt: Date;
+        code: string | null;
+        status: import("generated/prisma").$Enums.SprintStatus;
+        projectId: string;
+        targetPoints: number | null;
+        startDate: Date | null;
+        endDate: Date | null;
+        closedAs: import("generated/prisma").$Enums.SprintClosureType | null;
+        parentSprintId: string | null;
+        totalPoints: number;
+    }>;
+    private fanOutSprintNotification;
     private loadSprintOrThrow;
 }

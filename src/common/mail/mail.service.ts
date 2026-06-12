@@ -56,11 +56,11 @@ export class MailService implements OnModuleInit {
   async sendOrganizationInvite(input: OrganizationInviteEmail): Promise<void> {
     await this.sendEmail({
       to: input.to,
-      subject: `Você foi convidado para ${input.orgName} no ForgeBase`,
+      subject: `Você foi convidado para ${input.orgName} no Entur-Forge`,
       html: this.wrap(
         `<h2 style="margin:0 0 12px">Convite para ${input.orgName}</h2>
          <p>${input.inviterName} convidou você para participar da organização
-         <strong>${input.orgName}</strong> no ForgeBase como <strong>${input.role}</strong>.</p>
+         <strong>${input.orgName}</strong> no Entur-Forge como <strong>${input.role}</strong>.</p>
          ${this.button(input.acceptUrl, 'Aceitar convite')}
          <p style="color:#888;font-size:13px;">Se você não tem uma conta, poderá criar uma ao aceitar. Este link expira em 7 dias.</p>`,
       ),
@@ -70,10 +70,10 @@ export class MailService implements OnModuleInit {
   async sendPasswordReset(input: PasswordResetEmail): Promise<void> {
     await this.sendEmail({
       to: input.to,
-      subject: 'Redefinir sua senha do ForgeBase',
+      subject: 'Redefinir sua senha do Entur-Forge',
       html: this.wrap(
         `<h2 style="margin:0 0 12px">Redefinir senha</h2>
-         <p>Recebemos um pedido para redefinir a senha da sua conta no ForgeBase.</p>
+         <p>Recebemos um pedido para redefinir a senha da sua conta no Entur-Forge.</p>
          ${this.button(input.resetUrl, 'Criar nova senha')}
          <p style="color:#888;font-size:13px;">Se não foi você, ignore este e-mail. Este link expira em 30 minutos.</p>`,
       ),
@@ -83,10 +83,10 @@ export class MailService implements OnModuleInit {
   async sendEmailVerification(input: EmailVerificationEmail): Promise<void> {
     await this.sendEmail({
       to: input.to,
-      subject: 'Seu código de verificação do ForgeBase',
+      subject: 'Seu código de verificação do Entur-Forge',
       html: this.wrap(
         `<h2 style="margin:0 0 12px">Confirme seu e-mail</h2>
-         <p>Use o código abaixo para verificar sua conta no ForgeBase:</p>
+         <p>Use o código abaixo para verificar sua conta no Entur-Forge:</p>
          <p style="font-size:30px;font-weight:700;letter-spacing:6px;margin:16px 0;color:#FF6B5E;">${input.code}</p>
          <p style="color:#888;font-size:13px;">O código expira em 15 minutos.</p>`,
       ),

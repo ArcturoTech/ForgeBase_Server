@@ -40,4 +40,7 @@ export class Channel {
 
   @Field(() => Int)
   unreadCount: number;
+
+  @Field({ defaultValue: false })
+  muted: boolean;
 }

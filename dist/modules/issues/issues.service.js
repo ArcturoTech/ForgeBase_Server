@@ -21,6 +21,7 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const pubsub_module_1 = require("../../common/pubsub/pubsub.module");
 const tenancy_service_1 = require("../../common/tenancy/tenancy.service");
 const activity_service_1 = require("../activity/activity.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 exports.ISSUE_EVENTS = {
     moved: 'issueMoved',
     created: 'issueCreated',
@@ -32,11 +33,13 @@ let IssuesService = class IssuesService {
     prisma;
     tenancy;
     activity;
+    notifications;
     pubSub;
-    constructor(prisma, tenancy, activity, pubSub) {
+    constructor(prisma, tenancy, activity, notifications, pubSub) {
         this.prisma = prisma;
         this.tenancy = tenancy;
         this.activity = activity;
+        this.notifications = notifications;
         this.pubSub = pubSub;
     }
     async loadIssueOrThrow(id) {
@@ -82,6 +85,7 @@ let IssuesService = class IssuesService {
             boardId: input.boardId,
             columnId: input.columnId,
             sprintId: input.sprintId,
+            standalone: input.standalone ?? false,
             key,
             title: input.title,
             description: input.description,
@@ -200,6 +204,14 @@ let IssuesService = class IssuesService {
             }
             return tx.issue.findUniqueOrThrow({ where: { id: input.id } });
         });
+        if (issue.standalone && targetColumn.isDone) {
+            await this.pubSub.publish(exports.ISSUE_EVENTS.moved, {
+                [exports.ISSUE_EVENTS.moved]: issue,
+                boardId: issue.boardId,
+            });
+            await this.prisma.issue.delete({ where: { id: issue.id } });
+            return { ...issue, _deleted: true };
+        }
         await this.pubSub.publish(exports.ISSUE_EVENTS.moved, {
             [exports.ISSUE_EVENTS.moved]: issue,
             boardId: issue.boardId,
@@ -298,6 +310,15 @@ let IssuesService = class IssuesService {
             targetType: 'issue',
             targetId: issue.key,
         });
+        if (input.userId !== currentUserId) {
+            void this.notifications.createNotificationInternal({
+                orgId: issue.orgId,
+                userId: input.userId,
+                type: 'ISSUE_ASSIGNED',
+                title: `Você foi atribuído a ${issue.key}`,
+                body: issue.title,
+            });
+        }
         return issue;
     }
     async unassignUserFromIssue(currentUserId, input) {
@@ -372,10 +393,11 @@ let IssuesService = class IssuesService {
 exports.IssuesService = IssuesService;
 exports.IssuesService = IssuesService = __decorate([
     (0, common_1.Injectable)(),
-    __param(3, (0, common_1.Inject)(pubsub_module_1.PUB_SUB)),
+    __param(4, (0, common_1.Inject)(pubsub_module_1.PUB_SUB)),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         tenancy_service_1.TenancyService,
         activity_service_1.ActivityService,
+        notifications_service_1.NotificationsService,
         graphql_subscriptions_1.PubSub])
 ], IssuesService);
 //# sourceMappingURL=issues.service.js.map

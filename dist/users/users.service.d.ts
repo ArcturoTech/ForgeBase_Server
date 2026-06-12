@@ -30,6 +30,11 @@ export declare class UsersService {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -44,6 +49,11 @@ export declare class UsersService {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -58,6 +68,11 @@ export declare class UsersService {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -73,6 +88,11 @@ export declare class UsersService {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -87,10 +107,33 @@ export declare class UsersService {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
     removeUser(id: string): Promise<{
         message: string;
+    }>;
+    revokeAllUserSessions(userId: string): Promise<boolean>;
+    deleteMyAccount(userId: string): Promise<boolean>;
+    findUserProfile(userId: string): Promise<{
+        name: string | null;
+        userStatus: {
+            emoji: string | null;
+            userId: string;
+            status: import("generated/prisma").$Enums.PresenceStatus;
+            customText: string | null;
+            setAt: Date;
+            isManual: boolean;
+        } | null;
+        id: string;
+        avatarUrl: string | null;
+        jobTitle: string | null;
+        bio: string | null;
+        createdAt: Date;
     }>;
 }

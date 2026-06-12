@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const sprints_resolver_1 = require("./sprints.resolver");
 const sprints_service_1 = require("./sprints.service");
 const issues_module_1 = require("../issues/issues.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let SprintsModule = class SprintsModule {
 };
 exports.SprintsModule = SprintsModule;
 exports.SprintsModule = SprintsModule = __decorate([
     (0, common_1.Module)({
-        imports: [issues_module_1.IssuesModule],
+        imports: [issues_module_1.IssuesModule, notifications_module_1.NotificationsModule],
         providers: [sprints_resolver_1.SprintsResolver, sprints_service_1.SprintsService],
         exports: [sprints_service_1.SprintsService],
     })

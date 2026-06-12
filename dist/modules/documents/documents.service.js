@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const prisma_client_1 = require("../../prisma/prisma-client");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const tenancy_service_1 = require("../../common/tenancy/tenancy.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 const USER_FIELDS = {
     id: true,
     name: true,
@@ -26,14 +27,16 @@ const USER_FIELDS = {
 let DocumentsService = class DocumentsService {
     prisma;
     tenancy;
-    constructor(prisma, tenancy) {
+    notifications;
+    constructor(prisma, tenancy, notifications) {
         this.prisma = prisma;
         this.tenancy = tenancy;
+        this.notifications = notifications;
     }
     async listDocuments(userId, orgId) {
         await this.tenancy.assertOrgMembership(userId, orgId);
         return this.prisma.document.findMany({
-            where: { orgId },
+            where: { orgId, projectId: null },
             orderBy: { updatedAt: 'desc' },
         });
     }
@@ -67,7 +70,16 @@ let DocumentsService = class DocumentsService {
                 version: input.version,
                 status: input.status,
                 category: input.category,
+                isFolder: input.isFolder ?? false,
+                authorId: userId,
             },
+        });
+    }
+    async listRootDocuments(userId, orgId) {
+        await this.tenancy.assertOrgMembership(userId, orgId);
+        return this.prisma.document.findMany({
+            where: { orgId, projectId: null, parentId: null },
+            orderBy: [{ isFolder: 'desc' }, { title: 'asc' }],
         });
     }
     async updateDocument(userId, input) {
@@ -118,6 +130,62 @@ let DocumentsService = class DocumentsService {
             throw new common_1.NotFoundException('Autor não encontrado');
         return author;
     }
+    async listPublicDocuments(userId, orgId) {
+        await this.tenancy.assertOrgMembership(userId, orgId);
+        return this.prisma.document.findMany({
+            where: { orgId, projectId: null, isPrivate: false },
+            orderBy: { updatedAt: 'desc' },
+        });
+    }
+    async listMyDocuments(userId, orgId) {
+        await this.tenancy.assertOrgMembership(userId, orgId);
+        return this.prisma.document.findMany({
+            where: { orgId, projectId: null, authorId: userId },
+            orderBy: { updatedAt: 'desc' },
+        });
+    }
+    async listDocumentsSharedWithMe(userId, orgId) {
+        await this.tenancy.assertOrgMembership(userId, orgId);
+        const shares = await this.prisma.documentShare.findMany({
+            where: { sharedWithUserId: userId, document: { orgId } },
+            include: { document: true },
+        });
+        return shares.map((s) => s.document);
+    }
+    async listDocumentChildren(userId, orgId, parentId) {
+        await this.tenancy.assertOrgMembership(userId, orgId);
+        return this.prisma.document.findMany({
+            where: { orgId, parentId },
+            orderBy: [{ isFolder: 'desc' }, { title: 'asc' }],
+        });
+    }
+    async shareDocument(userId, documentId, targetUserId) {
+        const document = await this.loadDocumentOrThrow(documentId);
+        await this.tenancy.assertOrgMembership(userId, document.orgId);
+        if (document.authorId !== userId) {
+            throw new common_1.ForbiddenException('Apenas o autor pode compartilhar este documento');
+        }
+        const share = await this.prisma.documentShare.upsert({
+            where: { documentId_sharedWithUserId: { documentId, sharedWithUserId: targetUserId } },
+            create: { documentId, sharedWithUserId: targetUserId, grantedById: userId },
+            update: {},
+        });
+        void this.notifications.createNotificationInternal({
+            orgId: document.orgId,
+            userId: targetUserId,
+            type: 'DOCUMENT_SHARED',
+            title: `Documento compartilhado: ${document.title}`,
+        });
+        return share;
+    }
+    async setDocumentPrivacy(userId, documentId, isPrivate) {
+        const document = await this.loadDocumentOrThrow(documentId);
+        await this.tenancy.assertOrgMembership(userId, document.orgId);
+        if (document.authorId !== userId) {
+            throw new common_1.ForbiddenException('Apenas o autor pode alterar a privacidade');
+        }
+        return this.prisma.document.update({ where: { id: documentId }, data: { isPrivate } });
+    }
     async loadDocumentOrThrow(id) {
         const document = await this.prisma.document.findUnique({ where: { id } });
         if (!document)
@@ -129,6 +197,7 @@ exports.DocumentsService = DocumentsService;
 exports.DocumentsService = DocumentsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        tenancy_service_1.TenancyService])
+        tenancy_service_1.TenancyService,
+        notifications_service_1.NotificationsService])
 ], DocumentsService);
 //# sourceMappingURL=documents.service.js.map

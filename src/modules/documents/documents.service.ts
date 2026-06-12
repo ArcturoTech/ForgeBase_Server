@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { DocCategory, Prisma } from '@/prisma/prisma-client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { TenancyService } from '@/common/tenancy/tenancy.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
 
@@ -20,6 +21,7 @@ export class DocumentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenancy: TenancyService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async listDocuments(userId: string, orgId: string) {
@@ -63,7 +65,17 @@ export class DocumentsService {
         version: input.version,
         status: input.status,
         category: input.category,
+        isFolder: input.isFolder ?? false,
+        authorId: userId,
       },
+    });
+  }
+
+  async listRootDocuments(userId: string, orgId: string) {
+    await this.tenancy.assertOrgMembership(userId, orgId);
+    return this.prisma.document.findMany({
+      where: { orgId, projectId: null, parentId: null },
+      orderBy: [{ isFolder: 'desc' }, { title: 'asc' }],
     });
   }
 
@@ -117,6 +129,68 @@ export class DocumentsService {
     });
     if (!author) throw new NotFoundException('Autor não encontrado');
     return author;
+  }
+
+  async listPublicDocuments(userId: string, orgId: string) {
+    await this.tenancy.assertOrgMembership(userId, orgId);
+    return this.prisma.document.findMany({
+      where: { orgId, projectId: null, isPrivate: false },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  async listMyDocuments(userId: string, orgId: string) {
+    await this.tenancy.assertOrgMembership(userId, orgId);
+    return this.prisma.document.findMany({
+      where: { orgId, projectId: null, authorId: userId },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  async listDocumentsSharedWithMe(userId: string, orgId: string) {
+    await this.tenancy.assertOrgMembership(userId, orgId);
+    const shares = await this.prisma.documentShare.findMany({
+      where: { sharedWithUserId: userId, document: { orgId } },
+      include: { document: true },
+    });
+    return shares.map((s) => s.document);
+  }
+
+  async listDocumentChildren(userId: string, orgId: string, parentId: string) {
+    await this.tenancy.assertOrgMembership(userId, orgId);
+    return this.prisma.document.findMany({
+      where: { orgId, parentId },
+      orderBy: [{ isFolder: 'desc' }, { title: 'asc' }],
+    });
+  }
+
+  async shareDocument(userId: string, documentId: string, targetUserId: string) {
+    const document = await this.loadDocumentOrThrow(documentId);
+    await this.tenancy.assertOrgMembership(userId, document.orgId);
+    if (document.authorId !== userId) {
+      throw new ForbiddenException('Apenas o autor pode compartilhar este documento');
+    }
+    const share = await this.prisma.documentShare.upsert({
+      where: { documentId_sharedWithUserId: { documentId, sharedWithUserId: targetUserId } },
+      create: { documentId, sharedWithUserId: targetUserId, grantedById: userId },
+      update: {},
+    });
+    void this.notifications.createNotificationInternal({
+      orgId: document.orgId,
+      userId: targetUserId,
+      type: 'DOCUMENT_SHARED',
+      title: `Documento compartilhado: ${document.title}`,
+    });
+    return share;
+  }
+
+  async setDocumentPrivacy(userId: string, documentId: string, isPrivate: boolean) {
+    const document = await this.loadDocumentOrThrow(documentId);
+    await this.tenancy.assertOrgMembership(userId, document.orgId);
+    if (document.authorId !== userId) {
+      throw new ForbiddenException('Apenas o autor pode alterar a privacidade');
+    }
+    return this.prisma.document.update({ where: { id: documentId }, data: { isPrivate } });
   }
 
   private async loadDocumentOrThrow(id: string) {

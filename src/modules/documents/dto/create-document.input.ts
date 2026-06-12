@@ -1,5 +1,5 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
-import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { DocCategory, DocStatus } from '@/common/graphql/enums';
 
 @InputType()
@@ -37,4 +37,9 @@ export class CreateDocumentInput {
   @IsOptional()
   @IsEnum(DocStatus)
   status?: DocStatus;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isFolder?: boolean;
 }

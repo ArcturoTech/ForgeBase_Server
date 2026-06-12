@@ -5,7 +5,7 @@ import { IsIn, IsOptional, IsString } from 'class-validator';
 export class UpdateUserPreferencesInput {
   @Field({ nullable: true })
   @IsOptional()
-  @IsIn(['light', 'dark'])
+  @IsIn(['light', 'dark', 'system'])
   theme?: string;
 
   @Field({ nullable: true })
@@ -13,4 +13,19 @@ export class UpdateUserPreferencesInput {
   @IsString()
   @IsIn(['pt-BR', 'en-US', 'es-ES'])
   locale?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  timezone?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  dateFormat?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  currency?: string;
 }

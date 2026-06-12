@@ -18,6 +18,7 @@ export declare class Issue {
     position: number;
     urgent: boolean;
     done: boolean;
+    standalone: boolean;
     epic?: string;
     parentId?: string;
     startDate?: Date;

@@ -2,6 +2,7 @@ import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nest
 import { UseGuards } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { Document } from './models/document.model';
+import { DocumentShare } from './models/document-share.model';
 import { DocumentComment } from './models/document-comment.model';
 import { CreateDocumentInput } from './dto/create-document.input';
 import { UpdateDocumentInput } from './dto/update-document.input';
@@ -106,6 +107,72 @@ export class DocumentsResolver {
       id,
       resolved,
     ) as Promise<DocumentComment>;
+  }
+
+  @Query(() => [Document])
+  @UseGuards(GqlAuthGuard)
+  listPublicDocuments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('orgId', { type: () => ID }) orgId: string,
+  ): Promise<Document[]> {
+    return this.documentsService.listPublicDocuments(user.id, orgId) as Promise<Document[]>;
+  }
+
+  @Query(() => [Document])
+  @UseGuards(GqlAuthGuard)
+  listMyDocuments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('orgId', { type: () => ID }) orgId: string,
+  ): Promise<Document[]> {
+    return this.documentsService.listMyDocuments(user.id, orgId) as Promise<Document[]>;
+  }
+
+  @Query(() => [Document])
+  @UseGuards(GqlAuthGuard)
+  listDocumentsSharedWithMe(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('orgId', { type: () => ID }) orgId: string,
+  ): Promise<Document[]> {
+    return this.documentsService.listDocumentsSharedWithMe(user.id, orgId) as Promise<Document[]>;
+  }
+
+  @Query(() => [Document])
+  @UseGuards(GqlAuthGuard)
+  listRootDocuments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('orgId', { type: () => ID }) orgId: string,
+  ): Promise<Document[]> {
+    return this.documentsService.listRootDocuments(user.id, orgId) as Promise<Document[]>;
+  }
+
+  @Query(() => [Document])
+  @UseGuards(GqlAuthGuard)
+  listDocumentChildren(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('orgId', { type: () => ID }) orgId: string,
+    @Args('parentId', { type: () => ID }) parentId: string,
+  ): Promise<Document[]> {
+    return this.documentsService.listDocumentChildren(user.id, orgId, parentId) as Promise<Document[]>;
+  }
+
+  @Mutation(() => DocumentShare)
+  @UseGuards(GqlAuthGuard)
+  shareDocument(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('documentId', { type: () => ID }) documentId: string,
+    @Args('targetUserId', { type: () => ID }) targetUserId: string,
+  ): Promise<DocumentShare> {
+    return this.documentsService.shareDocument(user.id, documentId, targetUserId) as Promise<DocumentShare>;
+  }
+
+  @Mutation(() => Document)
+  @UseGuards(GqlAuthGuard)
+  setDocumentPrivacy(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('documentId', { type: () => ID }) documentId: string,
+    @Args('isPrivate') isPrivate: boolean,
+  ): Promise<Document> {
+    return this.documentsService.setDocumentPrivacy(user.id, documentId, isPrivate) as Promise<Document>;
   }
 
   @ResolveField(() => [DocumentComment])

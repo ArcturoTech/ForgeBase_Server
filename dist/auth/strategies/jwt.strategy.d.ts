@@ -22,6 +22,11 @@ export declare class JwtStrategy extends JwtStrategy_base {
         bio: string | null;
         theme: string;
         locale: string;
+        phone: string | null;
+        linkedIn: string | null;
+        timezone: string;
+        dateFormat: string;
+        currency: string;
         createdAt: Date;
         updatedAt: Date;
     }>;

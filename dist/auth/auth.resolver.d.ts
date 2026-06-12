@@ -14,4 +14,8 @@ export declare class AuthResolver {
     loginUser(input: LoginUserInput): Promise<AuthTokens>;
     refreshToken(token: string): Promise<AuthTokens>;
     logoutUser(user: AuthenticatedUser): Promise<boolean>;
+    requestPasswordReset(email: string): Promise<boolean>;
+    resetPassword(token: string, newPassword: string): Promise<boolean>;
+    verifyEmailOtp(user: AuthenticatedUser, code: string): Promise<boolean>;
+    resendEmailOtp(user: AuthenticatedUser): Promise<boolean>;
 }

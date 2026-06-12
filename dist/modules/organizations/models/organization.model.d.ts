@@ -7,6 +7,12 @@ export declare class Organization {
     status: OrgStatus;
     region: string;
     databaseName?: string;
+    description?: string;
+    website?: string;
+    cnpj?: string;
+    sector?: string;
+    city?: string;
+    state?: string;
     mrrCents: number;
     trialEndsAt?: Date;
     createdAt: Date;

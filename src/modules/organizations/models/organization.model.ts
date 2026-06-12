@@ -24,6 +24,24 @@ export class Organization {
   @Field({ nullable: true })
   databaseName?: string;
 
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field({ nullable: true })
+  website?: string;
+
+  @Field({ nullable: true })
+  cnpj?: string;
+
+  @Field({ nullable: true })
+  sector?: string;
+
+  @Field({ nullable: true })
+  city?: string;
+
+  @Field({ nullable: true })
+  state?: string;
+
   @Field(() => Int)
   mrrCents: number;
 

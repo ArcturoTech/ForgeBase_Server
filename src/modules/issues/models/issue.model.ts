@@ -49,6 +49,9 @@ export class Issue {
   @Field()
   done: boolean;
 
+  @Field()
+  standalone: boolean;
+
   @Field({ nullable: true })
   epic?: string;
 
