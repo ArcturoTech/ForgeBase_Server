@@ -15,7 +15,9 @@ RUN pnpm install --ignore-workspace --no-frozen-lockfile
 COPY . .
 # Drop the vestigial pnpm-workspace.yaml (no `packages` field) so every pnpm invocation stops erroring.
 RUN rm -f pnpm-workspace.yaml
-RUN pnpm prisma generate
+# prisma generate reads the schema only — no DB connection needed. A placeholder satisfies prisma.config.ts's env() call.
+ARG DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder
+RUN DATABASE_URL=$DATABASE_URL pnpm prisma generate
 RUN pnpm build
 
 FROM base AS prod
